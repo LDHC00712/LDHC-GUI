@@ -838,16 +838,25 @@ if isAlt(PLAYER.UserId) == true then
     StarterGui:ClearAllChildren()
     PLAYER_GUI:ClearAllChildren()
 
-    --AltGui (of 'ScreenGui' class)
+    --AltGui (of 'ScreenGui' class) - ULTRA PREMIUM DESIGN
 	local AltGui = Instance.new("ScreenGui")
 	AltGui.Name = "AltGui"
 	AltGui.IgnoreGuiInset = true
 	AltGui.DisplayOrder = 5
 	AltGui.Parent = CORE_GUI
-	--Create instances
+	
+	-- Create animated background with particles
 	local Background = Instance.new("Frame")
 	local BackgroundGdt = Instance.new("UIGradient")
+	local ParticleFrame = Instance.new("Frame")
+	
+	-- Main Info Panel with glass effect
 	local Info = Instance.new("Frame")
+	local InfoBlur = Instance.new("Frame")
+	local InfoGlow = Instance.new("Frame")
+	local InfoGradient = Instance.new("UIGradient")
+	
+	-- Text elements with enhanced styling
 	local DisplayName = Instance.new("TextLabel")
 	local BetterDaHood = Instance.new("TextLabel")
 	local Username = Instance.new("TextLabel")
@@ -858,9 +867,14 @@ if isAlt(PLAYER.UserId) == true then
 	local TimeRemainingText = Instance.new("TextLabel")
 	local TimeRemaining = Instance.new("TextLabel")
 	local TotalFloorCash = Instance.new("TextLabel")
+	
+	-- Enhanced buttons with animations
 	local RecountFloorCash = Instance.new("TextButton")
 	local DestroyFloorCash = Instance.new("TextButton")
+	
+	-- Options panel with premium styling
 	local Options = Instance.new("Frame")
+	local OptionsGlow = Instance.new("Frame")
 	local DropFrame = Instance.new("Frame")
 	local DroppingTitle = Instance.new("TextLabel")
 	local DropBtn = Instance.new("TextButton")
@@ -877,141 +891,245 @@ if isAlt(PLAYER.UserId) == true then
 	local HelpText = Instance.new("TextLabel")
     local Cursor = Instance.new("Frame")
 
+		-- PREMIUM ANIMATED BACKGROUND
 		Background.Name = "Background"
-		Background.BorderColor3 = Color3.new(0, 0, 0)
 		Background.BorderSizePixel = 0
-		Background.BackgroundColor3 = Color3.new(0.08, 0.08, 0.12)
+		Background.BackgroundColor3 = Color3.new(0.02, 0.02, 0.05)
 		Background.Size = UDim2.new(1, 0, 1, 0)
 		Background.Parent = AltGui
+		
+		-- Animated gradient background
 		BackgroundGdt.Name = "BackgroundGdt"
 		BackgroundGdt.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(0.05, 0.05, 0.08)),
-			ColorSequenceKeypoint.new(0.5, Color3.new(0.08, 0.08, 0.15)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.12, 0.12, 0.20))
+			ColorSequenceKeypoint.new(0, Color3.new(0.1, 0.05, 0.2)),
+			ColorSequenceKeypoint.new(0.3, Color3.new(0.05, 0.1, 0.25)),
+			ColorSequenceKeypoint.new(0.6, Color3.new(0.15, 0.05, 0.3)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.08, 0.15, 0.35))
 		}
-		BackgroundGdt.Rotation = 45
+		BackgroundGdt.Rotation = 0
 		BackgroundGdt.Parent = Background
+		
+		-- Create particle effect background
+		ParticleFrame.Name = "ParticleFrame"
+		ParticleFrame.Size = UDim2.new(1, 0, 1, 0)
+		ParticleFrame.BackgroundTransparency = 1
+		ParticleFrame.Parent = Background
+		
+		-- Create floating particles
+		for i = 1, 15 do
+			local particle = Instance.new("Frame")
+			particle.Name = "Particle" .. i
+			particle.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
+			particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+			particle.BackgroundColor3 = Color3.new(0.4 + math.random() * 0.4, 0.6 + math.random() * 0.4, 0.8 + math.random() * 0.2)
+			particle.BackgroundTransparency = 0.3 + math.random() * 0.4
+			particle.BorderSizePixel = 0
+			particle.Parent = ParticleFrame
+			
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(1, 0)
+			corner.Parent = particle
+			
+			-- Add particle glow
+			local glow = Instance.new("Frame")
+			glow.Name = "Glow"
+			glow.Size = UDim2.new(2, 0, 2, 0)
+			glow.Position = UDim2.new(-0.5, 0, -0.5, 0)
+			glow.BackgroundColor3 = particle.BackgroundColor3
+			glow.BackgroundTransparency = 0.8
+			glow.BorderSizePixel = 0
+			glow.Parent = particle
+			glow.ZIndex = -1
+			
+			local glowCorner = Instance.new("UICorner")
+			glowCorner.CornerRadius = UDim.new(1, 0)
+			glowCorner.Parent = glow
+		end
+		-- PREMIUM GLASS-MORPHISM INFO PANEL
 		Info.Name = "Info"
-		Info.BorderColor3 = Color3.new(0.2, 0.25, 0.35)
-		Info.BorderSizePixel = 2
+		Info.BorderSizePixel = 0
 		Info.AnchorPoint = Vector2.new(0.5, 0.5)
-		Info.BackgroundTransparency = 0.1
+		Info.BackgroundTransparency = 0.3
 		Info.Position = UDim2.new(0.5, 0, 0.4, 0)
-		Info.BackgroundColor3 = Color3.new(0.15, 0.15, 0.25)
-		Info.Size = UDim2.new(0.5625, 0, 0.5235, 0)
-		Info.Parent = Background
-		-- Add shadow effect
-		local InfoShadow = Instance.new("Frame")
-		InfoShadow.Name = "InfoShadow"
-		InfoShadow.BorderSizePixel = 0
-		InfoShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-		InfoShadow.BackgroundTransparency = 0.5
-		InfoShadow.Position = UDim2.new(0.5, 3, 0.4, 3)
-		InfoShadow.BackgroundColor3 = Color3.new(0, 0, 0)
-		InfoShadow.Size = UDim2.new(0.5625, 0, 0.5235, 0)
-		InfoShadow.ZIndex = Info.ZIndex - 1
-		InfoShadow.Parent = Background
+		Info.BackgroundColor3 = Color3.new(0.1, 0.1, 0.15)
+		-- Add animated gradient rotation
+		task.spawn(function()
+			while true do
+				for i = 0, 360, 2 do
+					if BackgroundGdt and BackgroundGdt.Parent then
+						BackgroundGdt.Rotation = i
+						task.wait(0.1)
+					else
+						break
+					end
+				end
+			end
+		end)
+		
+		-- Animate particles
+		task.spawn(function()
+			while true do
+				for _, particle in pairs(ParticleFrame:GetChildren()) do
+					if particle.Name:find("Particle") then
+						local randomX = math.random() * 0.02 - 0.01
+						local randomY = math.random() * 0.02 - 0.01
+						local newPos = particle.Position + UDim2.new(randomX, 0, randomY, 0)
+						
+						-- Wrap around screen
+						if newPos.X.Scale > 1 then newPos = UDim2.new(0, 0, newPos.Y.Scale, 0) end
+						if newPos.X.Scale < 0 then newPos = UDim2.new(1, 0, newPos.Y.Scale, 0) end
+						if newPos.Y.Scale > 1 then newPos = UDim2.new(newPos.X.Scale, 0, 0, 0) end
+						if newPos.Y.Scale < 0 then newPos = UDim2.new(newPos.X.Scale, 0, 1, 0) end
+						
+						particle.Position = newPos
+						
+						-- Pulse effect
+						local currentTime = tick()
+						local pulse = 0.5 + 0.3 * math.sin(currentTime * 2 + tonumber(particle.Name:gsub("Particle", "")) or 0)
+						particle.BackgroundTransparency = pulse
+					end
+				end
+				task.wait(0.05)
+			end
+		end)
+		
+		-- Glass morphism effect
+		InfoGradient.Name = "InfoGradient"
+		InfoGradient.Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0, Color3.new(0.2, 0.15, 0.3)),
+			ColorSequenceKeypoint.new(0.5, Color3.new(0.15, 0.2, 0.35)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.1, 0.1, 0.25))
+		}
+		InfoGradient.Rotation = 135
+		InfoGradient.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0, 0.2),
+			NumberSequenceKeypoint.new(0.5, 0.1),
+			NumberSequenceKeypoint.new(1, 0.3)
+		}
+		InfoGradient.Parent = Info
+		
+		-- Glow effect around panel
+		InfoGlow.Name = "InfoGlow"
+		InfoGlow.Size = UDim2.new(1, 20, 1, 20)
+		InfoGlow.Position = UDim2.new(0, -10, 0, -10)
+		InfoGlow.BackgroundColor3 = Color3.new(0.3, 0.5, 0.8)
+		InfoGlow.BackgroundTransparency = 0.7
+		InfoGlow.BorderSizePixel = 0
+		InfoGlow.ZIndex = Info.ZIndex - 1
+		InfoGlow.Parent = Background
+		
+		-- Multiple shadow layers for depth
+		for i = 1, 3 do
+			local shadow = Instance.new("Frame")
+			shadow.Name = "Shadow" .. i
+			shadow.Size = UDim2.new(1, i * 5, 1, i * 5)
+			shadow.Position = UDim2.new(0, -i * 2.5, 0, -i * 2.5 + i * 2)
+			shadow.BackgroundColor3 = Color3.new(0, 0, 0)
+			shadow.BackgroundTransparency = 0.5 + (i * 0.15)
+			shadow.BorderSizePixel = 0
+			shadow.ZIndex = Info.ZIndex - (i + 1)
+			shadow.Parent = Background
+			
+			local shadowCorner = Instance.new("UICorner")
+			shadowCorner.CornerRadius = UDim.new(0.05, 0)
+			shadowCorner.Parent = shadow
+		end
+		-- PREMIUM TEXT STYLING WITH NEON EFFECTS
 		DisplayName.Name = "DisplayName"
 		DisplayName.LayoutOrder = 1
-		DisplayName.TextStrokeTransparency = 0.2
-		DisplayName.TextStrokeColor3 = Color3.new(0, 0, 0)
-		DisplayName.Size = UDim2.new(1, 0, 0.25, 0)
-		DisplayName.TextColor3 = Color3.new(0.9, 0.95, 1)
-		DisplayName.TextXAlignment = Enum.TextXAlignment.Left
-		DisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DisplayName.Text = "Display Name"
-		DisplayName.TextSize = 18
-		DisplayName.Font = Enum.Font.GothamBold
+		DisplayName.TextStrokeTransparency = 0
+		DisplayName.TextStrokeColor3 = Color3.new(0.2, 0.6, 1)
+		DisplayName.Size = UDim2.new(1, 0, 0.2, 0)
+		DisplayName.TextColor3 = Color3.new(1, 1, 1)
+		DisplayName.TextXAlignment = Enum.TextXAlignment.Center
+		DisplayName.BorderSizePixel = 0
+		DisplayName.Text = "⭐ VIP PLAYER STATUS ⭐"
+		DisplayName.TextSize = 24
+		DisplayName.Font = Enum.Font.FredokaOne
 		DisplayName.BackgroundTransparency = 1
-		DisplayName.Position = UDim2.new(0, 0, 0.05, 0)
 		DisplayName.TextScaled = true
-		DisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
 		DisplayName.Parent = Info
+		
 		BetterDaHood.Name = "BetterDaHood"
-		BetterDaHood.TextTransparency = 0.2
-		BetterDaHood.TextStrokeTransparency = 0.3
-		BetterDaHood.TextStrokeColor3 = Color3.new(0, 0, 0)
-		BetterDaHood.Size = UDim2.new(1, 0, 0.05, 0)
-		BetterDaHood.TextColor3 = Color3.new(0.4, 0.8, 1)
-		BetterDaHood.TextXAlignment = Enum.TextXAlignment.Left
-		BetterDaHood.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		BetterDaHood.Text = "💰 Da Hood Premium Scripts"
-		BetterDaHood.TextSize = 16
-		BetterDaHood.Font = Enum.Font.GothamBold
+		BetterDaHood.TextTransparency = 0
+		BetterDaHood.TextStrokeTransparency = 0
+		BetterDaHood.TextStrokeColor3 = Color3.new(0.8, 0.2, 0.8)
+		BetterDaHood.Size = UDim2.new(1, 0, 0.08, 0)
+		BetterDaHood.TextColor3 = Color3.new(0.9, 0.7, 1)
+		BetterDaHood.TextXAlignment = Enum.TextXAlignment.Center
+		BetterDaHood.BorderSizePixel = 0
+		BetterDaHood.Text = "� PREMIUM DA HOOD SCRIPTS SUITE 🚀"
+		BetterDaHood.TextSize = 18
+		BetterDaHood.Font = Enum.Font.FredokaOne
 		BetterDaHood.BackgroundTransparency = 1
 		BetterDaHood.TextScaled = true
-		BetterDaHood.BackgroundColor3 = Color3.new(1, 1, 1)
 		BetterDaHood.Parent = Info
+		
 		Username.Name = "Username"
 		Username.LayoutOrder = 2
-		Username.TextTransparency = 0.3
-		Username.TextStrokeTransparency = 0.4
-		Username.TextStrokeColor3 = Color3.new(0, 0, 0)
-		Username.Size = UDim2.new(1, 0, 0.075, 0)
-		Username.TextColor3 = Color3.new(0.8, 0.85, 0.9)
+		Username.TextTransparency = 0
+		Username.TextStrokeTransparency = 0.2
+		Username.TextStrokeColor3 = Color3.new(0, 0.8, 0.4)
+		Username.Size = UDim2.new(1, 0, 0.1, 0)
+		Username.TextColor3 = Color3.new(0.7, 1, 0.8)
 		Username.RichText = true
-		Username.TextXAlignment = Enum.TextXAlignment.Left
-		Username.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		Username.Text = "<i>@username</i>"
-		Username.TextSize = 14
-		Username.Font = Enum.Font.Gotham
+		Username.TextXAlignment = Enum.TextXAlignment.Center
+		Username.BorderSizePixel = 0
+		Username.Text = "<b><i>🎮 @username 🎮</i></b>"
+		Username.TextSize = 16
+		Username.Font = Enum.Font.GothamBold
 		Username.BackgroundTransparency = 1
-		Username.Position = UDim2.new(0, 0, 0.3, 0)
 		Username.TextScaled = true
-		Username.BackgroundColor3 = Color3.new(1, 1, 1)
 		Username.Parent = Info
 		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		UIListLayout.Parent = Info
+		-- PREMIUM CASH DISPLAYS WITH GLOWING EFFECTS
 		StartingCash.Name = "StartingCash"
 		StartingCash.LayoutOrder = 3
-		StartingCash.TextStrokeTransparency = 0.3
-		StartingCash.TextStrokeColor3 = Color3.new(0, 0, 0)
-		StartingCash.Size = UDim2.new(1, 0, 0.1, 0)
-		StartingCash.TextColor3 = Color3.new(0.9, 0.95, 1)
+		StartingCash.TextStrokeTransparency = 0
+		StartingCash.TextStrokeColor3 = Color3.new(0, 0.8, 0.2)
+		StartingCash.Size = UDim2.new(1, 0, 0.12, 0)
+		StartingCash.TextColor3 = Color3.new(0.5, 1, 0.6)
 		StartingCash.RichText = true
-		StartingCash.TextXAlignment = Enum.TextXAlignment.Left
-		StartingCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		StartingCash.Text = "💵 Joined with - <font color='rgb(100,255,150)'>$0</font>"
-		StartingCash.TextSize = 14
-		StartingCash.Font = Enum.Font.Gotham
+		StartingCash.TextXAlignment = Enum.TextXAlignment.Center
+		StartingCash.BorderSizePixel = 0
+		StartingCash.Text = "� INITIAL CASH: <font color='rgb(100,255,150)'><b>$0</b></font> 💰"
+		StartingCash.TextSize = 16
+		StartingCash.Font = Enum.Font.GothamBold
 		StartingCash.BackgroundTransparency = 1
-		StartingCash.Position = UDim2.new(0, 0, 0.3, 0)
 		StartingCash.TextScaled = true
-		StartingCash.BackgroundColor3 = Color3.new(1, 1, 1)
 		StartingCash.Parent = Info
+		
 		CashGainedLost.Name = "CashGainedLost"
 		CashGainedLost.LayoutOrder = 5
-		CashGainedLost.TextStrokeTransparency = 0.3
-		CashGainedLost.TextStrokeColor3 = Color3.new(0, 0, 0)
-		CashGainedLost.Size = UDim2.new(1, 0, 0.1, 0)
-		CashGainedLost.TextColor3 = Color3.new(0.9, 0.95, 1)
+		CashGainedLost.TextStrokeTransparency = 0
+		CashGainedLost.TextStrokeColor3 = Color3.new(0.8, 0.6, 0)
+		CashGainedLost.Size = UDim2.new(1, 0, 0.12, 0)
+		CashGainedLost.TextColor3 = Color3.new(1, 0.9, 0.4)
 		CashGainedLost.RichText = true
-		CashGainedLost.TextXAlignment = Enum.TextXAlignment.Left
-		CashGainedLost.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CashGainedLost.Text = "📈 Cash gained/lost since join - <font color='rgb(255,255,100)'>$0</font>"
-		CashGainedLost.TextSize = 14
-		CashGainedLost.Font = Enum.Font.Gotham
+		CashGainedLost.TextXAlignment = Enum.TextXAlignment.Center
+		CashGainedLost.BorderSizePixel = 0
+		CashGainedLost.Text = "📈 SESSION P&L: <font color='rgb(255,255,100)'><b>$0</b></font> 📈"
+		CashGainedLost.TextSize = 16
+		CashGainedLost.Font = Enum.Font.GothamBold
 		CashGainedLost.BackgroundTransparency = 1
-		CashGainedLost.Position = UDim2.new(0, 0, 0.3, 0)
 		CashGainedLost.TextScaled = true
-		CashGainedLost.BackgroundColor3 = Color3.new(1, 1, 1)
 		CashGainedLost.Parent = Info
+		
 		CurrentCash.Name = "CurrentCash"
 		CurrentCash.LayoutOrder = 4
-		CurrentCash.TextStrokeTransparency = 0.3
-		CurrentCash.TextStrokeColor3 = Color3.new(0, 0, 0)
-		CurrentCash.Size = UDim2.new(1, 0, 0.1, 0)
-		CurrentCash.TextColor3 = Color3.new(0.9, 0.95, 1)
+		CurrentCash.TextStrokeTransparency = 0
+		CurrentCash.TextStrokeColor3 = Color3.new(0, 0.6, 1)
+		CurrentCash.Size = UDim2.new(1, 0, 0.15, 0)
+		CurrentCash.TextColor3 = Color3.new(0.4, 0.8, 1)
 		CurrentCash.RichText = true
-		CurrentCash.TextXAlignment = Enum.TextXAlignment.Left
-		CurrentCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CurrentCash.Text = "💰 Current Cash - <font color='rgb(100,255,150)'>$0</font>"
-		CurrentCash.TextSize = 14
-		CurrentCash.Font = Enum.Font.GothamBold
+		CurrentCash.TextXAlignment = Enum.TextXAlignment.Center
+		CurrentCash.BorderSizePixel = 0
+		CurrentCash.Text = "� CURRENT WEALTH: <font color='rgb(100,255,255)'><b>$0</b></font> 💎"
+		CurrentCash.TextSize = 20
+		CurrentCash.Font = Enum.Font.FredokaOne
 		CurrentCash.BackgroundTransparency = 1
-		CurrentCash.Position = UDim2.new(0, 0, 0.3, 0)
 		CurrentCash.TextScaled = true
-		CurrentCash.BackgroundColor3 = Color3.new(1, 1, 1)
 		CurrentCash.Parent = Info
 		TimeRemainingText.Name = "TimeRemainingText"
 		TimeRemainingText.LayoutOrder = 8
@@ -1109,69 +1227,115 @@ if isAlt(PLAYER.UserId) == true then
 		}
 		DestroyGradient.Rotation = 90
 		DestroyGradient.Parent = DestroyFloorCash
+		-- PREMIUM HOLOGRAPHIC OPTIONS PANEL
 		Options.Name = "Options"
-		Options.BorderColor3 = Color3.new(0.2, 0.25, 0.35)
-		Options.BorderSizePixel = 2
+		Options.BorderSizePixel = 0
 		Options.AnchorPoint = Vector2.new(0.5, 0.5)
-		Options.BackgroundTransparency = 0.1
+		Options.BackgroundTransparency = 0.2
 		Options.Position = UDim2.new(0.5, 0, 0.8, 0)
-		Options.BackgroundColor3 = Color3.new(0.15, 0.15, 0.25)
-		Options.Size = UDim2.new(0.5, 0, 0.2, 0)
+		Options.BackgroundColor3 = Color3.new(0.05, 0.05, 0.15)
+		Options.Size = UDim2.new(0.75, 0, 0.25, 0)
 		Options.Parent = Background
-		-- Add shadow effect for Options
-		local OptionsShadow = Instance.new("Frame")
-		OptionsShadow.Name = "OptionsShadow"
-		OptionsShadow.BorderSizePixel = 0
-		OptionsShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-		OptionsShadow.BackgroundTransparency = 0.5
-		OptionsShadow.Position = UDim2.new(0.5, 3, 0.8, 3)
-		OptionsShadow.BackgroundColor3 = Color3.new(0, 0, 0)
-		OptionsShadow.Size = UDim2.new(0.5, 0, 0.2, 0)
-		OptionsShadow.ZIndex = Options.ZIndex - 1
-		OptionsShadow.Parent = Background
+		
+		-- Add holographic glow to Options panel
+		OptionsGlow.Name = "OptionsGlow"
+		OptionsGlow.Size = UDim2.new(1, 15, 1, 15)
+		OptionsGlow.Position = UDim2.new(0, -7.5, 0, -7.5)
+		OptionsGlow.BackgroundColor3 = Color3.new(0.4, 0.7, 1)
+		OptionsGlow.BackgroundTransparency = 0.6
+		OptionsGlow.BorderSizePixel = 0
+		OptionsGlow.ZIndex = Options.ZIndex - 1
+		OptionsGlow.Parent = Background
+		
+		-- Animate options glow
+		task.spawn(function()
+			while true do
+				for i = 0, 360, 3 do
+					if OptionsGlow and OptionsGlow.Parent then
+						local r = 0.4 + 0.3 * math.sin(math.rad(i))
+						local g = 0.7 + 0.3 * math.sin(math.rad(i + 120))
+						local b = 1
+						OptionsGlow.BackgroundColor3 = Color3.new(r, g, b)
+						task.wait(0.05)
+					else
+						break
+					end
+				end
+			end
+		end)
+		-- ULTRA PREMIUM DROP BUTTON WITH HOLOGRAPHIC EFFECTS
 		DropFrame.Name = "DropFrame"
-		DropFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DropFrame.BorderSizePixel = 0
 		DropFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 		DropFrame.BackgroundTransparency = 1
-		DropFrame.Position = UDim2.new(0.25, 0, 0.5, 0)
+		DropFrame.Position = UDim2.new(0.2, 0, 0.5, 0)
 		DropFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-		DropFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+		DropFrame.Size = UDim2.new(0.25, 0, 0.8, 0)
 		DropFrame.Parent = Options
+		
 		DroppingTitle.Name = "DroppingTitle"
-		DroppingTitle.TextStrokeTransparency = 0.3
-		DroppingTitle.TextStrokeColor3 = Color3.new(0, 0, 0)
+		DroppingTitle.TextStrokeTransparency = 0
+		DroppingTitle.TextStrokeColor3 = Color3.new(1, 0.3, 0.7)
 		DroppingTitle.Size = UDim2.new(1, 0, 0.3, 0)
-		DroppingTitle.TextColor3 = Color3.new(0.9, 0.95, 1)
-		DroppingTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DroppingTitle.Text = "💸 Dropping"
+		DroppingTitle.TextColor3 = Color3.new(1, 0.7, 0.9)
+		DroppingTitle.BorderSizePixel = 0
+		DroppingTitle.Text = "💸 CASH DROP 💸"
 		DroppingTitle.TextSize = 14
-		DroppingTitle.Font = Enum.Font.GothamBold
+		DroppingTitle.Font = Enum.Font.FredokaOne
 		DroppingTitle.BackgroundTransparency = 1
 		DroppingTitle.TextScaled = true
-		DroppingTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+		DroppingTitle.TextXAlignment = Enum.TextXAlignment.Center
 		DroppingTitle.Parent = DropFrame
+		
 		DropBtn.Name = "DropBtn"
-		DropBtn.TextStrokeTransparency = 0.1
-		DropBtn.TextStrokeColor3 = Color3.new(0, 0, 0)
-		DropBtn.Size = UDim2.new(1, 0, 0.699, 0)
-		DropBtn.TextColor3 = Color3.new(1, 1, 1)
-		DropBtn.BorderColor3 = Color3.new(0.6, 0.2, 0.2)
-		DropBtn.BorderSizePixel = 1
-		DropBtn.Text = "OFF"
-		DropBtn.TextSize = 14
-		DropBtn.Font = Enum.Font.GothamBold
-		DropBtn.Position = UDim2.new(0, 0, 0.3, 0)
+		DropBtn.TextStrokeTransparency = 0
+		DropBtn.TextStrokeColor3 = Color3.new(1, 1, 1)
+		DropBtn.Size = UDim2.new(1, 0, 0.6, 0)
+		DropBtn.TextColor3 = Color3.new(0, 0, 0)
+		DropBtn.BorderSizePixel = 0
+		DropBtn.Text = "🔴 OFF"
+		DropBtn.TextSize = 16
+		DropBtn.Font = Enum.Font.FredokaOne
+		DropBtn.Position = UDim2.new(0, 0, 0.35, 0)
 		DropBtn.TextScaled = true
-		DropBtn.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
+		DropBtn.BackgroundColor3 = Color3.new(1, 0.2, 0.2)
 		DropBtn.Parent = DropFrame
-		-- Add gradient to DropBtn
+		
+		-- Add holographic gradient to DropBtn
 		local DropBtnGradient = Instance.new("UIGradient")
 		DropBtnGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(0.9, 0.3, 0.3)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.7, 0.1, 0.1))
+			ColorSequenceKeypoint.new(0, Color3.new(1, 0.3, 0.3)),
+			ColorSequenceKeypoint.new(0.5, Color3.new(1, 0.5, 0.7)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.8, 0.2, 0.4))
 		}
-		DropBtnGradient.Rotation = 90
+		DropBtnGradient.Rotation = 45
 		DropBtnGradient.Parent = DropBtn
+		
+		-- Add pulsing glow effect
+		local DropBtnGlow = Instance.new("Frame")
+		DropBtnGlow.Name = "DropBtnGlow"
+		DropBtnGlow.Size = UDim2.new(1, 10, 1, 10)
+		DropBtnGlow.Position = UDim2.new(0, -5, 0, -5)
+		DropBtnGlow.BackgroundColor3 = Color3.new(1, 0.2, 0.2)
+		DropBtnGlow.BackgroundTransparency = 0.7
+		DropBtnGlow.BorderSizePixel = 0
+		DropBtnGlow.ZIndex = DropBtn.ZIndex - 1
+		DropBtnGlow.Parent = DropBtn
+		
+		-- Animate button glow
+		task.spawn(function()
+			while true do
+				for i = 0, 100, 2 do
+					if DropBtnGlow and DropBtnGlow.Parent then
+						local transparency = 0.3 + 0.4 * math.sin(math.rad(i * 3.6))
+						DropBtnGlow.BackgroundTransparency = transparency
+						task.wait(0.05)
+					else
+						break
+					end
+				end
+			end
+		end)
 		DropTime.Name = "DropTime"
 		DropTime.TextStrokeTransparency = 0.75
 		DropTime.Size = UDim2.new(1, 0, 0.3, 0)
@@ -1186,94 +1350,129 @@ if isAlt(PLAYER.UserId) == true then
 		DropTime.TextScaled = true
 		DropTime.BackgroundColor3 = Color3.new(1, 1, 1)
 		DropTime.Parent = DropFrame
+		-- ULTRA PREMIUM CASH AURA BUTTON
 		CashAuraFrame.Name = "CashAuraFrame"
-		CashAuraFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		CashAuraFrame.BorderSizePixel = 0
 		CashAuraFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 		CashAuraFrame.BackgroundTransparency = 1
 		CashAuraFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 		CashAuraFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-		CashAuraFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+		CashAuraFrame.Size = UDim2.new(0.25, 0, 0.8, 0)
 		CashAuraFrame.Parent = Options
+		
 		CashAuraTitle.Name = "CashAuraTitle"
-		CashAuraTitle.TextStrokeTransparency = 0.3
-		CashAuraTitle.TextStrokeColor3 = Color3.new(0, 0, 0)
+		CashAuraTitle.TextStrokeTransparency = 0
+		CashAuraTitle.TextStrokeColor3 = Color3.new(0.2, 1, 0.5)
 		CashAuraTitle.Size = UDim2.new(1, 0, 0.3, 0)
-		CashAuraTitle.TextColor3 = Color3.new(0.9, 0.95, 1)
-		CashAuraTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CashAuraTitle.Text = "✨ Cash Aura"
+		CashAuraTitle.TextColor3 = Color3.new(0.5, 1, 0.7)
+		CashAuraTitle.BorderSizePixel = 0
+		CashAuraTitle.Text = "✨ CASH AURA ✨"
 		CashAuraTitle.TextSize = 14
-		CashAuraTitle.Font = Enum.Font.GothamBold
+		CashAuraTitle.Font = Enum.Font.FredokaOne
 		CashAuraTitle.BackgroundTransparency = 1
 		CashAuraTitle.TextScaled = true
-		CashAuraTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+		CashAuraTitle.TextXAlignment = Enum.TextXAlignment.Center
 		CashAuraTitle.Parent = CashAuraFrame
+		
 		CashAuraBtn.Name = "CashAuraBtn"
-		CashAuraBtn.TextStrokeTransparency = 0.1
-		CashAuraBtn.TextStrokeColor3 = Color3.new(0, 0, 0)
-		CashAuraBtn.Size = UDim2.new(1, 0, 0.699, 0)
-		CashAuraBtn.TextColor3 = Color3.new(1, 1, 1)
-		CashAuraBtn.BorderColor3 = Color3.new(0.6, 0.2, 0.2)
-		CashAuraBtn.BorderSizePixel = 1
-		CashAuraBtn.Text = "OFF"
-		CashAuraBtn.TextSize = 14
-		CashAuraBtn.Font = Enum.Font.GothamBold
-		CashAuraBtn.Position = UDim2.new(0, 0, 0.3, 0)
+		CashAuraBtn.TextStrokeTransparency = 0
+		CashAuraBtn.TextStrokeColor3 = Color3.new(1, 1, 1)
+		CashAuraBtn.Size = UDim2.new(1, 0, 0.6, 0)
+		CashAuraBtn.TextColor3 = Color3.new(0, 0, 0)
+		CashAuraBtn.BorderSizePixel = 0
+		CashAuraBtn.Text = "🔴 OFF"
+		CashAuraBtn.TextSize = 16
+		CashAuraBtn.Font = Enum.Font.FredokaOne
+		CashAuraBtn.Position = UDim2.new(0, 0, 0.35, 0)
 		CashAuraBtn.TextScaled = true
-		CashAuraBtn.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
+		CashAuraBtn.BackgroundColor3 = Color3.new(1, 0.2, 0.2)
 		CashAuraBtn.Parent = CashAuraFrame
-		-- Add gradient to CashAuraBtn
+		
+		-- Add rainbow gradient to CashAuraBtn
 		local CashAuraBtnGradient = Instance.new("UIGradient")
 		CashAuraBtnGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(0.9, 0.3, 0.3)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.7, 0.1, 0.1))
+			ColorSequenceKeypoint.new(0, Color3.new(1, 0.3, 0.3)),
+			ColorSequenceKeypoint.new(0.5, Color3.new(1, 0.5, 0.7)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.8, 0.2, 0.4))
 		}
-		CashAuraBtnGradient.Rotation = 90
+		CashAuraBtnGradient.Rotation = 45
 		CashAuraBtnGradient.Parent = CashAuraBtn
+		
+		-- Add rotating rainbow effect
+		task.spawn(function()
+			while true do
+				for i = 0, 360, 5 do
+					if CashAuraBtnGradient and CashAuraBtnGradient.Parent then
+						CashAuraBtnGradient.Rotation = i
+						task.wait(0.05)
+					else
+						break
+					end
+				end
+			end
+		end)
+		-- FUTURISTIC FPS CONTROL SECTION
 		FpsLockFrame.Name = "FpsLockFrame"
-		FpsLockFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		FpsLockFrame.BorderSizePixel = 0
 		FpsLockFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 		FpsLockFrame.BackgroundTransparency = 1
-		FpsLockFrame.Position = UDim2.new(0.75, 0, 0.5, 0)
+		FpsLockFrame.Position = UDim2.new(0.8, 0, 0.5, 0)
 		FpsLockFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-		FpsLockFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+		FpsLockFrame.Size = UDim2.new(0.25, 0, 0.8, 0)
 		FpsLockFrame.Parent = Options
+		
 		FpsLockTitle.Name = "FpsLockTitle"
-		FpsLockTitle.TextStrokeTransparency = 0.3
-		FpsLockTitle.TextStrokeColor3 = Color3.new(0, 0, 0)
+		FpsLockTitle.TextStrokeTransparency = 0
+		FpsLockTitle.TextStrokeColor3 = Color3.new(1, 0.7, 0.2)
 		FpsLockTitle.Size = UDim2.new(1, 0, 0.3, 0)
-		FpsLockTitle.TextColor3 = Color3.new(0.9, 0.95, 1)
-		FpsLockTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		FpsLockTitle.Text = "⚡ FPS Lock"
+		FpsLockTitle.TextColor3 = Color3.new(1, 0.9, 0.5)
+		FpsLockTitle.BorderSizePixel = 0
+		FpsLockTitle.Text = "⚡ FPS CONTROL ⚡"
 		FpsLockTitle.TextSize = 14
-		FpsLockTitle.Font = Enum.Font.GothamBold
+		FpsLockTitle.Font = Enum.Font.FredokaOne
 		FpsLockTitle.BackgroundTransparency = 1
 		FpsLockTitle.TextScaled = true
-		FpsLockTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+		FpsLockTitle.TextXAlignment = Enum.TextXAlignment.Center
 		FpsLockTitle.Parent = FpsLockFrame
+		
 		FpsLockBox.Name = "FpsLockBox"
-		FpsLockBox.TextStrokeTransparency = 0.3
-		FpsLockBox.TextStrokeColor3 = Color3.new(0, 0, 0)
-		FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
-		FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
-		FpsLockBox.BorderColor3 = Color3.new(0.3, 0.4, 0.6)
-		FpsLockBox.BorderSizePixel = 2
-		FpsLockBox.Text = "3"
-		FpsLockBox.TextSize = 14
-		FpsLockBox.Font = Enum.Font.GothamBold
-		FpsLockBox.BackgroundTransparency = 0.3
-		FpsLockBox.Position = UDim2.new(0, 0, 0.3, 0)
+		FpsLockBox.TextStrokeTransparency = 0
+		FpsLockBox.TextStrokeColor3 = Color3.new(0.2, 0.8, 1)
+		FpsLockBox.Size = UDim2.new(1, 0, 0.6, 0)
+		FpsLockBox.TextColor3 = Color3.new(0, 0, 0)
+		FpsLockBox.BorderSizePixel = 3
+		FpsLockBox.BorderColor3 = Color3.new(0.3, 0.7, 1)
+		FpsLockBox.Text = "60"
+		FpsLockBox.TextSize = 20
+		FpsLockBox.Font = Enum.Font.FredokaOne
+		FpsLockBox.BackgroundTransparency = 0
+		FpsLockBox.Position = UDim2.new(0, 0, 0.35, 0)
 		FpsLockBox.ClearTextOnFocus = false
 		FpsLockBox.TextScaled = true
-		FpsLockBox.BackgroundColor3 = Color3.new(0.2, 0.25, 0.4)
+		FpsLockBox.TextXAlignment = Enum.TextXAlignment.Center
+		FpsLockBox.BackgroundColor3 = Color3.new(0.8, 0.9, 1)
 		FpsLockBox.Parent = FpsLockFrame
-		-- Add gradient to FpsLockBox
+		
+		-- Add holographic gradient to FpsLockBox
 		local FpsLockBoxGradient = Instance.new("UIGradient")
 		FpsLockBoxGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(0.25, 0.3, 0.45)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.15, 0.2, 0.35))
+			ColorSequenceKeypoint.new(0, Color3.new(0.6, 0.8, 1)),
+			ColorSequenceKeypoint.new(0.5, Color3.new(0.8, 0.9, 1)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.4, 0.7, 0.9))
 		}
 		FpsLockBoxGradient.Rotation = 90
 		FpsLockBoxGradient.Parent = FpsLockBox
+		
+		-- Add cyber glow effect
+		local FpsGlow = Instance.new("Frame")
+		FpsGlow.Name = "FpsGlow"
+		FpsGlow.Size = UDim2.new(1, 8, 1, 8)
+		FpsGlow.Position = UDim2.new(0, -4, 0, -4)
+		FpsGlow.BackgroundColor3 = Color3.new(0.3, 0.7, 1)
+		FpsGlow.BackgroundTransparency = 0.6
+		FpsGlow.BorderSizePixel = 0
+		FpsGlow.ZIndex = FpsLockBox.ZIndex - 1
+		FpsGlow.Parent = FpsLockBox
 		Help.Name = "Help"
 		Help.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
 		Help.AnchorPoint = Vector2.new(0, 1)
@@ -1357,8 +1556,22 @@ if isAlt(PLAYER.UserId) == true then
         local cornerGlow = Instance.new("UICorner")
         cornerGlow.CornerRadius = UDim.new(0.5, 0)
         cornerGlow.Parent = CursorGlow
-		--Secondary instances
-		local secondaryInsts = {{["ClassName"] = "UICorner", ["Parent"] = RecountFloorCash, ["Properties"] = {["CornerRadius"] = UDim.new(0.15, 0)}},{["ClassName"] = "UICorner", ["Parent"] = DestroyFloorCash, ["Properties"] = {["CornerRadius"] = UDim.new(0.15, 0)}},{["ClassName"] = "UICorner", ["Parent"] = Info, ["Properties"] = {["CornerRadius"] = UDim.new(0.08, 0)}},{["ClassName"] = "UICorner", ["Parent"] = InfoShadow, ["Properties"] = {["CornerRadius"] = UDim.new(0.08, 0)}},{["ClassName"] = "UICorner", ["Parent"] = Options, ["Properties"] = {["CornerRadius"] = UDim.new(0.08, 0)}},{["ClassName"] = "UICorner", ["Parent"] = OptionsShadow, ["Properties"] = {["CornerRadius"] = UDim.new(0.08, 0)}},{["ClassName"] = "UICorner", ["Parent"] = DropBtn, ["Properties"] = {["CornerRadius"] = UDim.new(0.2, 0)}},{["ClassName"] = "UICorner", ["Parent"] = CashAuraBtn, ["Properties"] = {["CornerRadius"] = UDim.new(0.2, 0)}},{["ClassName"] = "UICorner", ["Parent"] = FpsLockBox, ["Properties"] = {["CornerRadius"] = UDim.new(0.15, 0)}},{["ClassName"] = "UICorner", ["Parent"] = HelpButton, ["Properties"] = {["CornerRadius"] = UDim.new(0.15, 0)}},{["ClassName"] = "UICorner", ["Parent"] = HelpFrame, ["Properties"] = {["CornerRadius"] = UDim.new(0.08, 0)}},}
+		--PREMIUM UI CORNERS AND FINAL TOUCHES
+		local secondaryInsts = {
+			{["ClassName"] = "UICorner", ["Parent"] = RecountFloorCash, ["Properties"] = {["CornerRadius"] = UDim.new(0.25, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = DestroyFloorCash, ["Properties"] = {["CornerRadius"] = UDim.new(0.25, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = Info, ["Properties"] = {["CornerRadius"] = UDim.new(0.03, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = InfoGlow, ["Properties"] = {["CornerRadius"] = UDim.new(0.03, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = Options, ["Properties"] = {["CornerRadius"] = UDim.new(0.03, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = OptionsGlow, ["Properties"] = {["CornerRadius"] = UDim.new(0.03, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = DropBtn, ["Properties"] = {["CornerRadius"] = UDim.new(0.15, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = DropBtnGlow, ["Properties"] = {["CornerRadius"] = UDim.new(0.15, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = CashAuraBtn, ["Properties"] = {["CornerRadius"] = UDim.new(0.15, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = FpsLockBox, ["Properties"] = {["CornerRadius"] = UDim.new(0.1, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = FpsGlow, ["Properties"] = {["CornerRadius"] = UDim.new(0.1, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = HelpButton, ["Properties"] = {["CornerRadius"] = UDim.new(0.2, 0)}},
+			{["ClassName"] = "UICorner", ["Parent"] = HelpFrame, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0)}}
+		}
 		for _, instInfo in ipairs(secondaryInsts) do
 			local inst = Instance.new(instInfo.ClassName)
 			for propertyName, value in pairs(instInfo.Properties) do
@@ -1475,28 +1688,32 @@ if isAlt(PLAYER.UserId) == true then
     local altCommands = {}
     --local crouchAnim = PLAYER.Character.Humanoid:LoadAnimation(game.ReplicatedStorage.ClientAnimations.Block)
     altCommands.drop = function(player, args)
-        if DropBtn.Text == "ON" then
-            MAIN_EVENT:FireServer("Block", false) -- (doesn't work if stuff in IGNORED is destroyed idk why)
-            Chat("Stopped Dropping")
-            DropBtn.Text = "OFF"
-            DropBtn.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
-            -- Update gradient
+        if DropBtn.Text == "🟢 ON" then
+            MAIN_EVENT:FireServer("Block", false)
+            Chat("💸 Stopped Cash Drop Mode! 💸")
+            DropBtn.Text = "🔴 OFF"
+            DropBtn.BackgroundColor3 = Color3.new(1, 0.2, 0.2)
+            DropBtn.TextColor3 = Color3.new(0, 0, 0)
+            -- Update gradient for OFF state
             if DropBtn:FindFirstChild("UIGradient") then
                 DropBtn.UIGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0, Color3.new(0.9, 0.3, 0.3)),
-                    ColorSequenceKeypoint.new(1, Color3.new(0.7, 0.1, 0.1))
+                    ColorSequenceKeypoint.new(0, Color3.new(1, 0.3, 0.3)),
+                    ColorSequenceKeypoint.new(0.5, Color3.new(1, 0.5, 0.7)),
+                    ColorSequenceKeypoint.new(1, Color3.new(0.8, 0.2, 0.4))
                 }
             end
         else
             MAIN_EVENT:FireServer("Block", true)
-            Chat("Started Dropping")
-            DropBtn.Text = "ON"
-            DropBtn.BackgroundColor3 = Color3.new(0.2, 0.8, 0.3)
-            -- Update gradient
+            Chat("🚀 CASH DROP MODE ACTIVATED! 🚀")
+            DropBtn.Text = "🟢 ON"
+            DropBtn.BackgroundColor3 = Color3.new(0.2, 1, 0.3)
+            DropBtn.TextColor3 = Color3.new(0, 0, 0)
+            -- Update gradient for ON state
             if DropBtn:FindFirstChild("UIGradient") then
                 DropBtn.UIGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0, Color3.new(0.3, 0.9, 0.4)),
-                    ColorSequenceKeypoint.new(1, Color3.new(0.1, 0.7, 0.2))
+                    ColorSequenceKeypoint.new(0, Color3.new(0.3, 1, 0.4)),
+                    ColorSequenceKeypoint.new(0.5, Color3.new(0.5, 1, 0.6)),
+                    ColorSequenceKeypoint.new(1, Color3.new(0.2, 0.8, 0.3))
                 }
             end
         end
@@ -1504,14 +1721,12 @@ if isAlt(PLAYER.UserId) == true then
         dropToggle = not dropToggle
 
         task.spawn(function()
-
-
-            while dropToggle == true do --currency
+            while dropToggle == true do
                 MAIN_EVENT:FireServer("DropMoney", 15000)
                 DropTime.Visible = true
                 for count = 15, 1, -1 do
                     if dropToggle == true then
-                        DropTime.Text = count.."s"
+                        DropTime.Text = "⏰ " .. count .. "s"
                         task.wait(1)
                     else
                         break
@@ -1520,17 +1735,17 @@ if isAlt(PLAYER.UserId) == true then
                 task.wait(0.15)
             end
             DropTime.Visible = false
-            DropBtn.Text = "OFF"
-            DropBtn.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
-            -- Update gradient
+            DropBtn.Text = "🔴 OFF"
+            DropBtn.BackgroundColor3 = Color3.new(1, 0.2, 0.2)
+            -- Reset gradient
             if DropBtn:FindFirstChild("UIGradient") then
                 DropBtn.UIGradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0, Color3.new(0.9, 0.3, 0.3)),
-                    ColorSequenceKeypoint.new(1, Color3.new(0.7, 0.1, 0.1))
+                    ColorSequenceKeypoint.new(0, Color3.new(1, 0.3, 0.3)),
+                    ColorSequenceKeypoint.new(0.5, Color3.new(1, 0.5, 0.7)),
+                    ColorSequenceKeypoint.new(1, Color3.new(0.8, 0.2, 0.4))
                 }
             end
-
-            MAIN_EVENT:FireServer("Block", false) -- (doesn't work if stuff in IGNORED is destroyed idk why)
+            MAIN_EVENT:FireServer("Block", false)
         end)
     end
 
@@ -1587,42 +1802,46 @@ if isAlt(PLAYER.UserId) == true then
 
 
     altCommands.aura = function(player, args)
-  
-            if CashAuraBtn.Text == "OFF" then
-                CashAuraBtn.Text = "ON"
-                CashAuraBtn.BackgroundColor3 = Color3.new(0.2, 0.8, 0.3)
-                -- Update gradient
-                if CashAuraBtn:FindFirstChild("UIGradient") then
-                    CashAuraBtn.UIGradient.Color = ColorSequence.new{
-                        ColorSequenceKeypoint.new(0, Color3.new(0.3, 0.9, 0.4)),
-                        ColorSequenceKeypoint.new(1, Color3.new(0.1, 0.7, 0.2))
-                    }
-                end
-
-                Chat("CashAura Turned On!")
-    
-                task.spawn(function()
-                    while CashAuraBtn.Text == "ON" do
-                        for _,v in ipairs(workspace.Ignored.Drop:GetChildren()) do
-                            if v:IsA("Part") and PLAYER:DistanceFromCharacter(v.Position) < 12 then
-                                fireclickdetector(v.ClickDetector)
-                                task.wait(0.1)
-                            end
-                        end
-                        task.wait(0.1)
-                    end
-                end)
-            elseif CashAuraBtn.Text == "ON" then
-                CashAuraBtn.Text = "OFF"
-                CashAuraBtn.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
-                -- Update gradient
-                if CashAuraBtn:FindFirstChild("UIGradient") then
-                    CashAuraBtn.UIGradient.Color = ColorSequence.new{
-                        ColorSequenceKeypoint.new(0, Color3.new(0.9, 0.3, 0.3)),
-                        ColorSequenceKeypoint.new(1, Color3.new(0.7, 0.1, 0.1))
-                    }
-                end
+        if CashAuraBtn.Text == "🔴 OFF" then
+            CashAuraBtn.Text = "🟢 ON"
+            CashAuraBtn.BackgroundColor3 = Color3.new(0.2, 1, 0.3)
+            CashAuraBtn.TextColor3 = Color3.new(0, 0, 0)
+            -- Update rainbow gradient for ON state
+            if CashAuraBtn:FindFirstChild("UIGradient") then
+                CashAuraBtn.UIGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.new(0.3, 1, 0.4)),
+                    ColorSequenceKeypoint.new(0.5, Color3.new(0.5, 1, 0.6)),
+                    ColorSequenceKeypoint.new(1, Color3.new(0.2, 0.8, 0.3))
+                }
             end
+
+            Chat("✨ CASH AURA ENGAGED! ✨")
+    
+            task.spawn(function()
+                while CashAuraBtn.Text == "🟢 ON" do
+                    for _,v in ipairs(workspace.Ignored.Drop:GetChildren()) do
+                        if v:IsA("Part") and PLAYER:DistanceFromCharacter(v.Position) < 12 then
+                            fireclickdetector(v.ClickDetector)
+                            task.wait(0.1)
+                        end
+                    end
+                    task.wait(0.1)
+                end
+            end)
+        elseif CashAuraBtn.Text == "🟢 ON" then
+            CashAuraBtn.Text = "🔴 OFF"
+            CashAuraBtn.BackgroundColor3 = Color3.new(1, 0.2, 0.2)
+            CashAuraBtn.TextColor3 = Color3.new(0, 0, 0)
+            -- Update gradient for OFF state
+            if CashAuraBtn:FindFirstChild("UIGradient") then
+                CashAuraBtn.UIGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.new(1, 0.3, 0.3)),
+                    ColorSequenceKeypoint.new(0.5, Color3.new(1, 0.5, 0.7)),
+                    ColorSequenceKeypoint.new(1, Color3.new(0.8, 0.2, 0.4))
+                }
+            end
+            Chat("💫 Cash Aura Deactivated 💫")
+        end
     end
 
     altCommands.dupefor = function(player, args)
