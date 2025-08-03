@@ -2114,8 +2114,8 @@ else -- SELLER GUI
     -- Simple clean main frame
     G2L["2"] = Instance.new("Frame", G2L["1"])
     G2L["2"]["BorderSizePixel"] = 0
-    G2L["2"]["BackgroundColor3"] = Color3.fromRGB(25, 27, 35)  -- Clean dark background
-    G2L["2"]["Size"] = UDim2.new(0, 520, 0, 350)  -- Slightly taller for header
+    G2L["2"]["BackgroundColor3"] = Color3.fromRGB(22, 23, 29)  -- Clean dark background
+    G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296)
     G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
     G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     
@@ -2123,166 +2123,57 @@ else -- SELLER GUI
     local mainCorner = Instance.new("UICorner", G2L["2"])
     mainCorner.CornerRadius = UDim.new(0, 12)
     
-    -- Simple border
-    local mainStroke = Instance.new("UIStroke", G2L["2"])
-    mainStroke.Color = Color3.fromRGB(45, 47, 55)
-    mainStroke.Thickness = 1
-    mainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    
-    -- Create Header Section
-    local headerFrame = Instance.new("Frame", G2L["2"])
-    headerFrame.Name = "HeaderSection"
-    headerFrame.Size = UDim2.new(1, 0, 0, 80)
-    headerFrame.Position = UDim2.new(0, 0, 0, 0)
-    headerFrame.BackgroundColor3 = Color3.fromRGB(30, 32, 40)
-    headerFrame.BorderSizePixel = 0
-    
-    local headerCorner = Instance.new("UICorner", headerFrame)
-    headerCorner.CornerRadius = UDim.new(0, 12)
-    
-    local headerStroke = Instance.new("UIStroke", headerFrame)
-    headerStroke.Color = Color3.fromRGB(50, 52, 60)
-    headerStroke.Thickness = 1
-    headerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    
-    -- LDHC GUI Title (ด้านบน)
-    local titleLabel = Instance.new("TextLabel", headerFrame)
-    titleLabel.Name = "Title"
-    titleLabel.Size = UDim2.new(1, -20, 0, 25)
-    titleLabel.Position = UDim2.new(0, 10, 0, 8)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "LDHC GUI"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.TextSize = 18
-    titleLabel.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-    
-    -- Main Section
-    local mainLabel = Instance.new("TextLabel", headerFrame)
-    mainLabel.Name = "MainLabel"
-    mainLabel.Size = UDim2.new(0, 50, 0, 20)
-    mainLabel.Position = UDim2.new(0, 15, 0, 35)
-    mainLabel.BackgroundTransparency = 1
-    mainLabel.Text = "Main:"
-    mainLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-    mainLabel.TextSize = 14
-    mainLabel.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-    mainLabel.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Main ID TextBox
-    local mainIdBox = Instance.new("TextBox", headerFrame)
-    mainIdBox.Name = "MainId"
-    mainIdBox.Size = UDim2.new(0, 150, 0, 22)
-    mainIdBox.Position = UDim2.new(0, 70, 0, 34)
-    mainIdBox.BackgroundColor3 = Color3.fromRGB(40, 42, 50)
-    mainIdBox.BorderSizePixel = 0
-    mainIdBox.Text = ""
-    mainIdBox.PlaceholderText = "Enter mainId..."
-    mainIdBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-    mainIdBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    mainIdBox.TextSize = 12
-    mainIdBox.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-    
-    local mainIdCorner = Instance.new("UICorner", mainIdBox)
-    mainIdCorner.CornerRadius = UDim.new(0, 6)
-    
-    local mainIdStroke = Instance.new("UIStroke", mainIdBox)
-    mainIdStroke.Color = Color3.fromRGB(60, 62, 70)
-    mainIdStroke.Thickness = 1
-    
-    -- Discord Link (ด้านล่าง)
-    local discordLabel = Instance.new("TextLabel", headerFrame)
-    discordLabel.Name = "DiscordLink"
-    discordLabel.Size = UDim2.new(0, 200, 0, 18)
-    discordLabel.Position = UDim2.new(0, 15, 0, 58)
-    discordLabel.BackgroundTransparency = 1
-    discordLabel.Text = "discord.gg/ldhcs"
-    discordLabel.TextColor3 = Color3.fromRGB(114, 137, 218)  -- Discord blue
-    discordLabel.TextSize = 12
-    discordLabel.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-    discordLabel.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Store original size and position for fullscreen toggle
+    -- Store original size and position
     local originalSize = G2L["2"].Size
     local originalPosition = G2L["2"].Position
     local isFullscreen = false
     local isMinimized = false
     
-    -- Simple control buttons frame
+    -- Simple control buttons
     local controlFrame = Instance.new("Frame", G2L["2"])
     controlFrame.Name = "ControlFrame"
-    controlFrame.Size = UDim2.new(0, 90, 0, 30)
-    controlFrame.Position = UDim2.new(1, -100, 0, 10)
-    controlFrame.BackgroundColor3 = Color3.fromRGB(35, 37, 45)
-    controlFrame.BorderSizePixel = 0
+    controlFrame.Size = UDim2.new(0, 80, 0, 25)
+    controlFrame.Position = UDim2.new(1, -90, 0, 10)
+    controlFrame.BackgroundTransparency = 1
     controlFrame.ZIndex = 15
     
-    local controlCorner = Instance.new("UICorner", controlFrame)
-    controlCorner.CornerRadius = UDim.new(0, 8)
-    
-    local controlStroke = Instance.new("UIStroke", controlFrame)
-    controlStroke.Color = Color3.fromRGB(55, 57, 65)
-    controlStroke.Thickness = 1
-    
-    -- Simple minimize button
+    -- Minimize button
     local minimizeBtn = Instance.new("TextButton", controlFrame)
-    minimizeBtn.Size = UDim2.new(0, 25, 0, 20)
-    minimizeBtn.Position = UDim2.new(0, 5, 0.5, -10)
-    minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 62, 70)
+    minimizeBtn.Size = UDim2.new(0, 20, 0, 20)
+    minimizeBtn.Position = UDim2.new(0, 5, 0, 2)
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 52, 60)
     minimizeBtn.Text = "—"
     minimizeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    minimizeBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    minimizeBtn.TextSize = 14
+    minimizeBtn.TextSize = 12
     minimizeBtn.BorderSizePixel = 0
     local minimizeCorner = Instance.new("UICorner", minimizeBtn)
     minimizeCorner.CornerRadius = UDim.new(0, 4)
     
-    -- Simple fullscreen button
-    local fullscreenBtn = Instance.new("TextButton", controlFrame)
-    fullscreenBtn.Size = UDim2.new(0, 25, 0, 20)
-    fullscreenBtn.Position = UDim2.new(0, 32, 0.5, -10)
-    fullscreenBtn.BackgroundColor3 = Color3.fromRGB(60, 62, 70)
-    fullscreenBtn.Text = "□"
-    fullscreenBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    fullscreenBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    fullscreenBtn.TextSize = 12
-    fullscreenBtn.BorderSizePixel = 0
-    local fullscreenCorner = Instance.new("UICorner", fullscreenBtn)
-    fullscreenCorner.CornerRadius = UDim.new(0, 4)
-    
-    -- Simple close button
+    -- Close button
     local closeBtn = Instance.new("TextButton", controlFrame)
-    closeBtn.Size = UDim2.new(0, 25, 0, 20)
-    closeBtn.Position = UDim2.new(0, 59, 0.5, -10)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(220, 80, 80)
+    closeBtn.Size = UDim2.new(0, 20, 0, 20)
+    closeBtn.Position = UDim2.new(0, 55, 0, 2)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
     closeBtn.Text = "✕"
     closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    closeBtn.TextSize = 12
+    closeBtn.TextSize = 10
     closeBtn.BorderSizePixel = 0
     local closeCorner = Instance.new("UICorner", closeBtn)
     closeCorner.CornerRadius = UDim.new(0, 4)
     
     -- Simple hover effects
     minimizeBtn.MouseEnter:Connect(function()
-        minimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 82, 90)
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(70, 72, 80)
     end)
     minimizeBtn.MouseLeave:Connect(function()
-        minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 62, 70)
-    end)
-    
-    fullscreenBtn.MouseEnter:Connect(function()
-        fullscreenBtn.BackgroundColor3 = Color3.fromRGB(80, 82, 90)
-    end)
-    fullscreenBtn.MouseLeave:Connect(function()
-        fullscreenBtn.BackgroundColor3 = Color3.fromRGB(60, 62, 70)
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 52, 60)
     end)
     
     closeBtn.MouseEnter:Connect(function()
-        closeBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+        closeBtn.BackgroundColor3 = Color3.fromRGB(230, 80, 80)
     end)
     closeBtn.MouseLeave:Connect(function()
-        closeBtn.BackgroundColor3 = Color3.fromRGB(220, 80, 80)
+        closeBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
     end)
     
     -- Button functionalities
@@ -3891,25 +3782,19 @@ else -- SELLER GUI
     -- StarterGui.ScreenGui.Frame.UICorner
     G2L["3"] = Instance.new("UICorner", G2L["2"])
     
-    -- StarterGui.ScreenGui.Frame.ScrollingFrame
-    -- Modern glass player cards FRAME
+    -- Simple scrolling frame
     G2L["7"] = Instance.new("ScrollingFrame", G2L["2"])
     G2L["7"]["Active"] = true
     G2L["7"]["BorderSizePixel"] = 0
-    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(30, 32, 40)  -- Simple dark
-    G2L["7"]["Size"] = UDim2.new(0, 360, 0, 250)  -- Shorter for header
-    G2L["7"]["Position"] = UDim2.new(0, 150, 0, 90)  -- Under header
+    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(18, 19, 24)
+    G2L["7"]["Size"] = UDim2.new(0, 360, 0, 276)
+    G2L["7"]["Position"] = UDim2.new(0, 150, 0, 10)
     G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    G2L["7"]["ScrollBarThickness"] = 8
-    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(60, 62, 70)
-    G2L["7"]["ScrollBarImageTransparency"] = 0.3
+    G2L["7"]["ScrollBarThickness"] = 6
+    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(50, 52, 60)
     
     local scrollCorner = Instance.new("UICorner", G2L["7"])
     scrollCorner.CornerRadius = UDim.new(0, 8)
-    
-    local scrollStroke = Instance.new("UIStroke", G2L["7"])
-    scrollStroke.Color = Color3.fromRGB(45, 47, 55)
-    scrollStroke.Thickness = 1
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.UIListLayout
     G2L["8"] = Instance.new("UIListLayout", G2L["7"])
@@ -4079,23 +3964,18 @@ else -- SELLER GUI
     local function createbox(player, THREE, LABEL1)
     local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
     
-    -- Simple clean player card
+    -- Simple player card
     frame = Instance.new("Frame", G2L["7"]);
     frame["BorderSizePixel"] = 0;
-    frame["BackgroundColor3"] = Color3.fromRGB(35, 37, 45);  -- Simple dark card
+    frame["BackgroundColor3"] = Color3.fromRGB(22, 23, 29);
     frame["Size"] = UDim2.new(0, 340, 0, 85);
     frame["Position"] = UDim2.new(-0.02488, 0, -0.01718, 0);
     frame["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     frame.Name = player.Name .. "_Box"
     
-    -- Simple rounded corners
+    -- Rounded corners
     uicorner1 = Instance.new("UICorner", frame);
     uicorner1["CornerRadius"] = UDim.new(0, 8);
-    
-    -- Simple border
-    local frameStroke = Instance.new("UIStroke", frame);
-    frameStroke["Color"] = Color3.fromRGB(50, 52, 60);
-    frameStroke["Thickness"] = 1;
     
     
     
@@ -4105,11 +3985,11 @@ else -- SELLER GUI
     image1 = Instance.new("ImageLabel");
     image1.Parent = frame
     image1["BorderSizePixel"] = 0;
-    image1["BackgroundColor3"] = Color3.fromRGB(45, 47, 55);
+    image1["BackgroundColor3"] = Color3.fromRGB(31, 32, 39);
     image1["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png";
     image1["Size"] = UDim2.new(0, 55, 0, 55);
     image1["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-    image1["Position"] = UDim2.new(0.03, 0, 0.15, 0);
+    image1["Position"] = UDim2.new(0.02, 0, 0.15, 0);
     
     local userId = player.UserId
     local thumbType = Enum.ThumbnailType.HeadShot
@@ -4118,14 +3998,14 @@ else -- SELLER GUI
     
     image1.Image = (isReady and content) or PLACEHOLDER_IMAGE
     
-    -- Simple circular avatar
+    -- Circular avatar
     uicorner2 = Instance.new("UICorner", image1);
-    uicorner2["CornerRadius"] = UDim.new(0, 28);
+    uicorner2["CornerRadius"] = UDim.new(1, 0);
     
     -- Simple avatar border
     stroke2 = Instance.new("UIStroke", image1);
     stroke2["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
-    stroke2["Color"] = Color3.fromRGB(70, 73, 82);
+    stroke2["Color"] = Color3.fromRGB(60, 120, 200);
     stroke2["Thickness"] = 2;
     
     --right side cash
