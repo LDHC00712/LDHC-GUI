@@ -2119,21 +2119,145 @@ else -- SELLER GUI
     G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
     G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     
+    -- Store original size and position for fullscreen toggle
+    local originalSize = G2L["2"].Size
+    local originalPosition = G2L["2"].Position
+    local isFullscreen = false
+    local isMinimized = false
     
-    -- Create a new frame named "sideFrame" with size {0, 100}, {0, 300} inside G2L["2"]
+    -- Create control buttons frame (top-right corner)
+    local controlFrame = Instance.new("Frame", G2L["2"])
+    controlFrame.Name = "ControlFrame"
+    controlFrame.Size = UDim2.new(0, 120, 0, 30)
+    controlFrame.Position = UDim2.new(1, -125, 0, 5)
+    controlFrame.BackgroundTransparency = 1
+    controlFrame.ZIndex = 10
+    
+    -- Minimize button (-)
+    local minimizeBtn = Instance.new("TextButton", controlFrame)
+    minimizeBtn.Size = UDim2.new(0, 30, 0, 25)
+    minimizeBtn.Position = UDim2.new(0, 0, 0, 0)
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 193, 7)  -- Amber color
+    minimizeBtn.Text = "—"
+    minimizeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+    minimizeBtn.Font = Enum.Font.GothamBold
+    minimizeBtn.TextSize = 14
+    minimizeBtn.BorderSizePixel = 0
+    local minimizeCorner = Instance.new("UICorner", minimizeBtn)
+    minimizeCorner.CornerRadius = UDim.new(0, 6)
+    
+    -- Fullscreen/Restore button (□/◇)
+    local fullscreenBtn = Instance.new("TextButton", controlFrame)
+    fullscreenBtn.Size = UDim2.new(0, 30, 0, 25)
+    fullscreenBtn.Position = UDim2.new(0, 35, 0, 0)
+    fullscreenBtn.BackgroundColor3 = Color3.fromRGB(40, 167, 69)  -- Green color
+    fullscreenBtn.Text = "□"
+    fullscreenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    fullscreenBtn.Font = Enum.Font.GothamBold
+    fullscreenBtn.TextSize = 12
+    fullscreenBtn.BorderSizePixel = 0
+    local fullscreenCorner = Instance.new("UICorner", fullscreenBtn)
+    fullscreenCorner.CornerRadius = UDim.new(0, 6)
+    
+    -- Close button (X)
+    local closeBtn = Instance.new("TextButton", controlFrame)
+    closeBtn.Size = UDim2.new(0, 30, 0, 25)
+    closeBtn.Position = UDim2.new(0, 70, 0, 0)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(220, 53, 69)  -- Red color
+    closeBtn.Text = "✕"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 12
+    closeBtn.BorderSizePixel = 0
+    local closeCorner = Instance.new("UICorner", closeBtn)
+    closeCorner.CornerRadius = UDim.new(0, 6)
+    
+    -- Add hover effects for control buttons
+    minimizeBtn.MouseEnter:Connect(function()
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 214, 51)
+    end)
+    minimizeBtn.MouseLeave:Connect(function()
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 193, 7)
+    end)
+    
+    fullscreenBtn.MouseEnter:Connect(function()
+        fullscreenBtn.BackgroundColor3 = Color3.fromRGB(51, 185, 85)
+    end)
+    fullscreenBtn.MouseLeave:Connect(function()
+        fullscreenBtn.BackgroundColor3 = Color3.fromRGB(40, 167, 69)
+    end)
+    
+    closeBtn.MouseEnter:Connect(function()
+        closeBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    end)
+    closeBtn.MouseLeave:Connect(function()
+        closeBtn.BackgroundColor3 = Color3.fromRGB(220, 53, 69)
+    end)
+    
+    -- Button functionalities
+    minimizeBtn.MouseButton1Click:Connect(function()
+        if isMinimized then
+            -- Restore
+            G2L["2"]:TweenSize(isFullscreen and UDim2.new(1, 0, 1, 0) or originalSize, "Out", "Quad", 0.3, true)
+            minimizeBtn.Text = "—"
+            isMinimized = false
+        else
+            -- Minimize
+            G2L["2"]:TweenSize(UDim2.new(0, 520, 0, 35), "Out", "Quad", 0.3, true)
+            minimizeBtn.Text = "□"
+            isMinimized = true
+        end
+    end)
+    
+    fullscreenBtn.MouseButton1Click:Connect(function()
+        if isFullscreen then
+            -- Restore to original size
+            G2L["2"]:TweenSize(originalSize, "Out", "Quad", 0.3, true)
+            G2L["2"]:TweenPosition(originalPosition, "Out", "Quad", 0.3, true)
+            fullscreenBtn.Text = "□"
+            isFullscreen = false
+        else
+            -- Go fullscreen
+            G2L["2"]:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Quad", 0.3, true)
+            G2L["2"]:TweenPosition(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.3, true)
+            fullscreenBtn.Text = "◇"
+            isFullscreen = true
+        end
+        isMinimized = false
+        minimizeBtn.Text = "—"
+    end)
+    
+    closeBtn.MouseButton1Click:Connect(function()
+        G2L["1"]:Destroy()
+    end)
+    
+    
+    -- Create a modern styled sideFrame
     local sideFrame = Instance.new("Frame", G2L["2"])
-    sideFrame.Name = "sideFrame"  -- Name the inner frame "sideFrame"
-    sideFrame.Size = UDim2.new(0, 130, 0, 296)  -- Size {0, 100}, {0, 300}
-    sideFrame.Position = UDim2.new(0, 0, 0, 0)  -- Position it inside the parent frame (G2L["2"])
-    sideFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Set a different background color to distinguish it
-    sideFrame.BorderSizePixel = 0  -- Remove the border
-    sideFrame.ZIndex = 2  -- Set a higher ZIndex for sideFrame to appear above the parent
-    sideFrame.BackgroundTransparency = 0.5
+    sideFrame.Name = "sideFrame"
+    sideFrame.Size = UDim2.new(0, 130, 0, 296)
+    sideFrame.Position = UDim2.new(0, 0, 0, 0)
+    sideFrame.BackgroundColor3 = Color3.fromRGB(22, 23, 29)  -- Modern dark background
+    sideFrame.BorderSizePixel = 0
+    sideFrame.ZIndex = 2
     
+    -- Add modern gradient to sideFrame
+    local sideGradient = Instance.new("UIGradient", sideFrame)
+    sideGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 23, 29)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(28, 30, 36))
+    }
+    sideGradient.Rotation = 45
     
-    -- Add rounded corners to sideFrame using UICorner
+    -- Add subtle stroke
+    local sideStroke = Instance.new("UIStroke", sideFrame)
+    sideStroke.Color = Color3.fromRGB(45, 47, 55)
+    sideStroke.Thickness = 1
+    sideStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    
+    -- Add rounded corners to sideFrame
     local uiCorner = Instance.new("UICorner", sideFrame)
-    uiCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the radius value to make the corners more or less rounded
+    uiCorner.CornerRadius = UDim.new(0, 12)  -- More rounded corners
     
     
     
@@ -3297,9 +3421,9 @@ else -- SELLER GUI
         if input.KeyCode == guiKeyEnum then
             -- Toggle the visibility of the GUI when the dynamic key is pressed
             if G2L["1"].Enabled then
-                hideGUIs()  -- If the GUI is visible, hide it
+                G2L["1"].Enabled = false  -- Hide the GUI
             else
-                showGUIs()  -- If the GUI is hidden, show it
+                G2L["1"].Enabled = true   -- Show the GUI
             end
         end
     
@@ -3517,25 +3641,80 @@ else -- SELLER GUI
         {Text = "Settings", Position = UDim2.new(0, 0, 0, 200), Frame = SettingsFrame}
     }
     
-    -- Create buttons inside the sideFrame
-    for _, buttonData in ipairs(buttonsData) do
+    -- Create modern styled buttons inside the sideFrame
+    for i, buttonData in ipairs(buttonsData) do
         local button = Instance.new("TextButton", sideFrame)
-        button.Size = UDim2.new(1, 0, 0, 40)  -- Set the button size (full width, 40px height)
-        button.Position = buttonData.Position  -- Set the position from the data table
-        button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)  -- Set the background color
-        button.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Set the text color to white
-        button.Text = buttonData.Text  -- Set the text of the button (e.g., "Players")
-        button.Font = Enum.Font.GothamBold  -- Set the font style
-        button.TextSize = 18  -- Set the font size
-        button.BorderSizePixel = 0  -- Remove the border around the button
+        button.Size = UDim2.new(1, -10, 0, 35)  -- Slightly smaller with padding
+        button.Position = UDim2.new(0, 5, 0, (i-1) * 45 + 10)  -- Better spacing with margin
+        button.BackgroundColor3 = Color3.fromRGB(35, 37, 43)  -- Modern dark color
+        button.TextColor3 = Color3.fromRGB(220, 222, 224)  -- Softer white
+        button.Text = buttonData.Text
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 14  -- Slightly smaller text
+        button.BorderSizePixel = 0
+        button.ZIndex = 3
     
         -- Add rounded corners to each button
         local buttonUICorner = Instance.new("UICorner", button)
-        buttonUICorner.CornerRadius = UDim.new(0, 8)  -- Adjust the radius for rounded corners
+        buttonUICorner.CornerRadius = UDim.new(0, 10)  -- More rounded
+        
+        -- Add modern stroke
+        local buttonStroke = Instance.new("UIStroke", button)
+        buttonStroke.Color = Color3.fromRGB(60, 63, 70)
+        buttonStroke.Thickness = 1
+        buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        
+        -- Add gradient effect
+        local buttonGradient = Instance.new("UIGradient", button)
+        buttonGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 37, 43)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 47, 55))
+        }
+        buttonGradient.Rotation = 90
+        
+        -- Add hover effects
+        local isActive = false
+        
+        button.MouseEnter:Connect(function()
+            if not isActive then
+                button:TweenSize(UDim2.new(1, -8, 0, 38), "Out", "Quad", 0.2, true)
+                buttonStroke.Color = Color3.fromRGB(100, 150, 255)
+                buttonStroke.Thickness = 2
+                button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            end
+        end)
+        
+        button.MouseLeave:Connect(function()
+            if not isActive then
+                button:TweenSize(UDim2.new(1, -10, 0, 35), "Out", "Quad", 0.2, true)
+                buttonStroke.Color = Color3.fromRGB(60, 63, 70)
+                buttonStroke.Thickness = 1
+                button.TextColor3 = Color3.fromRGB(220, 222, 224)
+            end
+        end)
     
         -- Add functionality for button click
         button.MouseButton1Click:Connect(function()
-    
+            -- Reset all buttons to inactive state
+            for _, child in pairs(sideFrame:GetChildren()) do
+                if child:IsA("TextButton") then
+                    child.BackgroundColor3 = Color3.fromRGB(35, 37, 43)
+                    child.TextColor3 = Color3.fromRGB(220, 222, 224)
+                    local childStroke = child:FindFirstChild("UIStroke")
+                    if childStroke then
+                        childStroke.Color = Color3.fromRGB(60, 63, 70)
+                        childStroke.Thickness = 1
+                    end
+                end
+            end
+            
+            -- Set this button as active
+            button.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            buttonStroke.Color = Color3.fromRGB(120, 170, 255)
+            buttonStroke.Thickness = 2
+            isActive = true
+            
             -- Hide all frames first
             G2L["7"].Visible = false
             AltsFrame.Visible = false
@@ -3553,10 +3732,13 @@ else -- SELLER GUI
                 MiscFrame.Visible = true
             elseif button.Text == "Settings" then
                 SettingsFrame.Visible = true
-    
             elseif button.Text == "Alt Control" then
                 altcontrol.Visible = true
             end
+            
+            -- Reset active state after a delay to allow hover effects
+            task.wait(0.1)
+            isActive = false
         end)
     end
     
@@ -3940,88 +4122,161 @@ else -- SELLER GUI
     end)
     
     
-    -- Adding buttons with the same style
+    -- Adding modern styled buttons frame
     local buttonsFrame = Instance.new("Frame", frame)
-    buttonsFrame["Size"] = UDim2.new(0, 160, 0, 40)  -- Adjust size as needed
-    buttonsFrame["Position"] = UDim2.new(0.01583, 0, 0.59991, 0)  -- Position the button frame
-    buttonsFrame["BackgroundTransparency"] = 1  -- No background transparency
+    buttonsFrame["Size"] = UDim2.new(0, 180, 0, 35)  -- Better proportions
+    buttonsFrame["Position"] = UDim2.new(0.015, 0, 0.65, 0)  -- Better positioning
+    buttonsFrame["BackgroundTransparency"] = 1
     
-    -- Button 1 (with the same style as the TextBox)
-    local button1 = Instance.new("ImageButton", buttonsFrame)
-    button1["Size"] = UDim2.new(0, 30, 0, 30)  -- Size of the button
-    button1["Position"] = UDim2.new(0, 0, 0, 0)  -- Position of the button
-    button1["BackgroundColor3"] = Color3.fromRGB(45, 47, 55)  -- Modernized dark background
-    button1["Image"] = "http://www.roblox.com/asset/?id=6710784639";
-    button1["ImageTransparency"] = 0.1  -- Slightly less transparency
+    -- Create button container with glass effect
+    local buttonContainer = Instance.new("Frame", buttonsFrame)
+    buttonContainer.Size = UDim2.new(1, 0, 1, 0)
+    buttonContainer.Position = UDim2.new(0, 0, 0, 0)
+    buttonContainer.BackgroundColor3 = Color3.fromRGB(30, 32, 39)
+    buttonContainer.BackgroundTransparency = 0.3
+    buttonContainer.BorderSizePixel = 0
+    
+    local containerCorner = Instance.new("UICorner", buttonContainer)
+    containerCorner.CornerRadius = UDim.new(0, 10)
+    
+    local containerStroke = Instance.new("UIStroke", buttonContainer)
+    containerStroke.Color = Color3.fromRGB(70, 73, 82)
+    containerStroke.Thickness = 1
+    containerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    
+    -- Button 1 - Kick (Red theme)
+    local button1 = Instance.new("ImageButton", buttonContainer)
+    button1["Size"] = UDim2.new(0, 35, 0, 25)
+    button1["Position"] = UDim2.new(0, 5, 0.5, -12.5)
+    button1["BackgroundColor3"] = Color3.fromRGB(239, 68, 68)  -- Modern red
+    button1["Image"] = "http://www.roblox.com/asset/?id=6710784639"
+    button1["ImageTransparency"] = 0
+    button1["ImageColor3"] = Color3.fromRGB(255, 255, 255)
     local button1Corner = Instance.new("UICorner", button1)
-    button1Corner["CornerRadius"] = UDim.new(0, 8)  -- Rounded corners
+    button1Corner["CornerRadius"] = UDim.new(0, 6)
     
-    -- Add hover effect to button1
-    local button1Stroke = Instance.new("UIStroke", button1)
-    button1Stroke["Color"] = Color3.fromRGB(70, 73, 82)
-    button1Stroke["Thickness"] = 1
-    button1Stroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+    -- Add modern shadow effect
+    local button1Shadow = Instance.new("Frame", buttonContainer)
+    button1Shadow.Size = button1.Size
+    button1Shadow.Position = UDim2.new(0, 7, 0.5, -10.5)  -- Slight offset for shadow
+    button1Shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    button1Shadow.BackgroundTransparency = 0.8
+    button1Shadow.ZIndex = button1.ZIndex - 1
+    local shadowCorner1 = Instance.new("UICorner", button1Shadow)
+    shadowCorner1.CornerRadius = UDim.new(0, 6)
     
+    -- Hover animations for button1
     button1.MouseEnter:Connect(function()
-        button1.BackgroundColor3 = Color3.fromRGB(255, 85, 85)  -- Red on hover (kick)
-        button1Stroke.Color = Color3.fromRGB(255, 100, 100)
+        button1:TweenSize(UDim2.new(0, 38, 0, 28), "Out", "Quad", 0.2, true)
+        button1.BackgroundColor3 = Color3.fromRGB(220, 38, 38)
     end)
     
     button1.MouseLeave:Connect(function()
-        button1.BackgroundColor3 = Color3.fromRGB(45, 47, 55)
-        button1Stroke.Color = Color3.fromRGB(70, 73, 82)
+        button1:TweenSize(UDim2.new(0, 35, 0, 25), "Out", "Quad", 0.2, true)
+        button1.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
     end)
     
-    -- Button 2
-    local button2 = Instance.new("ImageButton", buttonsFrame)
-    button2["Size"] = UDim2.new(0, 30, 0, 30)
-    button2["Position"] = UDim2.new(0.25, 0, 0, 0)
-    button2["BackgroundColor3"] = Color3.fromRGB(45, 47, 55)
-    button2["Image"] = "http://www.roblox.com/asset/?id=12941020168"  -- Replace with actual decal ID
-    button2["ImageTransparency"] = 0.1
+    -- Button 2 - Teleport (Blue theme)
+    local button2 = Instance.new("ImageButton", buttonContainer)
+    button2["Size"] = UDim2.new(0, 35, 0, 25)
+    button2["Position"] = UDim2.new(0, 50, 0.5, -12.5)
+    button2["BackgroundColor3"] = Color3.fromRGB(59, 130, 246)  -- Modern blue
+    button2["Image"] = "http://www.roblox.com/asset/?id=12941020168"
+    button2["ImageTransparency"] = 0
+    button2["ImageColor3"] = Color3.fromRGB(255, 255, 255)
     local button2Corner = Instance.new("UICorner", button2)
-    button2Corner["CornerRadius"] = UDim.new(0, 8)
+    button2Corner["CornerRadius"] = UDim.new(0, 6)
     
-    -- Add hover effect to button2
-    local button2Stroke = Instance.new("UIStroke", button2)
-    button2Stroke["Color"] = Color3.fromRGB(70, 73, 82)
-    button2Stroke["Thickness"] = 1
-    button2Stroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+    -- Shadow for button2
+    local button2Shadow = Instance.new("Frame", buttonContainer)
+    button2Shadow.Size = button2.Size
+    button2Shadow.Position = UDim2.new(0, 52, 0.5, -10.5)
+    button2Shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    button2Shadow.BackgroundTransparency = 0.8
+    button2Shadow.ZIndex = button2.ZIndex - 1
+    local shadowCorner2 = Instance.new("UICorner", button2Shadow)
+    shadowCorner2.CornerRadius = UDim.new(0, 6)
     
+    -- Hover animations for button2
     button2.MouseEnter:Connect(function()
-        button2.BackgroundColor3 = Color3.fromRGB(85, 170, 255)  -- Blue on hover (teleport)
-        button2Stroke.Color = Color3.fromRGB(100, 180, 255)
+        button2:TweenSize(UDim2.new(0, 38, 0, 28), "Out", "Quad", 0.2, true)
+        button2.BackgroundColor3 = Color3.fromRGB(37, 99, 235)
     end)
     
     button2.MouseLeave:Connect(function()
-        button2.BackgroundColor3 = Color3.fromRGB(45, 47, 55)
-        button2Stroke.Color = Color3.fromRGB(70, 73, 82)
+        button2:TweenSize(UDim2.new(0, 35, 0, 25), "Out", "Quad", 0.2, true)
+        button2.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
     end)
     
-    -- Button 3
-    local button3 = Instance.new("ImageButton", buttonsFrame)
-    button3["Size"] = UDim2.new(0, 30, 0, 30)
-    button3["Position"] = UDim2.new(0.5, 0, 0, 0)
-    button3["BackgroundColor3"] = Color3.fromRGB(45, 47, 55)
-    button3["Image"] = "http://www.roblox.com/asset/?id=131012702"  -- Replace with actual decal ID
-    button3["ImageTransparency"] = 0.1
+    -- Button 3 - Summon (Green theme)
+    local button3 = Instance.new("ImageButton", buttonContainer)
+    button3["Size"] = UDim2.new(0, 35, 0, 25)
+    button3["Position"] = UDim2.new(0, 95, 0.5, -12.5)
+    button3["BackgroundColor3"] = Color3.fromRGB(34, 197, 94)  -- Modern green
+    button3["Image"] = "http://www.roblox.com/asset/?id=131012702"
+    button3["ImageTransparency"] = 0
+    button3["ImageColor3"] = Color3.fromRGB(255, 255, 255)
     local button3Corner = Instance.new("UICorner", button3)
-    button3Corner["CornerRadius"] = UDim.new(0, 8)
+    button3Corner["CornerRadius"] = UDim.new(0, 6)
     
-    -- Add hover effect to button3
-    local button3Stroke = Instance.new("UIStroke", button3)
-    button3Stroke["Color"] = Color3.fromRGB(70, 73, 82)
-    button3Stroke["Thickness"] = 1
-    button3Stroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+    -- Shadow for button3
+    local button3Shadow = Instance.new("Frame", buttonContainer)
+    button3Shadow.Size = button3.Size
+    button3Shadow.Position = UDim2.new(0, 97, 0.5, -10.5)
+    button3Shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    button3Shadow.BackgroundTransparency = 0.8
+    button3Shadow.ZIndex = button3.ZIndex - 1
+    local shadowCorner3 = Instance.new("UICorner", button3Shadow)
+    shadowCorner3.CornerRadius = UDim.new(0, 6)
     
+    -- Hover animations for button3
     button3.MouseEnter:Connect(function()
-        button3.BackgroundColor3 = Color3.fromRGB(120, 255, 120)  -- Green on hover (summon)
-        button3Stroke.Color = Color3.fromRGB(140, 255, 140)
+        button3:TweenSize(UDim2.new(0, 38, 0, 28), "Out", "Quad", 0.2, true)
+        button3.BackgroundColor3 = Color3.fromRGB(22, 163, 74)
     end)
     
     button3.MouseLeave:Connect(function()
-        button3.BackgroundColor3 = Color3.fromRGB(45, 47, 55)
-        button3Stroke.Color = Color3.fromRGB(70, 73, 82)
+        button3:TweenSize(UDim2.new(0, 35, 0, 25), "Out", "Quad", 0.2, true)
+        button3.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+    end)
+    
+    -- Status indicator (optional - shows button purpose on hover)
+    local statusLabel = Instance.new("TextLabel", buttonContainer)
+    statusLabel.Size = UDim2.new(0, 40, 0, 15)
+    statusLabel.Position = UDim2.new(1, 5, 0.5, -7.5)
+    statusLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    statusLabel.BackgroundTransparency = 0.3
+    statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    statusLabel.TextSize = 10
+    statusLabel.Font = Enum.Font.GothamBold
+    statusLabel.Text = ""
+    statusLabel.Visible = false
+    local statusCorner = Instance.new("UICorner", statusLabel)
+    statusCorner.CornerRadius = UDim.new(0, 4)
+    
+    -- Show status on hover
+    button1.MouseEnter:Connect(function()
+        statusLabel.Text = "Kick"
+        statusLabel.Visible = true
+    end)
+    button1.MouseLeave:Connect(function()
+        statusLabel.Visible = false
+    end)
+    
+    button2.MouseEnter:Connect(function()
+        statusLabel.Text = "TP"
+        statusLabel.Visible = true
+    end)
+    button2.MouseLeave:Connect(function()
+        statusLabel.Visible = false
+    end)
+    
+    button3.MouseEnter:Connect(function()
+        statusLabel.Text = "Summon"
+        statusLabel.Visible = true
+    end)
+    button3.MouseLeave:Connect(function()
+        statusLabel.Visible = false
     end)
     
     
