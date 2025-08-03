@@ -2558,6 +2558,10 @@ if isAlt(PLAYER.UserId) == true then
                 StatusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
             end
             
+            task.wait(1)
+        end
+    end)
+
     -- Add settings panel
     local SettingsCard = Instance.new("Frame")
     SettingsCard.Size = UDim2.new(1, 0, 0, 120)
@@ -2809,8 +2813,12 @@ if isAlt(PLAYER.UserId) == true then
             end
         end
     end
-    print("Ran")   
-else -- SELLER GUI
+    
+    print("Ran")
+
+-- End of Alt Controller section (closes the if isAlt(PLAYER.UserId) == true then statement)
+else
+    -- SELLER GUI section starts here (for non-alt players)
     local function format(value)
         -- Check if the value is negative
         local isNegative = value < 0
