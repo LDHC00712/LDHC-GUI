@@ -2218,54 +2218,22 @@ else -- SELLER GUI
     end)
     
     
-    -- Create modern glassmorphism sideFrame
+    -- Create simple sidebar
     local sideFrame = Instance.new("Frame", G2L["2"])
     sideFrame.Name = "sideFrame"
     sideFrame.Size = UDim2.new(0, 140, 0, 296)
     sideFrame.Position = UDim2.new(0, 0, 0, 0)
-    sideFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    sideFrame.BackgroundTransparency = 0.85  -- Glass transparency
+    sideFrame.BackgroundColor3 = Color3.fromRGB(18, 19, 24)
     sideFrame.BorderSizePixel = 0
     sideFrame.ZIndex = 2
     
-    -- Glass blur effect for sidebar
-    local sideBlur = Instance.new("Frame", sideFrame)
-    sideBlur.Size = UDim2.new(1, 0, 1, 0)
-    sideBlur.Position = UDim2.new(0, 0, 0, 0)
-    sideBlur.BackgroundColor3 = Color3.fromRGB(150, 170, 255)
-    sideBlur.BackgroundTransparency = 0.8
-    sideBlur.ZIndex = -1
-    
-    -- Add animated gradient
-    local sideGradient = Instance.new("UIGradient", sideBlur)
-    sideGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 140, 255)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(80, 200, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 120, 255))
-    }
-    sideGradient.Rotation = 45
-    
-    -- Animate gradient rotation
-    local rotationTween = game:GetService("TweenService"):Create(
-        sideGradient,
-        TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1),
-        {Rotation = 405}
-    )
-    rotationTween:Play()
-    
-    -- Glass stroke effect
-    local sideStroke = Instance.new("UIStroke", sideFrame)
-    sideStroke.Color = Color3.fromRGB(255, 255, 255)
-    sideStroke.Thickness = 1
-    sideStroke.Transparency = 0.6
-    sideStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    
-    -- Rounded corners
+    -- Add simple corner and border
     local sideCorner = Instance.new("UICorner", sideFrame)
-    sideCorner.CornerRadius = UDim.new(0, 20)
+    sideCorner.CornerRadius = UDim.new(0, 12)
     
-    local sideBlurCorner = Instance.new("UICorner", sideBlur)
-    sideBlurCorner.CornerRadius = UDim.new(0, 20)
+    local sideStroke = Instance.new("UIStroke", sideFrame)
+    sideStroke.Color = Color3.fromRGB(35, 37, 45)
+    sideStroke.Thickness = 1
     
     
     
@@ -3678,36 +3646,34 @@ else -- SELLER GUI
         buttonBlur.Size = UDim2.new(1, 0, 1, 0)
         buttonBlur.Position = UDim2.new(0, 0, 0, 0)
         buttonBlur.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
-        buttonBlur.BackgroundTransparency = 0.9
-        buttonBlur.ZIndex = -1
-        local buttonBlurCorner = Instance.new("UICorner", buttonBlur)
-        buttonBlurCorner.CornerRadius = UDim.new(0, 15)
+    -- Create simple buttons inside the sideFrame
+    for i, buttonData in ipairs(buttonsData) do
+        local button = Instance.new("TextButton", sideFrame)
+        button.Size = UDim2.new(1, -20, 0, 35)
+        button.Position = UDim2.new(0, 10, 0, (i-1) * 45 + 15)
+        button.BackgroundColor3 = Color3.fromRGB(25, 27, 35)
+        button.TextColor3 = Color3.fromRGB(200, 200, 200)
+        button.Text = buttonData.Text
+        button.FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        button.TextSize = 13
+        button.BorderSizePixel = 0
+        button.ZIndex = 3
+    
+        -- Simple button styling
+        local buttonCorner = Instance.new("UICorner", button)
+        buttonCorner.CornerRadius = UDim.new(0, 8)
         
-        -- Hover glow effect
-        local glowFrame = Instance.new("Frame", button)
-        glowFrame.Size = UDim2.new(1, 4, 1, 4)
-        glowFrame.Position = UDim2.new(0, -2, 0, -2)
-        glowFrame.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-        glowFrame.BackgroundTransparency = 1
-        glowFrame.ZIndex = -2
-        local glowCorner = Instance.new("UICorner", glowFrame)
-        glowCorner.CornerRadius = UDim.new(0, 17)
+        local buttonStroke = Instance.new("UIStroke", button)
+        buttonStroke.Color = Color3.fromRGB(40, 42, 50)
+        buttonStroke.Thickness = 1
         
         -- Active state management
         local isActive = false
         
         button.MouseEnter:Connect(function()
             if not isActive then
-                button:TweenSize(UDim2.new(1, -16, 0, 42), "Out", "Quad", 0.2, true)
-                buttonStroke.Transparency = 0.3
-                buttonBlur.BackgroundTransparency = 0.7
-                button.TextColor3 = Color3.fromRGB(50, 50, 100)
-                -- Glow effect
-                game:GetService("TweenService"):Create(
-                    glowFrame,
-                    TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                    {BackgroundTransparency = 0.8}
-                ):Play()
+                button.BackgroundColor3 = Color3.fromRGB(35, 37, 45)
+                button.TextColor3 = Color3.fromRGB(255, 255, 255)
             end
         end)
         
@@ -3741,18 +3707,10 @@ else -- SELLER GUI
                 end
             end
             
-            -- Set this button as active with glass effect
-            button.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
-            button.BackgroundTransparency = 0.3
+            -- Set this button as active
+            button.BackgroundColor3 = Color3.fromRGB(40, 120, 200)
             button.TextColor3 = Color3.fromRGB(255, 255, 255)
-            buttonStroke.Transparency = 0.2
             isActive = true
-            
-            -- Pulse effect for active button
-            local pulseSize = button.Size
-            button:TweenSize(UDim2.new(1, -14, 0, 44), "Out", "Quad", 0.1, true, function()
-                button:TweenSize(pulseSize, "Out", "Quad", 0.1, true)
-            end)
             
             -- Hide all frames first
             G2L["7"].Visible = false
