@@ -2117,11 +2117,15 @@ else -- SELLER GUI
     G2L["2"]["BackgroundColor3"] = Color3.fromRGB(22, 23, 29)  -- Clean dark background
     G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296)
     G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
-    G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     
     -- Simple rounded corners
     local mainCorner = Instance.new("UICorner", G2L["2"])
     mainCorner.CornerRadius = UDim.new(0, 12)
+    
+    -- Add subtle border
+    local mainStroke = Instance.new("UIStroke", G2L["2"])
+    mainStroke.Color = Color3.fromRGB(45, 47, 55)
+    mainStroke.Thickness = 1
     
     -- Store original size and position
     local originalSize = G2L["2"].Size
@@ -3789,12 +3793,16 @@ else -- SELLER GUI
     G2L["7"]["BackgroundColor3"] = Color3.fromRGB(18, 19, 24)
     G2L["7"]["Size"] = UDim2.new(0, 360, 0, 276)
     G2L["7"]["Position"] = UDim2.new(0, 150, 0, 10)
-    G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     G2L["7"]["ScrollBarThickness"] = 6
     G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(50, 52, 60)
     
     local scrollCorner = Instance.new("UICorner", G2L["7"])
     scrollCorner.CornerRadius = UDim.new(0, 8)
+    
+    -- Add border to scrolling frame
+    local scrollStroke = Instance.new("UIStroke", G2L["7"])
+    scrollStroke.Color = Color3.fromRGB(35, 37, 45)
+    scrollStroke.Thickness = 1
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.UIListLayout
     G2L["8"] = Instance.new("UIListLayout", G2L["7"])
@@ -3970,12 +3978,16 @@ else -- SELLER GUI
     frame["BackgroundColor3"] = Color3.fromRGB(22, 23, 29);
     frame["Size"] = UDim2.new(0, 340, 0, 85);
     frame["Position"] = UDim2.new(-0.02488, 0, -0.01718, 0);
-    frame["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     frame.Name = player.Name .. "_Box"
     
     -- Rounded corners
     uicorner1 = Instance.new("UICorner", frame);
     uicorner1["CornerRadius"] = UDim.new(0, 8);
+    
+    -- Add border to frame
+    local frameStroke = Instance.new("UIStroke", frame);
+    frameStroke.Color = Color3.fromRGB(35, 37, 45);
+    frameStroke.Thickness = 1;
     
     
     
@@ -3988,7 +4000,6 @@ else -- SELLER GUI
     image1["BackgroundColor3"] = Color3.fromRGB(31, 32, 39);
     image1["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png";
     image1["Size"] = UDim2.new(0, 55, 0, 55);
-    image1["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     image1["Position"] = UDim2.new(0.02, 0, 0.15, 0);
     
     local userId = player.UserId
@@ -4009,30 +4020,25 @@ else -- SELLER GUI
     stroke2["Thickness"] = 2;
     
     --right side cash
-    -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.ShouldHave
     textlabel1 = Instance.new("TextLabel", frame);
     textlabel1["BorderSizePixel"] = 0;
-    textlabel1["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+    textlabel1["BackgroundTransparency"] = 1;
     textlabel1["TextSize"] = 14;
     textlabel1["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
     textlabel1["TextColor3"] = Color3.fromRGB(255, 255, 255);
-    textlabel1["BackgroundTransparency"] = 1;
     textlabel1["Size"] = UDim2.new(0, 200, 0, 26);
-    textlabel1["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     textlabel1["Text"] = LABEL1 or "";
     textlabel1["Name"] = "ShouldHave";
     textlabel1["Position"] = UDim2.new(0.67018, 0, -0.00049, 0);
     
-    -- Simple username label
+    -- Username label
     label2 = Instance.new("TextLabel", frame);
     label2["BorderSizePixel"] = 0;
-    label2["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
     label2["BackgroundTransparency"] = 1;
     label2["TextSize"] = 15;
-    label2["FontFace"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+    label2["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
     label2["TextColor3"] = Color3.fromRGB(255, 255, 255);
     label2["Size"] = UDim2.new(0, 145, 0, 26);
-    label2["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     label2["Text"] = player.Name;
     label2["Name"] = "NAYM";
     label2["Position"] = UDim2.new(0.24, 0, 0.1, 0);
