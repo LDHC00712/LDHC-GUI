@@ -2111,23 +2111,18 @@ else -- SELLER GUI
     G2L["1"].Name = "SELLERGUI"
     G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
     
-    -- Simple clean main frame
-    G2L["2"] = Instance.new("Frame", G2L["1"])
-    G2L["2"]["BorderSizePixel"] = 0
-    G2L["2"]["BackgroundColor3"] = Color3.fromRGB(22, 23, 29)  -- Clean dark background
-    G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296)
-    G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
+    -- StarterGui.ScreenGui.Frame
+    G2L["2"] = Instance.new("Frame", G2L["1"]);
+    G2L["2"]["BorderSizePixel"] = 0;
+    G2L["2"]["BackgroundColor3"] = Color3.fromRGB(22, 23, 29);
+    G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296);
+    G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0);
+    G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     
-    -- Simple rounded corners
-    local mainCorner = Instance.new("UICorner", G2L["2"])
-    mainCorner.CornerRadius = UDim.new(0, 12)
+    -- StarterGui.ScreenGui.Frame.UICorner
+    G2L["3"] = Instance.new("UICorner", G2L["2"]);
     
-    -- Add subtle border
-    local mainStroke = Instance.new("UIStroke", G2L["2"])
-    mainStroke.Color = Color3.fromRGB(45, 47, 55)
-    mainStroke.Thickness = 1
-    
-    -- Store original size and position
+    -- Store original size and position for fullscreen toggle
     local originalSize = G2L["2"].Size
     local originalPosition = G2L["2"].Position
     local isFullscreen = false
@@ -2218,22 +2213,63 @@ else -- SELLER GUI
     end)
     
     
-    -- Create simple sidebar
-    local sideFrame = Instance.new("Frame", G2L["2"])
-    sideFrame.Name = "sideFrame"
-    sideFrame.Size = UDim2.new(0, 140, 0, 296)
-    sideFrame.Position = UDim2.new(0, 0, 0, 0)
-    sideFrame.BackgroundColor3 = Color3.fromRGB(18, 19, 24)
-    sideFrame.BorderSizePixel = 0
-    sideFrame.ZIndex = 2
+    -- StarterGui.ScreenGui.Frame.Frame (Sidebar)
+    G2L["4"] = Instance.new("Frame", G2L["2"]);
+    G2L["4"]["BorderSizePixel"] = 0;
+    G2L["4"]["BackgroundColor3"] = Color3.fromRGB(18, 19, 24);
+    G2L["4"]["Size"] = UDim2.new(0, 140, 0, 276);
+    G2L["4"]["Position"] = UDim2.new(0, 0, 0, 10);
+    G2L["4"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     
-    -- Add simple corner and border
-    local sideCorner = Instance.new("UICorner", sideFrame)
-    sideCorner.CornerRadius = UDim.new(0, 12)
+    -- StarterGui.ScreenGui.Frame.Frame.UICorner
+    G2L["5"] = Instance.new("UICorner", G2L["4"]);
     
-    local sideStroke = Instance.new("UIStroke", sideFrame)
-    sideStroke.Color = Color3.fromRGB(35, 37, 45)
-    sideStroke.Thickness = 1
+    -- Create sidebar buttons
+    local buttonsData = {
+        {Text = "Players", Frame = "7"},
+        {Text = "Alts", Frame = "Alts"},
+        {Text = "Misc", Frame = "Misc"},
+        {Text = "Settings", Frame = "Settings"},
+        {Text = "Alt Control", Frame = "AltControl"}
+    }
+    
+    for i, buttonData in ipairs(buttonsData) do
+        local button = Instance.new("TextButton", G2L["4"])
+        button.Size = UDim2.new(1, -10, 0, 40)
+        button.Position = UDim2.new(0, 5, 0, (i-1) * 50 + 10)
+        button.BackgroundColor3 = Color3.fromRGB(25, 27, 35)
+        button.TextColor3 = Color3.fromRGB(200, 200, 200)
+        button.Text = buttonData.Text
+        button.FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        button.TextSize = 14
+        button.BorderSizePixel = 0
+        
+        local buttonCorner = Instance.new("UICorner", button)
+        buttonCorner.CornerRadius = UDim.new(0, 8)
+        
+        button.MouseButton1Click:Connect(function()
+            -- Hide all frames first
+            G2L["7"].Visible = false
+            if AltsFrame then AltsFrame.Visible = false end
+            if MiscFrame then MiscFrame.Visible = false end
+            if SettingsFrame then SettingsFrame.Visible = false end
+            if altcontrol then altcontrol.Visible = false end
+            
+            -- Show the corresponding frame
+            if button.Text == "Players" then
+                G2L["7"].Visible = true
+            elseif button.Text == "Alts" and AltsFrame then
+                calculateAltsValues()
+                AltsFrame.Visible = true
+            elseif button.Text == "Misc" and MiscFrame then
+                MiscFrame.Visible = true
+            elseif button.Text == "Settings" and SettingsFrame then
+                SettingsFrame.Visible = true
+            elseif button.Text == "Alt Control" and altcontrol then
+                altcontrol.Visible = true
+            end
+        end)
+    end
     
     
     
@@ -3744,23 +3780,18 @@ else -- SELLER GUI
     -- StarterGui.ScreenGui.Frame.UICorner
     G2L["3"] = Instance.new("UICorner", G2L["2"])
     
-    -- Simple scrolling frame
-    G2L["7"] = Instance.new("ScrollingFrame", G2L["2"])
-    G2L["7"]["Active"] = true
-    G2L["7"]["BorderSizePixel"] = 0
-    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(18, 19, 24)
-    G2L["7"]["Size"] = UDim2.new(0, 360, 0, 276)
-    G2L["7"]["Position"] = UDim2.new(0, 150, 0, 10)
-    G2L["7"]["ScrollBarThickness"] = 6
-    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(50, 52, 60)
+    -- StarterGui.ScreenGui.Frame.ScrollingFrame
+    G2L["7"] = Instance.new("ScrollingFrame", G2L["2"]);
+    G2L["7"]["Active"] = true;
+    G2L["7"]["BorderSizePixel"] = 0;
+    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(18, 19, 24);
+    G2L["7"]["Size"] = UDim2.new(0, 360, 0, 276);
+    G2L["7"]["Position"] = UDim2.new(0, 150, 0, 10);
+    G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+    G2L["7"]["ScrollBarThickness"] = 6;
     
-    local scrollCorner = Instance.new("UICorner", G2L["7"])
-    scrollCorner.CornerRadius = UDim.new(0, 8)
-    
-    -- Add border to scrolling frame
-    local scrollStroke = Instance.new("UIStroke", G2L["7"])
-    scrollStroke.Color = Color3.fromRGB(35, 37, 45)
-    scrollStroke.Thickness = 1
+    -- StarterGui.ScreenGui.Frame.ScrollingFrame.UICorner
+    G2L["6"] = Instance.new("UICorner", G2L["7"]);
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.UIListLayout
     G2L["8"] = Instance.new("UIListLayout", G2L["7"])
