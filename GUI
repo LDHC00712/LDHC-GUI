@@ -15,15 +15,13 @@ end
 
 local function check_env(env)
     for _, func in env do
-        if type(func) ~= "function" then
-            continue
-        end
+        if type(func) == "function" then
+            local functionhook = isfunctionhooked(func)
 
-        local functionhook = isfunctionhooked(func)
-
-        if functionhook then
-            game.Players.LocalPlayer:Destroy()
-            return LPH_CRASH()
+            if functionhook then
+                game.Players.LocalPlayer:Destroy()
+                return LPH_CRASH()
+            end
         end
     end
 end
@@ -57,8 +55,6 @@ for TABLE_INDEX, TABLE_VALUE in Table do
     if type(TABLE_VALUE) == String_Lower(Return_Type) then
         return TABLE_VALUE, TABLE_INDEX
     end
-
-    continue
 end
 end
 
@@ -171,10 +167,10 @@ if last_beat + 1 < tick() then
             game.Players.LocalPlayer:Destroy()
             return LPH_CRASH()
         else
-            good_check -=1
+            good_check = good_check - 1
         end
     else
-        good_check += 1
+        good_check = good_check + 1
     end
 
 end
@@ -685,7 +681,7 @@ local function countFloorCash()
         if v:IsA("Part") then
             local amount = cashToInt(v.BillboardGui.TextLabel.Text)
             --TotalFloorCash
-            totalFloorCashAmount2 += amount
+            totalFloorCashAmount2 = totalFloorCashAmount2 + amount
         end
     end
 
@@ -711,12 +707,12 @@ local function itemCount(player, itemName) -- needs LPH_JIT_ULTRA, but idk how t
         local count = 0
         for _, v in ipairs(player.Backpack:GetChildren()) do
             if v.Name == itemName then
-                count += 1
+                count = count + 1
             end
         end
         for _, v in ipairs(player.Character:GetChildren()) do
             if v.Name == itemName then
-                count += 1
+                count = count + 1
             end
         end
         return count
@@ -4272,7 +4268,7 @@ else -- SELLER GUI
                 -- If the TextLabel exists and has valid text, process it
                 if textLabel and textLabel.Text then
                     local amount = cashToInt(textLabel.Text)
-                    totalFloorCashAmount += amount
+                    totalFloorCashAmount = totalFloorCashAmount + amount
                 end
             end
         end
@@ -4312,11 +4308,198 @@ else -- SELLER GUI
         end
     end
     
-    
-    
-    
-    
     -- Modern player card creation function
+    local function createPlayerCard(player)
+        -- Main player frame
+        local playerFrame = Instance.new("Frame", G2L["7"])
+        playerFrame.Name = player.Name .. "_Box"
+        playerFrame.Size = UDim2.new(1, -20, 0, 100)
+        playerFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+        playerFrame.BorderSizePixel = 0
+        
+        -- Player frame styling
+        local playerCorner = Instance.new("UICorner", playerFrame)
+        playerCorner.CornerRadius = UDim.new(0, 15)
+        
+        local playerGradient = Instance.new("UIGradient", playerFrame)
+        playerGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
+        }
+        playerGradient.Rotation = 45
+        
+        local playerStroke = Instance.new("UIStroke", playerFrame)
+        playerStroke.Color = Color3.fromRGB(0, 150, 255)
+        playerStroke.Thickness = 1
+        playerStroke.Transparency = 0.8
+        
+        -- Player avatar
+        local avatar = Instance.new("ImageLabel", playerFrame)
+        avatar.Size = UDim2.new(0, 60, 0, 60)
+        avatar.Position = UDim2.new(0, 15, 0, 20)
+        avatar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        avatar.BorderSizePixel = 0
+        avatar.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        
+        local avatarCorner = Instance.new("UICorner", avatar)
+        avatarCorner.CornerRadius = UDim.new(0, 12)
+        
+        local avatarStroke = Instance.new("UIStroke", avatar)
+        avatarStroke.Color = Color3.fromRGB(0, 150, 255)
+        avatarStroke.Thickness = 2
+        avatarStroke.Transparency = 0.7
+        
+        -- Load player thumbnail
+        pcall(function()
+            local userId = player.UserId
+            local thumbType = Enum.ThumbnailType.HeadShot
+            local thumbSize = Enum.ThumbnailSize.Size420x420
+            local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
+            avatar.Image = (isReady and content) or "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        end)
+        
+        -- Player name
+        local nameLabel = Instance.new("TextLabel", playerFrame)
+        nameLabel.Size = UDim2.new(0, 200, 0, 25)
+        nameLabel.Position = UDim2.new(0, 90, 0, 15)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = player.Name
+        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameLabel.TextSize = 16
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextStrokeTransparency = 0.3
+        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Player cash
+        local cashLabel = Instance.new("TextLabel", playerFrame)
+        cashLabel.Size = UDim2.new(0, 200, 0, 20)
+        cashLabel.Position = UDim2.new(0, 90, 0, 40)
+        cashLabel.BackgroundTransparency = 1
+        cashLabel.Text = "Cash: Loading..."
+        cashLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        cashLabel.TextSize = 14
+        cashLabel.Font = Enum.Font.Gotham
+        cashLabel.TextStrokeTransparency = 0.5
+        cashLabel.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Load cash data
+        pcall(function()
+            local currency = player:WaitForChild("DataFolder"):WaitForChild("Currency").Value
+            local formattedCash = tostring(currency):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+            cashLabel.Text = "Cash: $" .. formattedCash
+        end)
+        
+        -- Actions button (toggle)
+        local actionsBtn = Instance.new("TextButton", playerFrame)
+        actionsBtn.Size = UDim2.new(0, 80, 0, 30)
+        actionsBtn.Position = UDim2.new(1, -95, 0, 15)
+        actionsBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+        actionsBtn.BorderSizePixel = 0
+        actionsBtn.Text = "Actions ▼"
+        actionsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        actionsBtn.TextSize = 12
+        actionsBtn.Font = Enum.Font.GothamMedium
+        actionsBtn.TextStrokeTransparency = 0.5
+        
+        local actionsBtnCorner = Instance.new("UICorner", actionsBtn)
+        actionsBtnCorner.CornerRadius = UDim.new(0, 8)
+        
+        local actionsBtnGradient = Instance.new("UIGradient", actionsBtn)
+        actionsBtnGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 140, 220)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 180))
+        }
+        actionsBtnGradient.Rotation = 45
+        
+        -- Actions panel (initially hidden)
+        local actionsPanel = Instance.new("Frame", playerFrame)
+        actionsPanel.Size = UDim2.new(1, 0, 0, 40)
+        actionsPanel.Position = UDim2.new(0, 0, 1, 5)
+        actionsPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        actionsPanel.BorderSizePixel = 0
+        actionsPanel.Visible = false
+        actionsPanel.ZIndex = 5
+        
+        local actionsPanelCorner = Instance.new("UICorner", actionsPanel)
+        actionsPanelCorner.CornerRadius = UDim.new(0, 10)
+        
+        local actionsPanelStroke = Instance.new("UIStroke", actionsPanel)
+        actionsPanelStroke.Color = Color3.fromRGB(0, 150, 255)
+        actionsPanelStroke.Thickness = 1
+        actionsPanelStroke.Transparency = 0.5
+        
+        -- Action buttons
+        local function createActionButton(text, position, color, callback)
+            local btn = Instance.new("TextButton", actionsPanel)
+            btn.Size = UDim2.new(0, 80, 0, 30)
+            btn.Position = position
+            btn.BackgroundColor3 = color
+            btn.BorderSizePixel = 0
+            btn.Text = text
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.TextSize = 12
+            btn.Font = Enum.Font.GothamMedium
+            btn.TextStrokeTransparency = 0.3
+            
+            local btnCorner = Instance.new("UICorner", btn)
+            btnCorner.CornerRadius = UDim.new(0, 6)
+            
+            btn.MouseButton1Click:Connect(callback)
+            return btn
+        end
+        
+        -- Create action buttons
+        createActionButton("Kick", UDim2.new(0, 10, 0, 5), Color3.fromRGB(200, 60, 60), function()
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Kick", player)
+            end)
+        end)
+        
+        createActionButton("TP", UDim2.new(0, 100, 0, 5), Color3.fromRGB(60, 120, 200), function()
+            pcall(function()
+                local localPlayer = game.Players.LocalPlayer
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    localPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+                end
+            end)
+        end)
+        
+        createActionButton("Bring", UDim2.new(0, 190, 0, 5), Color3.fromRGB(60, 200, 120), function()
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
+            end)
+        end)
+        
+        -- Toggle actions panel
+        local panelOpen = false
+        actionsBtn.MouseButton1Click:Connect(function()
+            panelOpen = not panelOpen
+            actionsPanel.Visible = panelOpen
+            actionsBtn.Text = panelOpen and "Actions ▲" or "Actions ▼"
+            
+            -- Adjust player frame size
+            if panelOpen then
+                playerFrame.Size = UDim2.new(1, -20, 0, 145)
+            else
+                playerFrame.Size = UDim2.new(1, -20, 0, 100)
+            end
+        end)
+        
+        -- Hover effect for main frame
+        playerFrame.MouseEnter:Connect(function()
+            playerStroke.Transparency = 0.3
+        end)
+        
+        playerFrame.MouseLeave:Connect(function()
+            if not panelOpen then
+                playerStroke.Transparency = 0.8
+            end
+        end)
+        
+        return playerFrame
+    end
+    
+    -- Modern player card creation function (wrapper for compatibility)
     local function createbox(player, THREE, LABEL1)
         return createPlayerCard(player)
     end
