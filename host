@@ -1,15 +1,5 @@
 -- Initialize required services and variables
-local Players = game:GetServic    end
-
-    -- Clear GUI safely
-    pcall(function()
-        StarterGui:ClearAllChildren()
-    end)
-    
-    local PLAYER_GUI = PLAYER:WaitForChild("PlayerGui")
-    pcall(function()
-        PLAYER_GUI:ClearAllChildren()
-    end)ayers")
+local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 local PLAYER = Players.LocalPlayer
 
@@ -87,10 +77,15 @@ print("Is Alt:", isAlt(PLAYER.UserId))
         end))
     end)
 
-    StarterGui:ClearAllChildren()
+    -- Clear GUI safely
+    pcall(function()
+        StarterGui:ClearAllChildren()
+    end)
+    
     local PLAYER_GUI = PLAYER:WaitForChild("PlayerGui")
-    PLAYER_GUI:ClearAllChildren()
-
+    pcall(function()
+        PLAYER_GUI:ClearAllChildren()
+    end)
     --HostSellerGui (of 'ScreenGui' class)
     local HostSellerGui = Instance.new("ScreenGui")
     HostSellerGui.Name = "HostSellerGui"
