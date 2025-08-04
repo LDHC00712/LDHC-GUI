@@ -300,7 +300,131 @@ if isAlt(PLAYER.UserId) == false then
     local uiCorner = Instance.new("UICorner", sideFrame)
     uiCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the radius value to make the corners more or less rounded
 
-    print("HOST GUI Loaded Successfully!")
+    -- Create Players Frame (G2L["7"])
+    G2L["7"] = Instance.new("ScrollingFrame", G2L["2"])
+    G2L["7"]["Active"] = true
+    G2L["7"]["BorderSizePixel"] = 0
+    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["7"]["ScrollBarImageTransparency"] = 1
+    G2L["7"]["Size"] = UDim2.new(0, 410, 0, 296)
+    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["7"]["Position"] = UDim2.new(0.24, 0, 0, 0)
+    G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["7"]["BackgroundTransparency"] = 1
+    G2L["7"].ZIndex = 3
+
+    -- Create Alts Frame
+    local AltsFrame = Instance.new("ScrollingFrame", G2L["2"])
+    AltsFrame["Active"] = true
+    AltsFrame["BorderSizePixel"] = 0
+    AltsFrame["BackgroundColor3"] = Color3.fromRGB(255, 25, 255)
+    AltsFrame["ScrollBarImageTransparency"] = 1
+    AltsFrame["Size"] = UDim2.new(0, 396, 0, 296)
+    AltsFrame["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    AltsFrame["Position"] = UDim2.new(0.24, 10, 0, 0)
+    AltsFrame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    AltsFrame["BackgroundTransparency"] = 1
+    AltsFrame.Visible = false
+    AltsFrame.ZIndex = 3
+
+    -- Create Alt Control Frame
+    local altcontrol = Instance.new("ScrollingFrame", G2L["2"])
+    altcontrol["Active"] = true
+    altcontrol["BorderSizePixel"] = 0
+    altcontrol["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    altcontrol["ScrollBarImageTransparency"] = 1
+    altcontrol["Size"] = UDim2.new(0, 396, 0, 296)
+    altcontrol["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    altcontrol["Position"] = UDim2.new(0.24, 10, 0, 0)
+    altcontrol["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    altcontrol["BackgroundTransparency"] = 1
+    altcontrol.Visible = false
+    altcontrol.ZIndex = 3
+    altcontrol.CanvasSize = UDim2.new(0, 0, 0, 1000)
+    altcontrol.ScrollBarThickness = 6
+
+    -- Create Misc Frame
+    local MiscFrame = Instance.new("ScrollingFrame", G2L["2"])
+    MiscFrame["Active"] = true
+    MiscFrame["BorderSizePixel"] = 0
+    MiscFrame["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    MiscFrame["ScrollBarImageTransparency"] = 1
+    MiscFrame["Size"] = UDim2.new(0, 396, 0, 296)
+    MiscFrame["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    MiscFrame["Position"] = UDim2.new(0.24, 10, 0, 0)
+    MiscFrame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    MiscFrame["BackgroundTransparency"] = 1
+    MiscFrame.Visible = false
+    MiscFrame.ZIndex = 3
+    MiscFrame.CanvasSize = AltsFrame.Size
+    MiscFrame.ScrollBarThickness = 0
+
+    -- Create Settings Frame
+    local SettingsFrame = Instance.new("ScrollingFrame", G2L["2"])
+    SettingsFrame["Active"] = true
+    SettingsFrame["BorderSizePixel"] = 0
+    SettingsFrame["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    SettingsFrame["ScrollBarImageTransparency"] = 1
+    SettingsFrame["Size"] = UDim2.new(0, 396, 0, 296)
+    SettingsFrame["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    SettingsFrame["Position"] = UDim2.new(0.24, 10, 0, 0)
+    SettingsFrame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    SettingsFrame["BackgroundTransparency"] = 1
+    SettingsFrame.Visible = false
+    SettingsFrame.ZIndex = 3
+    SettingsFrame.CanvasSize = UDim2.new(0, 0, 0, 720)
+    SettingsFrame.ScrollBarThickness = 6
+
+    -- Navigation buttons data
+    local buttonsData = {
+        {Text = "Players", Position = UDim2.new(0, 0, 0, 0), Frame = G2L["7"]},
+        {Text = "Alts", Position = UDim2.new(0, 0, 0, 50), Frame = AltsFrame},
+        {Text = "Alt Control", Position = UDim2.new(0, 0, 0, 100), Frame = altcontrol},
+        {Text = "Misc", Position = UDim2.new(0, 0, 0, 150), Frame = MiscFrame},
+        {Text = "Settings", Position = UDim2.new(0, 0, 0, 200), Frame = SettingsFrame}
+    }
+
+    -- Create navigation buttons inside the sideFrame
+    for _, buttonData in ipairs(buttonsData) do
+        local button = Instance.new("TextButton", sideFrame)
+        button.Size = UDim2.new(1, 0, 0, 40)
+        button.Position = buttonData.Position
+        button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Text = buttonData.Text
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 18
+        button.BorderSizePixel = 0
+
+        -- Add rounded corners to each button
+        local buttonUICorner = Instance.new("UICorner", button)
+        buttonUICorner.CornerRadius = UDim.new(0, 8)
+
+        -- Add functionality for button click
+        button.MouseButton1Click:Connect(function()
+            -- Hide all frames first
+            G2L["7"].Visible = false
+            AltsFrame.Visible = false
+            MiscFrame.Visible = false
+            SettingsFrame.Visible = false
+            altcontrol.Visible = false
+
+            -- Show the corresponding frame for the button clicked
+            if button.Text == "Players" then
+                G2L["7"].Visible = true
+            elseif button.Text == "Alts" then
+                AltsFrame.Visible = true
+            elseif button.Text == "Alt Control" then
+                altcontrol.Visible = true
+            elseif button.Text == "Misc" then
+                MiscFrame.Visible = true
+            elseif button.Text == "Settings" then
+                SettingsFrame.Visible = true
+            end
+        end)
+    end
+
+    print("HOST GUI Loaded Successfully with Navigation!")
 end
 
 local GC = getconnections or get_signal_cons
