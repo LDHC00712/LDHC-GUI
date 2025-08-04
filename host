@@ -1,5 +1,5 @@
 -- Initialize required services and variables
-local Players = game:GetServic    end)
+local Players = game:GetServic    end
 
     -- Clear GUI safely
     pcall(function()
