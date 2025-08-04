@@ -2211,8 +2211,8 @@ else -- SELLER GUI
     G2L["2"] = Instance.new("Frame", G2L["1"])
     G2L["2"]["BorderSizePixel"] = 0
     G2L["2"]["BackgroundColor3"] = Color3.fromRGB(25, 25, 35)
-    G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296)
-    G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
+    G2L["2"]["Size"] = UDim2.new(0, 600, 0, 350)
+    G2L["2"]["Position"] = UDim2.new(0.1, 0, 0.25, 0)
     G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     
     -- Add modern corner and gradient to main frame
@@ -2220,8 +2220,8 @@ else -- SELLER GUI
     mainFrameCorner.CornerRadius = UDim.new(0, 15)
     
     local mainFrameStroke = Instance.new("UIStroke", G2L["2"])
-    mainFrameStroke.Color = Color3.fromRGB(60, 60, 80)
-    mainFrameStroke.Thickness = 2
+    mainFrameStroke.Color = Color3.fromRGB(80, 120, 200)
+    mainFrameStroke.Thickness = 4
     
     local mainFrameGradient = Instance.new("UIGradient", G2L["2"])
     mainFrameGradient.Color = ColorSequence.new{
@@ -2230,10 +2230,24 @@ else -- SELLER GUI
     }
     mainFrameGradient.Rotation = 45
     
+    -- Add LDHC title label at top left
+    local ldhcTitle = Instance.new("TextLabel", G2L["2"])
+    ldhcTitle.Name = "LDHCTitle"
+    ldhcTitle.Size = UDim2.new(0, 100, 0, 30)
+    ldhcTitle.Position = UDim2.new(0, 10, 0, 5)
+    ldhcTitle.BackgroundTransparency = 1
+    ldhcTitle.Text = "LDHC"
+    ldhcTitle.TextColor3 = Color3.fromRGB(100, 150, 255)
+    ldhcTitle.TextSize = 18
+    ldhcTitle.Font = Enum.Font.GothamBold
+    ldhcTitle.TextStrokeTransparency = 0.2
+    ldhcTitle.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    ldhcTitle.TextXAlignment = Enum.TextXAlignment.Left
+    
     -- Create a new frame named "sideFrame" with size {0, 100}, {0, 300} inside G2L["2"]
     local sideFrame = Instance.new("Frame", G2L["2"])
     sideFrame.Name = "sideFrame"  -- Name the inner frame "sideFrame"
-    sideFrame.Size = UDim2.new(0, 130, 0, 296)  -- Size {0, 100}, {0, 300}
+    sideFrame.Size = UDim2.new(0, 140, 0, 350)  -- Larger size to match main frame
     sideFrame.Position = UDim2.new(0, 0, 0, 0)  -- Position it inside the parent frame (G2L["2"])
     sideFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)  -- Modern dark color
     sideFrame.BorderSizePixel = 0  -- Remove the border
@@ -2336,9 +2350,9 @@ else -- SELLER GUI
     AltsFrame["BorderSizePixel"] = 0
     AltsFrame["BackgroundColor3"] = Color3.fromRGB(30, 30, 40)
     AltsFrame["ScrollBarImageTransparency"] = 0.5
-    AltsFrame["Size"] = UDim2.new(0, 396, 0, 296)
+    AltsFrame["Size"] = UDim2.new(0, 450, 0, 350)
     AltsFrame["ScrollBarImageColor3"] = Color3.fromRGB(80, 80, 100)
-    AltsFrame["Position"] = UDim2.new(0.24, 10, 0, 0)
+    AltsFrame["Position"] = UDim2.new(0.23, 10, 0, 0)
     AltsFrame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     AltsFrame["BackgroundTransparency"] = 0.1
     
@@ -3651,9 +3665,9 @@ else -- SELLER GUI
     G2L["7"]["BorderSizePixel"] = 0
     G2L["7"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 40)
     G2L["7"]["ScrollBarImageTransparency"] = 0.5
-    G2L["7"]["Size"] = UDim2.new(0, 410, 0, 296)
+    G2L["7"]["Size"] = UDim2.new(0, 450, 0, 350)
     G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(80, 80, 100)
-    G2L["7"]["Position"] = UDim2.new(0.24, 0, 0, 0)
+    G2L["7"]["Position"] = UDim2.new(0.23, 0, 0, 0)
     G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     G2L["7"]["BackgroundTransparency"] = 0.1
     
@@ -3842,27 +3856,27 @@ else -- SELLER GUI
     frame = Instance.new("Frame", G2L["7"]);
     frame["BorderSizePixel"] = 0;
     frame["BackgroundColor3"] = Color3.fromRGB(40, 40, 55);
-    frame["Size"] = UDim2.new(0, 379, 0, 76);
+    frame["Size"] = UDim2.new(0, 420, 0, 90);
     frame["Position"] = UDim2.new(-0.02488, 0, -0.01718, 0);
     frame["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     frame.Name = player.Name .. "_Box"  -- Naming the box with player name
     
     -- Add modern corner and gradient to player frame
     uicorner1 = Instance.new("UICorner", frame);
-    uicorner1.CornerRadius = UDim.new(0, 12)
+    uicorner1.CornerRadius = UDim.new(0, 15)
     
     -- Add gradient to player frame
     local playerFrameGradient = Instance.new("UIGradient", frame)
     playerFrameGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 65)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 45))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 55, 70)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 50))
     }
     playerFrameGradient.Rotation = 45
     
     -- Add stroke to player frame
     local playerFrameStroke = Instance.new("UIStroke", frame)
-    playerFrameStroke.Color = Color3.fromRGB(70, 70, 90)
-    playerFrameStroke.Thickness = 1
+    playerFrameStroke.Color = Color3.fromRGB(80, 120, 200)
+    playerFrameStroke.Thickness = 2
     
     
     
@@ -3873,13 +3887,13 @@ else -- SELLER GUI
     image1["BorderSizePixel"] = 0;
     image1["BackgroundColor3"] = Color3.fromRGB(50, 50, 65);
     image1["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png";
-    image1["Size"] = UDim2.new(0, 40, 0, 40);
+    image1["Size"] = UDim2.new(0, 50, 0, 50);
     image1["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-    image1["Position"] = UDim2.new(0.01583, 0, 0.05117, 0);
+    image1["Position"] = UDim2.new(0.02, 0, 0.2, 0);
     
     -- Add modern corner to player image
     local imageCorner = Instance.new("UICorner", image1)
-    imageCorner.CornerRadius = UDim.new(0, 8)
+    imageCorner.CornerRadius = UDim.new(0, 12)
     
     local userId = player.UserId
     local thumbType = Enum.ThumbnailType.HeadShot
@@ -4079,6 +4093,111 @@ else -- SELLER GUI
     }
     button3Gradient.Rotation = 45
     button3Corner["CornerRadius"] = UDim.new(0, 8)
+    
+    -- Create tooltip frame for buttons
+    local tooltipFrame = Instance.new("Frame", frame)
+    tooltipFrame.Name = "TooltipFrame"
+    tooltipFrame.Size = UDim2.new(0, 200, 0, 25)
+    tooltipFrame.Position = UDim2.new(0.02, 0, 1, 5)
+    tooltipFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    tooltipFrame.BorderSizePixel = 0
+    tooltipFrame.Visible = false
+    tooltipFrame.ZIndex = 10
+    
+    -- Add corner to tooltip
+    local tooltipCorner = Instance.new("UICorner", tooltipFrame)
+    tooltipCorner.CornerRadius = UDim.new(0, 8)
+    
+    -- Add stroke to tooltip
+    local tooltipStroke = Instance.new("UIStroke", tooltipFrame)
+    tooltipStroke.Color = Color3.fromRGB(80, 120, 200)
+    tooltipStroke.Thickness = 1
+    
+    -- Add arrow pointing up to tooltip
+    local arrow = Instance.new("Frame", tooltipFrame)
+    arrow.Name = "Arrow"
+    arrow.Size = UDim2.new(0, 10, 0, 10)
+    arrow.Position = UDim2.new(0, 30, 0, -5)
+    arrow.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    arrow.BorderSizePixel = 0
+    arrow.Rotation = 45
+    arrow.ZIndex = 9
+    
+    -- Arrow stroke
+    local arrowStroke = Instance.new("UIStroke", arrow)
+    arrowStroke.Color = Color3.fromRGB(80, 120, 200)
+    arrowStroke.Thickness = 1
+    
+    -- Tooltip text
+    local tooltipText = Instance.new("TextLabel", tooltipFrame)
+    tooltipText.Size = UDim2.new(1, 0, 1, 0)
+    tooltipText.Position = UDim2.new(0, 0, 0, 0)
+    tooltipText.BackgroundTransparency = 1
+    tooltipText.Text = ""
+    tooltipText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tooltipText.TextSize = 12
+    tooltipText.Font = Enum.Font.GothamBold
+    tooltipText.TextStrokeTransparency = 0.3
+    
+    -- Function to show tooltip
+    local function showTooltip(text)
+        tooltipText.Text = text
+        tooltipFrame.Visible = true
+    end
+    
+    -- Function to hide tooltip
+    local function hideTooltip()
+        tooltipFrame.Visible = false
+    end
+    
+    -- Add hover effects and tooltips to buttons
+    button1.MouseEnter:Connect(function()
+        showTooltip("Kick - Remove player from server")
+        button1Gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 80, 95)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 60, 75))
+        }
+    end)
+    
+    button1.MouseLeave:Connect(function()
+        hideTooltip()
+        button1Gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+        }
+    end)
+    
+    button2.MouseEnter:Connect(function()
+        showTooltip("TP - Teleport to player")
+        button2Gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 80, 95)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 60, 75))
+        }
+    end)
+    
+    button2.MouseLeave:Connect(function()
+        hideTooltip()
+        button2Gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+        }
+    end)
+    
+    button3.MouseEnter:Connect(function()
+        showTooltip("Bring - Summon player to you")
+        button3Gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 80, 95)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 60, 75))
+        }
+    end)
+    
+    button3.MouseLeave:Connect(function()
+        hideTooltip()
+        button3Gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+        }
+    end)
     
     
     
