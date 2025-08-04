@@ -844,8 +844,7 @@ if isAlt(PLAYER.UserId) == true then
 	AltGui.IgnoreGuiInset = true
 	AltGui.DisplayOrder = 5
 	AltGui.Parent = CORE_GUI
-	
-	-- Create instances with improved modern design
+	--Create instances
 	local Background = Instance.new("Frame")
 	local BackgroundGdt = Instance.new("UIGradient")
 	local Info = Instance.new("Frame")
@@ -877,104 +876,93 @@ if isAlt(PLAYER.UserId) == true then
 	local HelpFrame = Instance.new("Frame")
 	local HelpText = Instance.new("TextLabel")
     local Cursor = Instance.new("Frame")
-    
-    -- Add shadow effect
-    local Shadow = Instance.new("Frame")
-    Shadow.Name = "Shadow"
-    Shadow.Size = UDim2.new(1, 20, 1, 20)
-    Shadow.Position = UDim2.new(0, -10, 0, -10)
-    Shadow.BackgroundColor3 = Color3.new(0, 0, 0)
-    Shadow.BackgroundTransparency = 0.8
-    Shadow.BorderSizePixel = 0
-    Shadow.ZIndex = -1
-    Shadow.Parent = AltGui
-    
-    local ShadowCorner = Instance.new("UICorner")
-    ShadowCorner.CornerRadius = UDim.new(0, 15)
-    ShadowCorner.Parent = Shadow
 
 		Background.Name = "Background"
-		Background.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		Background.BackgroundColor3 = Color3.new(1, 1, 1)
+		Background.BorderSizePixel = 0
+		Background.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 		Background.Size = UDim2.new(1, 0, 1, 0)
 		Background.Parent = AltGui
 		
 		-- Modern gradient background
 		BackgroundGdt.Name = "BackgroundGdt"
 		BackgroundGdt.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(0.08, 0.08, 0.12)),
-			ColorSequenceKeypoint.new(0.5, Color3.new(0.12, 0.12, 0.18)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.15, 0.15, 0.22))
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 30)),
+			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 25, 40)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))
 		}
-		BackgroundGdt.Rotation = 45
+		BackgroundGdt.Rotation = 135
 		BackgroundGdt.Parent = Background
 		
-		-- Add corner rounding to main background
+		-- Add corner rounding
 		local BackgroundCorner = Instance.new("UICorner")
-		BackgroundCorner.CornerRadius = UDim.new(0, 12)
+		BackgroundCorner.CornerRadius = UDim.new(0, 20)
 		BackgroundCorner.Parent = Background
 		
 		Info.Name = "Info"
-		Info.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Info.BorderSizePixel = 0
 		Info.AnchorPoint = Vector2.new(0.5, 0.5)
-		Info.BackgroundTransparency = 0.1
+		Info.BackgroundTransparency = 0.05
 		Info.Position = UDim2.new(0.5, 0, 0.4, 0)
-		Info.BackgroundColor3 = Color3.new(0.05, 0.05, 0.08)
+		Info.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
 		Info.Size = UDim2.new(0.5625, 0, 0.5235, 0)
 		Info.Parent = Background
 		
-		-- Add modern border to Info panel
+		-- Add modern border and corner
+		local InfoCorner = Instance.new("UICorner")
+		InfoCorner.CornerRadius = UDim.new(0, 15)
+		InfoCorner.Parent = Info
+		
 		local InfoStroke = Instance.new("UIStroke")
-		InfoStroke.Color = Color3.new(0.3, 0.3, 0.4)
-		InfoStroke.Thickness = 1
-		InfoStroke.Transparency = 0.5
+		InfoStroke.Color = Color3.fromRGB(70, 70, 100)
+		InfoStroke.Thickness = 2
+		InfoStroke.Transparency = 0.3
 		InfoStroke.Parent = Info
 		DisplayName.Name = "DisplayName"
 		DisplayName.LayoutOrder = 1
-		DisplayName.TextStrokeTransparency = 0.75
+		DisplayName.TextStrokeTransparency = 0.5
 		DisplayName.Size = UDim2.new(1, 0, 0.25, 0)
-		DisplayName.TextColor3 = Color3.new(1, 1, 1)
+		DisplayName.TextColor3 = Color3.fromRGB(255, 255, 255)
 		DisplayName.TextXAlignment = Enum.TextXAlignment.Left
-		DisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DisplayName.BorderSizePixel = 0
 		DisplayName.Text = "Display Name"
-		DisplayName.TextSize = 14
+		DisplayName.TextSize = 16
 		DisplayName.Font = Enum.Font.GothamBold
 		DisplayName.BackgroundTransparency = 1
 		DisplayName.Position = UDim2.new(0, 0, 0.05, 0)
 		DisplayName.TextScaled = true
-		DisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
+		DisplayName.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 		DisplayName.Parent = Info
 		
 		BetterDaHood.Name = "BetterDaHood"
-		BetterDaHood.TextTransparency = 0.25
-		BetterDaHood.TextStrokeTransparency = 0.5
+		BetterDaHood.TextTransparency = 0.1
+		BetterDaHood.TextStrokeTransparency = 0.3
 		BetterDaHood.Size = UDim2.new(1, 0, 0.05, 0)
-		BetterDaHood.TextColor3 = Color3.new(0.4, 0.8, 1)
+		BetterDaHood.TextColor3 = Color3.fromRGB(100, 200, 255)
 		BetterDaHood.TextXAlignment = Enum.TextXAlignment.Left
-		BetterDaHood.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		BetterDaHood.BorderSizePixel = 0
 		BetterDaHood.Text = "Da Hood Scripts"
 		BetterDaHood.TextSize = 14
 		BetterDaHood.Font = Enum.Font.GothamBold
 		BetterDaHood.BackgroundTransparency = 1
 		BetterDaHood.TextScaled = true
-		BetterDaHood.BackgroundColor3 = Color3.new(1, 1, 1)
+		BetterDaHood.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 		BetterDaHood.Parent = Info
 		Username.Name = "Username"
 		Username.LayoutOrder = 2
-		Username.TextTransparency = 0.5
-		Username.TextStrokeTransparency = 0.75
+		Username.TextTransparency = 0.2
+		Username.TextStrokeTransparency = 0.5
 		Username.Size = UDim2.new(1, 0, 0.075, 0)
-		Username.TextColor3 = Color3.new(1, 1, 1)
+		Username.TextColor3 = Color3.fromRGB(180, 180, 180)
 		Username.RichText = true
 		Username.TextXAlignment = Enum.TextXAlignment.Left
-		Username.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Username.BorderSizePixel = 0
 		Username.Text = "<i>@username</i>"
 		Username.TextSize = 14
-		Username.Font = Enum.Font.SourceSans
+		Username.Font = Enum.Font.Gotham
 		Username.BackgroundTransparency = 1
 		Username.Position = UDim2.new(0, 0, 0.3, 0)
 		Username.TextScaled = true
-		Username.BackgroundColor3 = Color3.new(1, 1, 1)
+		Username.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 		Username.Parent = Info
 		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		UIListLayout.Parent = Info
@@ -1081,57 +1069,42 @@ if isAlt(PLAYER.UserId) == true then
 		RecountFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
 		RecountFloorCash.Text = "Recount"
 		RecountFloorCash.TextSize = 14
-		RecountFloorCash.Font = Enum.Font.GothamBold
+		RecountFloorCash.Font = Enum.Font.SourceSans
 		RecountFloorCash.Position = UDim2.new(1, 0, 0, 0)
 		RecountFloorCash.TextScaled = true
-		RecountFloorCash.BackgroundColor3 = Color3.new(0.2, 0.6, 1)
+		RecountFloorCash.BackgroundColor3 = Color3.new(0, 0.533333, 1)
 		RecountFloorCash.Parent = TotalFloorCash
-		
-		-- Add gradient to button
-		local RecountGradient = Instance.new("UIGradient")
-		RecountGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(0.3, 0.7, 1)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.2, 0.6, 0.9))
-		}
-		RecountGradient.Rotation = 45
-		RecountGradient.Parent = RecountFloorCash
-		
 		DestroyFloorCash.Name = "DestroyFloorCash"
 		DestroyFloorCash.TextStrokeTransparency = 0
 		DestroyFloorCash.AnchorPoint = Vector2.new(1, 0)
 		DestroyFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
 		DestroyFloorCash.TextColor3 = Color3.new(1, 1, 1)
 		DestroyFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DestroyFloorCash.Text = "Destroy"
+		DestroyFloorCash.Text = "Destroy cash (client side)"
 		DestroyFloorCash.TextSize = 14
-		DestroyFloorCash.Font = Enum.Font.GothamBold
+		DestroyFloorCash.Font = Enum.Font.SourceSans
 		DestroyFloorCash.Position = UDim2.new(0.899, 0, 0, 0)
 		DestroyFloorCash.TextScaled = true
-		DestroyFloorCash.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
+		DestroyFloorCash.BackgroundColor3 = Color3.new(0.364706, 0.364706, 0.364706)
 		DestroyFloorCash.Parent = TotalFloorCash
-		
-		-- Add gradient to button
-		local DestroyGradient = Instance.new("UIGradient")
-		DestroyGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(0.6, 0.6, 0.6)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.4, 0.4, 0.4))
-		}
-		DestroyGradient.Rotation = 45
-		DestroyGradient.Parent = DestroyFloorCash
 		Options.Name = "Options"
-		Options.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Options.BorderSizePixel = 0
 		Options.AnchorPoint = Vector2.new(0.5, 0.5)
-		Options.BackgroundTransparency = 0.1
+		Options.BackgroundTransparency = 0.05
 		Options.Position = UDim2.new(0.5, 0, 0.8, 0)
-		Options.BackgroundColor3 = Color3.new(0.05, 0.05, 0.08)
+		Options.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
 		Options.Size = UDim2.new(0.5, 0, 0.2, 0)
 		Options.Parent = Background
 		
-		-- Add modern border to Options panel
+		-- Add modern corner and border
+		local OptionsCorner = Instance.new("UICorner")
+		OptionsCorner.CornerRadius = UDim.new(0, 15)
+		OptionsCorner.Parent = Options
+		
 		local OptionsStroke = Instance.new("UIStroke")
-		OptionsStroke.Color = Color3.new(0.3, 0.3, 0.4)
-		OptionsStroke.Thickness = 1
-		OptionsStroke.Transparency = 0.5
+		OptionsStroke.Color = Color3.fromRGB(70, 70, 100)
+		OptionsStroke.Thickness = 2
+		OptionsStroke.Transparency = 0.3
 		OptionsStroke.Parent = Options
 		DropFrame.Name = "DropFrame"
 		DropFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
@@ -1154,23 +1127,27 @@ if isAlt(PLAYER.UserId) == true then
 		DroppingTitle.BackgroundColor3 = Color3.new(1, 1, 1)
 		DroppingTitle.Parent = DropFrame
 		DropBtn.Name = "DropBtn"
-		DropBtn.TextStrokeTransparency = 0
+		DropBtn.TextStrokeTransparency = 0.3
 		DropBtn.Size = UDim2.new(1, 0, 0.699, 0)
-		DropBtn.TextColor3 = Color3.new(1, 1, 1)
-		DropBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DropBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		DropBtn.BorderSizePixel = 0
 		DropBtn.Text = "Off"
 		DropBtn.TextSize = 14
 		DropBtn.Font = Enum.Font.GothamBold
 		DropBtn.Position = UDim2.new(0, 0, 0.3, 0)
 		DropBtn.TextScaled = true
-		DropBtn.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
+		DropBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
 		DropBtn.Parent = DropFrame
 		
-		-- Add hover effects and modern styling
+		-- Add modern corner and gradient
+		local DropBtnCorner = Instance.new("UICorner")
+		DropBtnCorner.CornerRadius = UDim.new(0, 8)
+		DropBtnCorner.Parent = DropBtn
+		
 		local DropBtnGradient = Instance.new("UIGradient")
 		DropBtnGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(1, 0.3, 0.3)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.8, 0.2, 0.2))
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 80, 80)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 40, 40))
 		}
 		DropBtnGradient.Rotation = 45
 		DropBtnGradient.Parent = DropBtn
@@ -1209,88 +1186,123 @@ if isAlt(PLAYER.UserId) == true then
 		CashAuraTitle.BackgroundColor3 = Color3.new(1, 1, 1)
 		CashAuraTitle.Parent = CashAuraFrame
 		CashAuraBtn.Name = "CashAuraBtn"
-		CashAuraBtn.TextStrokeTransparency = 0
+		CashAuraBtn.TextStrokeTransparency = 0.3
 		CashAuraBtn.Size = UDim2.new(1, 0, 0.699, 0)
-		CashAuraBtn.TextColor3 = Color3.new(1, 1, 1)
-		CashAuraBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		CashAuraBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		CashAuraBtn.BorderSizePixel = 0
 		CashAuraBtn.Text = "Off"
 		CashAuraBtn.TextSize = 14
 		CashAuraBtn.Font = Enum.Font.GothamBold
 		CashAuraBtn.Position = UDim2.new(0, 0, 0.3, 0)
 		CashAuraBtn.TextScaled = true
-		CashAuraBtn.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
+		CashAuraBtn.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
 		CashAuraBtn.Parent = CashAuraFrame
 		
-		-- Add hover effects and modern styling
+		-- Add modern corner and gradient
+		local CashAuraBtnCorner = Instance.new("UICorner")
+		CashAuraBtnCorner.CornerRadius = UDim.new(0, 8)
+		CashAuraBtnCorner.Parent = CashAuraBtn
+		
 		local CashAuraBtnGradient = Instance.new("UIGradient")
 		CashAuraBtnGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(1, 0.3, 0.3)),
-			ColorSequenceKeypoint.new(1, Color3.new(0.8, 0.2, 0.2))
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 200, 80)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 160, 40))
 		}
 		CashAuraBtnGradient.Rotation = 45
 		CashAuraBtnGradient.Parent = CashAuraBtn
 		FpsLockFrame.Name = "FpsLockFrame"
-		FpsLockFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		FpsLockFrame.BorderSizePixel = 0
 		FpsLockFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-		FpsLockFrame.BackgroundTransparency = 1
+		FpsLockFrame.BackgroundTransparency = 0.1
 		FpsLockFrame.Position = UDim2.new(0.75, 0, 0.5, 0)
-		FpsLockFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+		FpsLockFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
 		FpsLockFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
 		FpsLockFrame.Parent = Options
+		
+		-- Add modern corner and border
+		local FpsLockFrameCorner = Instance.new("UICorner")
+		FpsLockFrameCorner.CornerRadius = UDim.new(0, 10)
+		FpsLockFrameCorner.Parent = FpsLockFrame
+		
+		local FpsLockFrameStroke = Instance.new("UIStroke")
+		FpsLockFrameStroke.Color = Color3.fromRGB(80, 80, 100)
+		FpsLockFrameStroke.Thickness = 1
+		FpsLockFrameStroke.Parent = FpsLockFrame
 		FpsLockTitle.Name = "FpsLockTitle"
-		FpsLockTitle.TextStrokeTransparency = 0.75
+		FpsLockTitle.TextStrokeTransparency = 0.3
 		FpsLockTitle.Size = UDim2.new(1, 0, 0.3, 0)
-		FpsLockTitle.TextColor3 = Color3.new(1, 1, 1)
-		FpsLockTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		FpsLockTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+		FpsLockTitle.BorderSizePixel = 0
 		FpsLockTitle.Text = "FPS Lock"
 		FpsLockTitle.TextSize = 14
-		FpsLockTitle.Font = Enum.Font.SourceSans
+		FpsLockTitle.Font = Enum.Font.GothamBold
 		FpsLockTitle.BackgroundTransparency = 1
 		FpsLockTitle.TextScaled = true
-		FpsLockTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+		FpsLockTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
 		FpsLockTitle.Parent = FpsLockFrame
 		FpsLockBox.Name = "FpsLockBox"
-		FpsLockBox.TextStrokeTransparency = 0.75
+		FpsLockBox.TextStrokeTransparency = 0.3
 		FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
-		FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
-		FpsLockBox.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		FpsLockBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		FpsLockBox.BorderSizePixel = 0
 		FpsLockBox.Text = "3"
 		FpsLockBox.TextSize = 14
 		FpsLockBox.Font = Enum.Font.GothamBold
-		FpsLockBox.BackgroundTransparency = 0.3
+		FpsLockBox.BackgroundTransparency = 0.2
 		FpsLockBox.Position = UDim2.new(0, 0, 0.3, 0)
 		FpsLockBox.ClearTextOnFocus = false
 		FpsLockBox.TextScaled = true
-		FpsLockBox.BackgroundColor3 = Color3.new(0.15, 0.15, 0.2)
+		FpsLockBox.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 		FpsLockBox.Parent = FpsLockFrame
 		
-		-- Add modern border to TextBox
-		local FpsBoxStroke = Instance.new("UIStroke")
-		FpsBoxStroke.Color = Color3.new(0.4, 0.4, 0.5)
-		FpsBoxStroke.Thickness = 1
-		FpsBoxStroke.Transparency = 0.3
-		FpsBoxStroke.Parent = FpsLockBox
+		-- Add modern corner
+		local FpsLockBoxCorner = Instance.new("UICorner")
+		FpsLockBoxCorner.CornerRadius = UDim.new(0, 6)
+		FpsLockBoxCorner.Parent = FpsLockBox
 		Help.Name = "Help"
-		Help.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Help.BorderSizePixel = 0
 		Help.AnchorPoint = Vector2.new(0, 1)
-		Help.BackgroundTransparency = 1
+		Help.BackgroundTransparency = 0.1
 		Help.Position = UDim2.new(0, 0, 1, 0)
-		Help.BackgroundColor3 = Color3.new(1, 1, 1)
+		Help.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 		Help.Size = UDim2.new(0.25, 0, 0.5, 0)
 		Help.Parent = Background
+		
+		-- Add modern corner and border
+		local HelpCorner = Instance.new("UICorner")
+		HelpCorner.CornerRadius = UDim.new(0, 12)
+		HelpCorner.Parent = Help
+		
+		local HelpStroke = Instance.new("UIStroke")
+		HelpStroke.Color = Color3.fromRGB(70, 70, 90)
+		HelpStroke.Thickness = 1
+		HelpStroke.Parent = Help
 		HelpButton.Name = "HelpButton"
-		HelpButton.TextStrokeTransparency = 0.75
+		HelpButton.TextStrokeTransparency = 0.3
 		HelpButton.Size = UDim2.new(0.15, 0, 0.15, 0)
-		HelpButton.TextColor3 = Color3.new(1, 1, 1)
-		HelpButton.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		HelpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		HelpButton.BorderSizePixel = 0
 		HelpButton.Text = "Help"
 		HelpButton.TextSize = 14
-		HelpButton.Font = Enum.Font.SourceSans
-		HelpButton.BackgroundTransparency = 0.949999988079071
+		HelpButton.Font = Enum.Font.GothamBold
+		HelpButton.BackgroundTransparency = 0.2
 		HelpButton.Position = UDim2.new(0, 0, 0.85, 0)
 		HelpButton.TextScaled = true
-		HelpButton.BackgroundColor3 = Color3.new(1, 1, 1)
+		HelpButton.BackgroundColor3 = Color3.fromRGB(70, 120, 180)
 		HelpButton.Parent = Help
+		
+		-- Add modern corner and gradient
+		local HelpButtonCorner = Instance.new("UICorner")
+		HelpButtonCorner.CornerRadius = UDim.new(0, 8)
+		HelpButtonCorner.Parent = HelpButton
+		
+		local HelpButtonGradient = Instance.new("UIGradient")
+		HelpButtonGradient.Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 140, 200)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 100, 160))
+		}
+		HelpButtonGradient.Rotation = 45
+		HelpButtonGradient.Parent = HelpButton
 		HelpFrame.Name = "HelpFrame"
 		HelpFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
 		HelpFrame.Visible = false
@@ -2194,8 +2206,8 @@ else -- SELLER GUI
     G2L["1"] = Instance.new("ScreenGui", gethui())
     G2L["1"].Name = "SELLERGUI"
     G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
-
-    -- Create the frame with modern design
+    
+    -- Create the frame
     G2L["2"] = Instance.new("Frame", G2L["1"])
     G2L["2"]["BorderSizePixel"] = 0
     G2L["2"]["BackgroundColor3"] = Color3.fromRGB(25, 25, 35)
@@ -2203,88 +2215,89 @@ else -- SELLER GUI
     G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
     G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     
-    -- Add modern gradient background
-    local MainGradient = Instance.new("UIGradient")
-    MainGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 25, 35)),
+    -- Add modern corner and gradient to main frame
+    local mainFrameCorner = Instance.new("UICorner", G2L["2"])
+    mainFrameCorner.CornerRadius = UDim.new(0, 15)
+    
+    local mainFrameStroke = Instance.new("UIStroke", G2L["2"])
+    mainFrameStroke.Color = Color3.fromRGB(60, 60, 80)
+    mainFrameStroke.Thickness = 2
+    
+    local mainFrameGradient = Instance.new("UIGradient", G2L["2"])
+    mainFrameGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 40)),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
     }
-    MainGradient.Rotation = 45
-    MainGradient.Parent = G2L["2"]
+    mainFrameGradient.Rotation = 45
     
-    -- Add modern border
-    local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Color3.fromRGB(60, 60, 80)
-    MainStroke.Thickness = 2
-    MainStroke.Transparency = 0.3
-    MainStroke.Parent = G2L["2"]
-    
-    
-    -- Create a new frame named "sideFrame" with modern design
+    -- Create a new frame named "sideFrame" with size {0, 100}, {0, 300} inside G2L["2"]
     local sideFrame = Instance.new("Frame", G2L["2"])
-    sideFrame.Name = "sideFrame"
-    sideFrame.Size = UDim2.new(0, 130, 0, 296)
-    sideFrame.Position = UDim2.new(0, 0, 0, 0)
-    sideFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    sideFrame.BorderSizePixel = 0
-    sideFrame.ZIndex = 2
-    sideFrame.BackgroundTransparency = 0.1
+    sideFrame.Name = "sideFrame"  -- Name the inner frame "sideFrame"
+    sideFrame.Size = UDim2.new(0, 130, 0, 296)  -- Size {0, 100}, {0, 300}
+    sideFrame.Position = UDim2.new(0, 0, 0, 0)  -- Position it inside the parent frame (G2L["2"])
+    sideFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)  -- Modern dark color
+    sideFrame.BorderSizePixel = 0  -- Remove the border
+    sideFrame.ZIndex = 2  -- Set a higher ZIndex for sideFrame to appear above the parent
+    sideFrame.BackgroundTransparency = 0.2
     
-    -- Add gradient to sidebar
-    local SideGradient = Instance.new("UIGradient")
-    SideGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 40)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))
-    }
-    SideGradient.Rotation = 90
-    SideGradient.Parent = sideFrame
-    
-    -- Add modern border to sidebar
-    local SideStroke = Instance.new("UIStroke")
-    SideStroke.Color = Color3.fromRGB(50, 50, 70)
-    SideStroke.Thickness = 1
-    SideStroke.Transparency = 0.5
-    SideStroke.Parent = sideFrame
-    
-    
-    -- Add rounded corners to sideFrame using UICorner
+    -- Add rounded corners and gradient to sideFrame using UICorner
     local uiCorner = Instance.new("UICorner", sideFrame)
-    uiCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the radius value to make the corners more or less rounded
+    uiCorner.CornerRadius = UDim.new(0, 12)  -- Modern rounded corners
+    
+    local sideFrameGradient = Instance.new("UIGradient", sideFrame)
+    sideFrameGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 55)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 45))
+    }
+    sideFrameGradient.Rotation = 90
     
     
     
     
-    -- Function to create buttons with modern design
+    -- Function to create buttons
     local function createmobile(parent, position, text, callback)
         local button = Instance.new("TextButton", parent)
         button.Size = UDim2.new(0, 100, 0, 40)
         button.Position = position
-        button.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+        button.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.Text = text
         button.Font = Enum.Font.GothamBold
         button.TextSize = 16
         button.BorderSizePixel = 0
+        button.TextStrokeTransparency = 0.3
         
-        -- Add modern gradient
-        local ButtonGradient = Instance.new("UIGradient")
-        ButtonGradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 70)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 45))
-        }
-        ButtonGradient.Rotation = 45
-        ButtonGradient.Parent = button
-        
-        -- Add border
-        local ButtonStroke = Instance.new("UIStroke")
-        ButtonStroke.Color = Color3.fromRGB(80, 80, 100)
-        ButtonStroke.Thickness = 1
-        ButtonStroke.Transparency = 0.5
-        ButtonStroke.Parent = button
-        
+        -- Add modern corner
         local uiCorner = Instance.new("UICorner", button)
         uiCorner.CornerRadius = UDim.new(0, 10)
+        
+        -- Add gradient
+        local buttonGradient = Instance.new("UIGradient", button)
+        buttonGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 55, 70)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 50))
+        }
+        buttonGradient.Rotation = 45
+        
+        -- Add stroke
+        local buttonStroke = Instance.new("UIStroke", button)
+        buttonStroke.Color = Color3.fromRGB(80, 80, 100)
+        buttonStroke.Thickness = 1
+        
+        -- Hover effect
+        button.MouseEnter:Connect(function()
+            buttonGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 70, 85)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 50, 65))
+            }
+        end)
+        
+        button.MouseLeave:Connect(function()
+            buttonGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 55, 70)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 50))
+            }
+        end)
 
         -- Button click event
         button.MouseButton1Click:Connect(callback)
@@ -2321,14 +2334,26 @@ else -- SELLER GUI
     local AltsFrame = Instance.new("ScrollingFrame", G2L["2"])
     AltsFrame["Active"] = true
     AltsFrame["BorderSizePixel"] = 0
-    AltsFrame["BackgroundColor3"] = Color3.fromRGB(255, 25, 255)
-    AltsFrame["ScrollBarImageTransparency"] = 1
+    AltsFrame["BackgroundColor3"] = Color3.fromRGB(30, 30, 40)
+    AltsFrame["ScrollBarImageTransparency"] = 0.5
     AltsFrame["Size"] = UDim2.new(0, 396, 0, 296)
-    AltsFrame["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    AltsFrame["ScrollBarImageColor3"] = Color3.fromRGB(80, 80, 100)
     AltsFrame["Position"] = UDim2.new(0.24, 10, 0, 0)
     AltsFrame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    AltsFrame["BackgroundTransparency"] = 1
+    AltsFrame["BackgroundTransparency"] = 0.1
     
+    -- Add modern corner to AltsFrame
+    local altsFrameCorner = Instance.new("UICorner", AltsFrame)
+    altsFrameCorner.CornerRadius = UDim.new(0, 10)
+    
+    -- Add gradient to AltsFrame
+    local altsFrameGradient = Instance.new("UIGradient", AltsFrame)
+    altsFrameGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 45)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+    }
+    altsFrameGradient.Rotation = 90
+
     AltsFrame.Visible = false  -- Initially hidden
     AltsFrame.ZIndex = 3
     
@@ -2562,123 +2587,67 @@ else -- SELLER GUI
     
     
     
-    -- Function to create buttons with modern styling
+    -- Function to create buttons
     local function createButton(parent, position, text, callback)
         local button = Instance.new("TextButton", parent)
         button.Size = UDim2.new(0, 379, 0, 40)
         button.Position = position
-        button.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+        button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.Text = text
         button.Font = Enum.Font.GothamBold
-        button.TextSize = 16
+        button.TextSize = 18
         button.BorderSizePixel = 0
-        
-        -- Add modern gradient
-        local ButtonGradient = Instance.new("UIGradient")
-        ButtonGradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 70)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 45))
-        }
-        ButtonGradient.Rotation = 45
-        ButtonGradient.Parent = button
-        
-        -- Add border
-        local ButtonStroke = Instance.new("UIStroke")
-        ButtonStroke.Color = Color3.fromRGB(80, 80, 100)
-        ButtonStroke.Thickness = 1
-        ButtonStroke.Transparency = 0.5
-        ButtonStroke.Parent = button
-        
         local uiCorner = Instance.new("UICorner", button)
-        uiCorner.CornerRadius = UDim.new(0, 12)
-
+        uiCorner.CornerRadius = UDim.new(0, 8)
+    
         -- Button click event
         button.MouseButton1Click:Connect(callback)
         
         return button
-    end    -- Function to create toggle switches with modern design
+    end
+    
+    -- Function to create toggle switches
     local function createToggle1(parent, position, text, initialState, callback)
         local toggleFrame = Instance.new("Frame", parent)
         toggleFrame.Size = UDim2.new(0, 379, 0, 40)
         toggleFrame.Position = position
-        toggleFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
         toggleFrame.BorderSizePixel = 0
-        
-        -- Add gradient to toggle frame
-        local ToggleFrameGradient = Instance.new("UIGradient")
-        ToggleFrameGradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 60)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 40))
-        }
-        ToggleFrameGradient.Rotation = 45
-        ToggleFrameGradient.Parent = toggleFrame
-        
-        -- Add border to toggle frame
-        local ToggleFrameStroke = Instance.new("UIStroke")
-        ToggleFrameStroke.Color = Color3.fromRGB(70, 70, 90)
-        ToggleFrameStroke.Thickness = 1
-        ToggleFrameStroke.Transparency = 0.5
-        ToggleFrameStroke.Parent = toggleFrame
-        
         local uiCorner = Instance.new("UICorner", toggleFrame)
-        uiCorner.CornerRadius = UDim.new(0, 12)
-
+        uiCorner.CornerRadius = UDim.new(0, 8)
+    
+    
+    
         local toggleLabel = Instance.new("TextLabel", toggleFrame)
         toggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
         toggleLabel.BackgroundTransparency = 1
         toggleLabel.Text = text
-        toggleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)  -- Lighter text for better visibility
+        toggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         toggleLabel.Font = Enum.Font.GothamBold
-        toggleLabel.TextSize = 14
-        toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-        toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-
+        toggleLabel.TextSize = 18
+    
         local toggleButton = Instance.new("TextButton", toggleFrame)
-        toggleButton.Size = UDim2.new(0.25, 0, 0.7, 0)
-        toggleButton.Position = UDim2.new(0.7, 0, 0.15, 0)
-        toggleButton.BackgroundColor3 = initialState and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+        toggleButton.Size = UDim2.new(0.3, 0, 1, 0)
+        toggleButton.Position = UDim2.new(0.7, 0, 0, 0)
+        toggleButton.BackgroundColor3 = initialState and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
         toggleButton.Text = initialState and "ON" or "OFF"
         toggleButton.Font = Enum.Font.GothamBold
-        toggleButton.TextSize = 12
-        toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        toggleButton.TextSize = 18
         toggleButton.BorderSizePixel = 0
-        
-        -- Add gradient to toggle button
-        local ToggleButtonGradient = Instance.new("UIGradient")
-        ToggleButtonGradient.Color = initialState and ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 220, 60)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 180, 40))
-        } or ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 60, 60)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 40, 40))
-        }
-        ToggleButtonGradient.Rotation = 45
-        ToggleButtonGradient.Parent = toggleButton
-        
         local uiCornerToggle = Instance.new("UICorner", toggleButton)
-        uiCornerToggle.CornerRadius = UDim.new(0, 10)
-
+        uiCornerToggle.CornerRadius = UDim.new(0, 8)
+    
         -- Toggle button click event
         toggleButton.MouseButton1Click:Connect(function()
             initialState = not initialState  -- Toggle state
-            toggleButton.BackgroundColor3 = initialState and Color3.fromRGB(50, 200, 50) or Color3.fromRGB(200, 50, 50)
+            toggleButton.BackgroundColor3 = initialState and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
             toggleButton.Text = initialState and "ON" or "OFF"
-            
-            -- Update gradient
-            ToggleButtonGradient.Color = initialState and ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 220, 60)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 180, 40))
-            } or ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 60, 60)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 40, 40))
-            }
-            
             if callback then
                 callback(initialState)  -- Trigger the callback with the new state
             end
         end)
-
+    
         return toggleFrame
     end
     
@@ -2709,11 +2678,11 @@ else -- SELLER GUI
     
     
     -- Create the buttons inside MiscFrame
-    createButton(MiscFrame, UDim2.new(0, 0, 0, 10), "Bring all buyers", function()
+    createButton(MiscFrame, UDim2.new(0, 0, 0, 10), "Bring all buyers [👑]", function()
         bringallplayers()
     end)
     
-    createButton(MiscFrame, UDim2.new(0, 0, 0, 60), "Baby alts", function()
+    createButton(MiscFrame, UDim2.new(0, 0, 0, 60), "Baby alts [👑]", function()
         babyAlts()
     end)
     -- Define a variable to control the loop state
@@ -2986,10 +2955,9 @@ else -- SELLER GUI
         label.Size = UDim2.new(0.7, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = text
-        label.TextColor3 = Color3.fromRGB(220, 220, 220)  -- Lighter text for better visibility
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
         label.Font = Enum.Font.GothamBold
         label.TextSize = 13
-        label.TextXAlignment = Enum.TextXAlignment.Left
     
         -- Create the input box inside the frame
         local inputBox = Instance.new("TextBox", textInputFrame)
@@ -3444,19 +3412,19 @@ else -- SELLER GUI
         GuiSettings["Teleport_Location_Keybind"] = input
         saveData()
     end)
-    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 110), "Auto Bring to Vault on Finished", GuiSettings["Auto_Bring_to_Vault"], function(state)
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 110), "Auto Bring to Vault on Finished [👑]", GuiSettings["Auto_Bring_to_Vault"], function(state)
         GuiSettings["Auto_Bring_to_Vault"] = state
         saveData()
     end)
-    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 160), "Auto Kick on Finished", GuiSettings["Auto_Kick_on_Finished"], function(state)
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 160), "Auto Kick on Finished [👑]", GuiSettings["Auto_Kick_on_Finished"], function(state)
         GuiSettings["Auto_Kick_on_Finished"] = state
         saveData()
     end)
-    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 210), "Auto Kick on Extra Pickup", GuiSettings["Auto_Kick_on_Extra_Pickup"], function(state)
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 210), "Auto Kick on Extra Pickup [👑]", GuiSettings["Auto_Kick_on_Extra_Pickup"], function(state)
         GuiSettings["Auto_Kick_on_Extra_Pickup"] = state
         saveData()
     end)
-    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 260), "Bring on Join", GuiSettings["Bring_on_Join"], function(state)
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 260), "Bring on Join [👑]", GuiSettings["Bring_on_Join"], function(state)
         GuiSettings["Bring_on_Join"] = state
         saveData()
     end)
@@ -3464,7 +3432,7 @@ else -- SELLER GUI
         GuiSettings["Roblox_Cookie"] = input
         saveData()
     end)
-    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 360), "Use Cookie block method", GuiSettings["Use_Cookie_block_method"], function(state)
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 360), "Use Cookie block method [👑]", GuiSettings["Use_Cookie_block_method"], function(state)
         GuiSettings["Use_Cookie_block_method"] = state
         saveData()
     end)
@@ -3628,55 +3596,23 @@ else -- SELLER GUI
         {Text = "Settings", Position = UDim2.new(0, 0, 0, 200), Frame = SettingsFrame}
     }
     
-    -- Create buttons inside the sideFrame with modern design
+    -- Create buttons inside the sideFrame
     for _, buttonData in ipairs(buttonsData) do
         local button = Instance.new("TextButton", sideFrame)
-        button.Size = UDim2.new(1, -10, 0, 40)  -- Slightly smaller to add padding
-        button.Position = UDim2.new(0, 5, 0, buttonData.Position.Y.Offset + 5)  -- Add padding
-        button.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-        button.TextColor3 = Color3.fromRGB(220, 220, 220)  -- Lighter text color for better visibility
-        button.Text = buttonData.Text
-        button.Font = Enum.Font.GothamBold
-        button.TextSize = 16  -- Slightly larger text
-        button.BorderSizePixel = 0
-
-        -- Set button text without icons
-        button.Text = buttonData.Text
-
-        -- Add modern gradient to sidebar buttons
-        local SideButtonGradient = Instance.new("UIGradient")
-        SideButtonGradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 65)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 40))
-        }
-        SideButtonGradient.Rotation = 45
-        SideButtonGradient.Parent = button
-
-        -- Add modern border to sidebar buttons
-        local SideButtonStroke = Instance.new("UIStroke")
-        SideButtonStroke.Color = Color3.fromRGB(70, 70, 90)
-        SideButtonStroke.Thickness = 1
-        SideButtonStroke.Transparency = 0.7
-        SideButtonStroke.Parent = button
-
+        button.Size = UDim2.new(1, 0, 0, 40)  -- Set the button size (full width, 40px height)
+        button.Position = buttonData.Position  -- Set the position from the data table
+        button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)  -- Set the background color
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Set the text color to white
+        button.Text = buttonData.Text  -- Set the text of the button (e.g., "Players")
+        button.Font = Enum.Font.GothamBold  -- Set the font style
+        button.TextSize = 18  -- Set the font size
+        button.BorderSizePixel = 0  -- Remove the border around the button
+    
         -- Add rounded corners to each button
         local buttonUICorner = Instance.new("UICorner", button)
-        buttonUICorner.CornerRadius = UDim.new(0, 10)
-
-        -- Add hover effect
-        button.MouseEnter:Connect(function()
-            SideButtonGradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 80)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 60))
-            }
-        end)
-        
-        button.MouseLeave:Connect(function()
-            SideButtonGradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 65)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 40))
-            }
-        end)        -- Add functionality for button click
+        buttonUICorner.CornerRadius = UDim.new(0, 8)  -- Adjust the radius for rounded corners
+    
+        -- Add functionality for button click
         button.MouseButton1Click:Connect(function()
     
             -- Hide all frames first
@@ -3703,13 +3639,6 @@ else -- SELLER GUI
         end)
     end
     
-    -- Set default frame to show (Players)
-    G2L["7"].Visible = true
-    AltsFrame.Visible = false
-    MiscFrame.Visible = false
-    SettingsFrame.Visible = false
-    altcontrol.Visible = false
-    
     
     
     -- StarterGui.ScreenGui.Frame.UICorner
@@ -3720,13 +3649,25 @@ else -- SELLER GUI
     G2L["7"] = Instance.new("ScrollingFrame", G2L["2"])
     G2L["7"]["Active"] = true
     G2L["7"]["BorderSizePixel"] = 0
-    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-    G2L["7"]["ScrollBarImageTransparency"] = 1
+    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 40)
+    G2L["7"]["ScrollBarImageTransparency"] = 0.5
     G2L["7"]["Size"] = UDim2.new(0, 410, 0, 296)
-    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(80, 80, 100)
     G2L["7"]["Position"] = UDim2.new(0.24, 0, 0, 0)
     G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    G2L["7"]["BackgroundTransparency"] = 1
+    G2L["7"]["BackgroundTransparency"] = 0.1
+    
+    -- Add modern corner to Players Frame
+    local playersFrameCorner = Instance.new("UICorner", G2L["7"])
+    playersFrameCorner.CornerRadius = UDim.new(0, 10)
+    
+    -- Add gradient to Players Frame
+    local playersFrameGradient = Instance.new("UIGradient", G2L["7"])
+    playersFrameGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 45)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+    }
+    playersFrameGradient.Rotation = 90
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.UIListLayout
     G2L["8"] = Instance.new("UIListLayout", G2L["7"])
@@ -3807,47 +3748,22 @@ else -- SELLER GUI
     
     
     
-    -- Create the TextLabel for cash display inside G2L["1"] with modern design
+    -- Create the TextLabel for cash display inside G2L["1"]
     local cashDisplay = Instance.new("TextLabel")
-    cashDisplay.Size = UDim2.new(0, 320, 0, 60)
-    cashDisplay.Position = UDim2.new(0, 15, 0, 15)
-    cashDisplay.TextSize = 20
-    cashDisplay.BackgroundTransparency = 0.1
-    cashDisplay.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    cashDisplay.Size = UDim2.new(0, 300, 0, 50)
+    cashDisplay.Position = UDim2.new(0, 10, 0, 10)
+    cashDisplay.TextSize = 24
+    cashDisplay.BackgroundTransparency = 0.5
+    cashDisplay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     cashDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
     cashDisplay.Text = "Total Floor Cash: $0"
-    cashDisplay.Parent = G2L["1"]
+    cashDisplay.Parent = G2L["1"]  -- Set the parent to G2L["1"]
     cashDisplay["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    cashDisplay.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Add modern gradient to cash display
-    local CashGradient = Instance.new("UIGradient")
-    CashGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
-    }
-    CashGradient.Rotation = 45
-    CashGradient.Parent = cashDisplay
-    
-    -- Add modern border to cash display
-    local CashStroke = Instance.new("UIStroke")
-    CashStroke.Color = Color3.fromRGB(60, 60, 80)
-    CashStroke.Thickness = 2
-    CashStroke.Transparency = 0.3
-    CashStroke.Parent = cashDisplay
     
     -- Create a UICorner to round the corners of the TextLabel
     local uiCorner = Instance.new("UICorner")
-    uiCorner.CornerRadius = UDim.new(0, 15)
+    uiCorner.CornerRadius = UDim.new(0, 12)  -- Adjust the radius to your preference
     uiCorner.Parent = cashDisplay
-    
-    -- Add padding for text
-    local CashPadding = Instance.new("UIPadding")
-    CashPadding.PaddingLeft = UDim.new(0, 15)
-    CashPadding.PaddingRight = UDim.new(0, 15)
-    CashPadding.PaddingTop = UDim.new(0, 10)
-    CashPadding.PaddingBottom = UDim.new(0, 10)
-    CashPadding.Parent = cashDisplay
     
     -- Function to convert cash text to integer
     local function cashToInt(cashText)
@@ -3925,14 +3841,28 @@ else -- SELLER GUI
     
     frame = Instance.new("Frame", G2L["7"]);
     frame["BorderSizePixel"] = 0;
-    frame["BackgroundColor3"] = Color3.fromRGB(28, 28, 28);
+    frame["BackgroundColor3"] = Color3.fromRGB(40, 40, 55);
     frame["Size"] = UDim2.new(0, 379, 0, 76);
     frame["Position"] = UDim2.new(-0.02488, 0, -0.01718, 0);
     frame["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     frame.Name = player.Name .. "_Box"  -- Naming the box with player name
     
-    -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.UICorner
+    -- Add modern corner and gradient to player frame
     uicorner1 = Instance.new("UICorner", frame);
+    uicorner1.CornerRadius = UDim.new(0, 12)
+    
+    -- Add gradient to player frame
+    local playerFrameGradient = Instance.new("UIGradient", frame)
+    playerFrameGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 65)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 45))
+    }
+    playerFrameGradient.Rotation = 45
+    
+    -- Add stroke to player frame
+    local playerFrameStroke = Instance.new("UIStroke", frame)
+    playerFrameStroke.Color = Color3.fromRGB(70, 70, 90)
+    playerFrameStroke.Thickness = 1
     
     
     
@@ -3941,11 +3871,15 @@ else -- SELLER GUI
     image1 = Instance.new("ImageLabel");
     image1.Parent = frame
     image1["BorderSizePixel"] = 0;
-    image1["BackgroundColor3"] = Color3.fromRGB(34, 34, 34);
+    image1["BackgroundColor3"] = Color3.fromRGB(50, 50, 65);
     image1["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png";
     image1["Size"] = UDim2.new(0, 40, 0, 40);
     image1["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     image1["Position"] = UDim2.new(0.01583, 0, 0.05117, 0);
+    
+    -- Add modern corner to player image
+    local imageCorner = Instance.new("UICorner", image1)
+    imageCorner.CornerRadius = UDim.new(0, 8)
     
     local userId = player.UserId
     local thumbType = Enum.ThumbnailType.HeadShot
@@ -3970,8 +3904,9 @@ else -- SELLER GUI
     textlabel1["BorderSizePixel"] = 0;
     textlabel1["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
     textlabel1["TextSize"] = 14;
-    textlabel1["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+    textlabel1["FontFace"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
     textlabel1["TextColor3"] = Color3.fromRGB(255, 255, 255);
+    textlabel1["TextStrokeTransparency"] = 0.3;
     textlabel1["BackgroundTransparency"] = 1;
     textlabel1["Size"] = UDim2.new(0, 200, 0, 26);
     textlabel1["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -3985,8 +3920,9 @@ else -- SELLER GUI
     label2["BorderSizePixel"] = 0;
     label2["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
     label2["TextSize"] = 14;
-    label2["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+    label2["FontFace"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
     label2["TextColor3"] = Color3.fromRGB(255, 255, 255);
+    label2["TextStrokeTransparency"] = 0.3;
     label2["BackgroundTransparency"] = 1;
     label2["Size"] = UDim2.new(0, 145, 0, 26);
     label2["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -4000,8 +3936,9 @@ else -- SELLER GUI
     label3["BorderSizePixel"] = 0;
     label3["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
     label3["TextSize"] = 14;
-    label3["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-    label3["TextColor3"] = Color3.fromRGB(64, 64, 64);
+    label3["FontFace"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+    label3["TextColor3"] = Color3.fromRGB(180, 180, 180);
+    label3["TextStrokeTransparency"] = 0.5;
     label3["BackgroundTransparency"] = 1;
     label3["Size"] = UDim2.new(0, 200, 0, 26);
     label3["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -4015,8 +3952,9 @@ else -- SELLER GUI
     label4["BorderSizePixel"] = 0;
     label4["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
     label4["TextSize"] = 14;
-    label4["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
-    label4["TextColor3"] = Color3.fromRGB(0, 131, 0);
+    label4["FontFace"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+    label4["TextColor3"] = Color3.fromRGB(100, 200, 100);
+    label4["TextStrokeTransparency"] = 0.3;
     label4["BackgroundTransparency"] = 1;
     label4["Size"] = UDim2.new(0, 200, 0, 26);
     label4["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -4030,8 +3968,9 @@ else -- SELLER GUI
     textbox["TextColor3"] = Color3.fromRGB(255, 255, 255);
     textbox["BorderSizePixel"] = 0;
     textbox["TextSize"] = 14;
-    textbox["BackgroundColor3"] = Color3.fromRGB(34, 34, 34);
-    textbox["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+    textbox["BackgroundColor3"] = Color3.fromRGB(50, 50, 65);
+    textbox["FontFace"] = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+    textbox["TextStrokeTransparency"] = 0.3;
     textbox["Size"] = UDim2.new(0, 104, 0, 23);
     textbox["Position"] = UDim2.new(0.67018, 0, 0.61136, 0);
     textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0);
@@ -4040,7 +3979,7 @@ else -- SELLER GUI
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.TextBox.UICorner
     corner4 = Instance.new("UICorner", textbox);
-    corner4["CornerRadius"] = UDim.new(0, 5);
+    corner4["CornerRadius"] = UDim.new(0, 8);
     
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.TextBox.UIStroke
@@ -4056,8 +3995,9 @@ else -- SELLER GUI
     removeButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Text color (white)
     removeButton.BorderSizePixel = 0  -- No border
     removeButton.TextSize = 14  -- Text size
-    removeButton.BackgroundColor3 = Color3.fromRGB(34, 34, 34)  -- Background color (dark gray)
-    removeButton.FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)  -- Font style
+    removeButton.BackgroundColor3 = Color3.fromRGB(180, 60, 60)  -- Red background
+    removeButton.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)  -- Modern font
+    removeButton.TextStrokeTransparency = 0.3
     removeButton.Size = UDim2.new(0, 104, 0, 23)  -- Size same as the TextBox
     removeButton.Position = UDim2.new(0.67018, 0, 0.61136, 0)  -- Position same as the TextBox
     removeButton.Text = "Remove"  -- Button text
@@ -4068,12 +4008,15 @@ else -- SELLER GUI
     
     -- Add a UICorner to the button
     local corner = Instance.new("UICorner", removeButton)
-    corner.CornerRadius = UDim.new(0, 5)  -- Rounded corners
+    corner.CornerRadius = UDim.new(0, 8)  -- Modern rounded corners
     
-    -- Add a UIStroke to the button
-    local uistroke = Instance.new("UIStroke", removeButton)
-    uistroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border  -- Apply stroke to the border
-    uistroke.Color = Color3.fromRGB(50, 50, 50)  -- Stroke color (dark gray)
+    -- Add gradient to remove button
+    local removeButtonGradient = Instance.new("UIGradient", removeButton)
+    removeButtonGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 80, 80)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 40, 40))
+    }
+    removeButtonGradient.Rotation = 45
     
     
     -- Adding buttons with the same style
@@ -4086,30 +4029,55 @@ else -- SELLER GUI
     local button1 = Instance.new("ImageButton", buttonsFrame)
     button1["Size"] = UDim2.new(0, 30, 0, 30)  -- Size of the button
     button1["Position"] = UDim2.new(0, 0, 0, 0)  -- Position of the button
-    button1["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)  -- Dark background
+    button1["BackgroundColor3"] = Color3.fromRGB(50, 50, 65)  -- Modern dark background
     button1["Image"] = "http://www.roblox.com/asset/?id=6710784639";
-    button1["ImageTransparency"] = 0.2  -- Slight transparency for the image
+    button1["ImageTransparency"] = 0.1  -- Less transparency for better visibility
     local button1Corner = Instance.new("UICorner", button1)
-    button1Corner["CornerRadius"] = UDim.new(0, 8)  -- Rounded corners
+    button1Corner["CornerRadius"] = UDim.new(0, 10)  -- More rounded corners
+    
+    -- Add gradient to button1
+    local button1Gradient = Instance.new("UIGradient", button1)
+    button1Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+    }
+    button1Gradient.Rotation = 45
     
     -- Button 2
     local button2 = Instance.new("ImageButton", buttonsFrame)
     button2["Size"] = UDim2.new(0, 30, 0, 30)
     button2["Position"] = UDim2.new(0.25, 0, 0, 0)
-    button2["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)
+    button2["BackgroundColor3"] = Color3.fromRGB(50, 50, 65)
     button2["Image"] = "http://www.roblox.com/asset/?id=12941020168"  -- Replace with actual decal ID
-    button2["ImageTransparency"] = 0.2
+    button2["ImageTransparency"] = 0.1
     local button2Corner = Instance.new("UICorner", button2)
-    button2Corner["CornerRadius"] = UDim.new(0, 8)
+    button2Corner["CornerRadius"] = UDim.new(0, 10)
+    
+    -- Add gradient to button2
+    local button2Gradient = Instance.new("UIGradient", button2)
+    button2Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+    }
+    button2Gradient.Rotation = 45
     
     -- Button 3
     local button3 = Instance.new("ImageButton", buttonsFrame)
     button3["Size"] = UDim2.new(0, 30, 0, 30)
     button3["Position"] = UDim2.new(0.5, 0, 0, 0)
-    button3["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)
+    button3["BackgroundColor3"] = Color3.fromRGB(50, 50, 65)
     button3["Image"] = "http://www.roblox.com/asset/?id=131012702"  -- Replace with actual decal ID
-    button3["ImageTransparency"] = 0.2
+    button3["ImageTransparency"] = 0.1
     local button3Corner = Instance.new("UICorner", button3)
+    button3Corner["CornerRadius"] = UDim.new(0, 10)
+    
+    -- Add gradient to button3
+    local button3Gradient = Instance.new("UIGradient", button3)
+    button3Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+    }
+    button3Gradient.Rotation = 45
     button3Corner["CornerRadius"] = UDim.new(0, 8)
     
     
