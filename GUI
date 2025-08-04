@@ -2207,28 +2207,496 @@ else -- SELLER GUI
     G2L["1"].Name = "SELLERGUI"
     G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
     
-    -- Create the frame
+    -- Create the main frame with modern design
     G2L["2"] = Instance.new("Frame", G2L["1"])
     G2L["2"]["BorderSizePixel"] = 0
-    G2L["2"]["BackgroundColor3"] = Color3.fromRGB(25, 25, 35)
-    G2L["2"]["Size"] = UDim2.new(0, 600, 0, 350)
-    G2L["2"]["Position"] = UDim2.new(0.1, 0, 0.25, 0)
+    G2L["2"]["BackgroundColor3"] = Color3.fromRGB(15, 15, 20)
+    G2L["2"]["Size"] = UDim2.new(0, 700, 0, 400)
+    G2L["2"]["Position"] = UDim2.new(0.5, -350, 0.5, -200)
     G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     
-    -- Add modern corner and gradient to main frame
+    -- Add premium rounded corners
     local mainFrameCorner = Instance.new("UICorner", G2L["2"])
-    mainFrameCorner.CornerRadius = UDim.new(0, 15)
+    mainFrameCorner.CornerRadius = UDim.new(0, 20)
     
+    -- Add neon glow effect
     local mainFrameStroke = Instance.new("UIStroke", G2L["2"])
-    mainFrameStroke.Color = Color3.fromRGB(80, 120, 200)
-    mainFrameStroke.Thickness = 4
+    mainFrameStroke.Color = Color3.fromRGB(0, 150, 255)
+    mainFrameStroke.Thickness = 3
+    mainFrameStroke.Transparency = 0.3
     
+    -- Premium gradient background
     local mainFrameGradient = Instance.new("UIGradient", G2L["2"])
     mainFrameGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 40)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 30)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 15, 25)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 20))
+    }
+    mainFrameGradient.Rotation = 135
+    
+    -- Add drop shadow effect
+    local shadow = Instance.new("ImageLabel", G2L["2"])
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 20, 1, 20)
+    shadow.Position = UDim2.new(0, -10, 0, -10)
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxasset://textures/ui/Controls/DropShadow.png"
+    shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.ImageTransparency = 0.7
+    shadow.ScaleType = Enum.ScaleType.Slice
+    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+    shadow.ZIndex = -1
+    
+    -- Create header bar
+    local headerBar = Instance.new("Frame", G2L["2"])
+    headerBar.Name = "HeaderBar"
+    headerBar.Size = UDim2.new(1, 0, 0, 60)
+    headerBar.Position = UDim2.new(0, 0, 0, 0)
+    headerBar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    headerBar.BorderSizePixel = 0
+    
+    -- Header corner (only top corners)
+    local headerCorner = Instance.new("UICorner", headerBar)
+    headerCorner.CornerRadius = UDim.new(0, 20)
+    
+    -- Header gradient
+    local headerGradient = Instance.new("UIGradient", headerBar)
+    headerGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
     }
-    mainFrameGradient.Rotation = 45
+    headerGradient.Rotation = 90
+    
+    -- Header stroke
+    local headerStroke = Instance.new("UIStroke", headerBar)
+    headerStroke.Color = Color3.fromRGB(0, 150, 255)
+    headerStroke.Thickness = 2
+    headerStroke.Transparency = 0.5
+    
+    -- LDHC Title with premium style
+    local ldhcTitle = Instance.new("TextLabel", headerBar)
+    ldhcTitle.Name = "LDHCTitle"
+    ldhcTitle.Size = UDim2.new(0, 200, 1, 0)
+    ldhcTitle.Position = UDim2.new(0, 20, 0, 0)
+    ldhcTitle.BackgroundTransparency = 1
+    ldhcTitle.Text = "LDHC"
+    ldhcTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
+    ldhcTitle.TextSize = 28
+    ldhcTitle.Font = Enum.Font.GothamBold
+    ldhcTitle.TextStrokeTransparency = 0
+    ldhcTitle.TextStrokeColor3 = Color3.fromRGB(0, 100, 150)
+    ldhcTitle.TextXAlignment = Enum.TextXAlignment.Left
+    ldhcTitle.TextYAlignment = Enum.TextYAlignment.Center
+    
+    -- Add subtitle
+    local subtitle = Instance.new("TextLabel", headerBar)
+    subtitle.Name = "Subtitle"
+    subtitle.Size = UDim2.new(0, 300, 0, 20)
+    subtitle.Position = UDim2.new(0, 100, 0, 35)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "Premium Da Hood Script"
+    subtitle.TextColor3 = Color3.fromRGB(150, 150, 200)
+    subtitle.TextSize = 12
+    subtitle.Font = Enum.Font.Gotham
+    subtitle.TextStrokeTransparency = 0.5
+    subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Create navigation sidebar
+    local navBar = Instance.new("Frame", G2L["2"])
+    navBar.Name = "NavigationBar"
+    navBar.Size = UDim2.new(0, 160, 1, -60)
+    navBar.Position = UDim2.new(0, 0, 0, 60)
+    navBar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    navBar.BorderSizePixel = 0
+    
+    -- Nav corner (only bottom left)
+    local navCorner = Instance.new("UICorner", navBar)
+    navCorner.CornerRadius = UDim.new(0, 20)
+    
+    -- Nav gradient
+    local navGradient = Instance.new("UIGradient", navBar)
+    navGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 35)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 25))
+    }
+    navGradient.Rotation = 180
+    
+    -- Nav separator line
+    local navLine = Instance.new("Frame", navBar)
+    navLine.Size = UDim2.new(0, 2, 1, 0)
+    navLine.Position = UDim2.new(1, 0, 0, 0)
+    navLine.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    navLine.BorderSizePixel = 0
+    navLine.BackgroundTransparency = 0.7
+    
+    -- Create main content area
+    local contentArea = Instance.new("Frame", G2L["2"])
+    contentArea.Name = "ContentArea"
+    contentArea.Size = UDim2.new(1, -160, 1, -60)
+    contentArea.Position = UDim2.new(0, 160, 0, 60)
+    contentArea.BackgroundTransparency = 1
+    contentArea.BorderSizePixel = 0
+    
+    -- Function to create modern navigation buttons
+    local function createNavButton(parent, text, position, isSelected)
+        local button = Instance.new("TextButton", parent)
+        button.Size = UDim2.new(1, -20, 0, 45)
+        button.Position = position
+        button.BackgroundColor3 = isSelected and Color3.fromRGB(0, 120, 200) or Color3.fromRGB(30, 30, 40)
+        button.BorderSizePixel = 0
+        button.Text = text
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextSize = 14
+        button.Font = Enum.Font.GothamMedium
+        button.TextStrokeTransparency = 0.5
+        
+        -- Button corner
+        local btnCorner = Instance.new("UICorner", button)
+        btnCorner.CornerRadius = UDim.new(0, 12)
+        
+        -- Button gradient
+        local btnGradient = Instance.new("UIGradient", button)
+        if isSelected then
+            btnGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 140, 220)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 180))
+            }
+        else
+            btnGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 45)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+            }
+        end
+        btnGradient.Rotation = 45
+        
+        -- Hover effect
+        button.MouseEnter:Connect(function()
+            if not isSelected then
+                btnGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 55)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(35, 35, 45))
+                }
+            end
+        end)
+        
+        button.MouseLeave:Connect(function()
+            if not isSelected then
+                btnGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 45)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+                }
+            end
+        end)
+        
+        return button
+    end
+    
+    -- Create navigation buttons
+    local playersBtn = createNavButton(navBar, "Players", UDim2.new(0, 10, 0, 20), true)
+    local altsBtn = createNavButton(navBar, "Alts", UDim2.new(0, 10, 0, 75), false)
+    local settingsBtn = createNavButton(navBar, "Settings", UDim2.new(0, 10, 0, 130), false)
+    local miscBtn = createNavButton(navBar, "Misc", UDim2.new(0, 10, 0, 185), false)
+    
+    -- Function to switch between tabs
+    local function switchTab(selectedBtn, frameName)
+        -- Reset all buttons to unselected state
+        local buttons = {playersBtn, altsBtn, settingsBtn, miscBtn}
+        for _, btn in pairs(buttons) do
+            local gradient = btn:FindFirstChild("UIGradient")
+            if gradient then
+                gradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 45)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+                }
+            end
+            btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+        end
+        
+        -- Set selected button style
+        local selectedGradient = selectedBtn:FindFirstChild("UIGradient")
+        if selectedGradient then
+            selectedGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 140, 220)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 180))
+            }
+        end
+        selectedBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+        
+        -- Hide all frames
+        if G2L["7"] then G2L["7"].Visible = false end
+        if AltsFrame then AltsFrame.Visible = false end
+        
+        -- Show selected frame
+        if frameName == "Players" and G2L["7"] then
+            G2L["7"].Visible = true
+        elseif frameName == "Alts" and AltsFrame then
+            AltsFrame.Visible = true
+        end
+    end
+    
+    -- Add click events
+    playersBtn.MouseButton1Click:Connect(function() switchTab(playersBtn, "Players") end)
+    altsBtn.MouseButton1Click:Connect(function() switchTab(altsBtn, "Alts") end)
+    
+    -- Modern player card creation function
+    local function createPlayerCard(player)
+        -- Main player frame
+        local playerFrame = Instance.new("Frame", G2L["7"])
+        playerFrame.Name = player.Name .. "_Box"
+        playerFrame.Size = UDim2.new(1, -20, 0, 100)
+        playerFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+        playerFrame.BorderSizePixel = 0
+        
+        -- Player frame styling
+        local playerCorner = Instance.new("UICorner", playerFrame)
+        playerCorner.CornerRadius = UDim.new(0, 15)
+        
+        local playerGradient = Instance.new("UIGradient", playerFrame)
+        playerGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
+        }
+        playerGradient.Rotation = 45
+        
+        local playerStroke = Instance.new("UIStroke", playerFrame)
+        playerStroke.Color = Color3.fromRGB(0, 150, 255)
+        playerStroke.Thickness = 1
+        playerStroke.Transparency = 0.8
+        
+        -- Player avatar
+        local avatar = Instance.new("ImageLabel", playerFrame)
+        avatar.Size = UDim2.new(0, 60, 0, 60)
+        avatar.Position = UDim2.new(0, 15, 0, 20)
+        avatar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        avatar.BorderSizePixel = 0
+        avatar.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        
+        local avatarCorner = Instance.new("UICorner", avatar)
+        avatarCorner.CornerRadius = UDim.new(0, 12)
+        
+        local avatarStroke = Instance.new("UIStroke", avatar)
+        avatarStroke.Color = Color3.fromRGB(0, 150, 255)
+        avatarStroke.Thickness = 2
+        avatarStroke.Transparency = 0.7
+        
+        -- Load player thumbnail
+        pcall(function()
+            local userId = player.UserId
+            local thumbType = Enum.ThumbnailType.HeadShot
+            local thumbSize = Enum.ThumbnailSize.Size420x420
+            local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
+            avatar.Image = (isReady and content) or "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        end)
+        
+        -- Player name
+        local nameLabel = Instance.new("TextLabel", playerFrame)
+        nameLabel.Size = UDim2.new(0, 200, 0, 25)
+        nameLabel.Position = UDim2.new(0, 90, 0, 15)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = player.Name
+        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameLabel.TextSize = 16
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextStrokeTransparency = 0.3
+        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Player cash
+        local cashLabel = Instance.new("TextLabel", playerFrame)
+        cashLabel.Size = UDim2.new(0, 200, 0, 20)
+        cashLabel.Position = UDim2.new(0, 90, 0, 40)
+        cashLabel.BackgroundTransparency = 1
+        cashLabel.Text = "Cash: Loading..."
+        cashLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        cashLabel.TextSize = 14
+        cashLabel.Font = Enum.Font.Gotham
+        cashLabel.TextStrokeTransparency = 0.5
+        cashLabel.TextXAlignment = Enum.TextXAlignment.Left
+        
+        -- Load cash data
+        pcall(function()
+            local currency = player:WaitForChild("DataFolder"):WaitForChild("Currency").Value
+            local formattedCash = tostring(currency):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+            cashLabel.Text = "Cash: $" .. formattedCash
+        end)
+        
+        -- Actions button (toggle)
+        local actionsBtn = Instance.new("TextButton", playerFrame)
+        actionsBtn.Size = UDim2.new(0, 80, 0, 30)
+        actionsBtn.Position = UDim2.new(1, -95, 0, 15)
+        actionsBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+        actionsBtn.BorderSizePixel = 0
+        actionsBtn.Text = "Actions ▼"
+        actionsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        actionsBtn.TextSize = 12
+        actionsBtn.Font = Enum.Font.GothamMedium
+        actionsBtn.TextStrokeTransparency = 0.5
+        
+        local actionsBtnCorner = Instance.new("UICorner", actionsBtn)
+        actionsBtnCorner.CornerRadius = UDim.new(0, 8)
+        
+        local actionsBtnGradient = Instance.new("UIGradient", actionsBtn)
+        actionsBtnGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 140, 220)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 100, 180))
+        }
+        actionsBtnGradient.Rotation = 45
+        
+        -- Actions panel (initially hidden)
+        local actionsPanel = Instance.new("Frame", playerFrame)
+        actionsPanel.Size = UDim2.new(1, 0, 0, 40)
+        actionsPanel.Position = UDim2.new(0, 0, 1, 5)
+        actionsPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        actionsPanel.BorderSizePixel = 0
+        actionsPanel.Visible = false
+        actionsPanel.ZIndex = 5
+        
+        local actionsPanelCorner = Instance.new("UICorner", actionsPanel)
+        actionsPanelCorner.CornerRadius = UDim.new(0, 10)
+        
+        local actionsPanelStroke = Instance.new("UIStroke", actionsPanel)
+        actionsPanelStroke.Color = Color3.fromRGB(0, 150, 255)
+        actionsPanelStroke.Thickness = 1
+        actionsPanelStroke.Transparency = 0.5
+        
+        -- Action buttons
+        local function createActionButton(text, position, color, callback)
+            local btn = Instance.new("TextButton", actionsPanel)
+            btn.Size = UDim2.new(0, 80, 0, 30)
+            btn.Position = position
+            btn.BackgroundColor3 = color
+            btn.BorderSizePixel = 0
+            btn.Text = text
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.TextSize = 12
+            btn.Font = Enum.Font.GothamMedium
+            btn.TextStrokeTransparency = 0.3
+            
+            local btnCorner = Instance.new("UICorner", btn)
+            btnCorner.CornerRadius = UDim.new(0, 6)
+            
+            local btnGradient = Instance.new("UIGradient", btn)
+            btnGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.new(math.min(1, color.R + 0.1), math.min(1, color.G + 0.1), math.min(1, color.B + 0.1))),
+                ColorSequenceKeypoint.new(1, Color3.new(math.max(0, color.R - 0.1), math.max(0, color.G - 0.1), math.max(0, color.B - 0.1)))
+            }
+            btnGradient.Rotation = 45
+            
+            -- Hover effect
+            btn.MouseEnter:Connect(function()
+                btnGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.new(math.min(1, color.R + 0.2), math.min(1, color.G + 0.2), math.min(1, color.B + 0.2))),
+                    ColorSequenceKeypoint.new(1, color)
+                }
+            end)
+            
+            btn.MouseLeave:Connect(function()
+                btnGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.new(math.min(1, color.R + 0.1), math.min(1, color.G + 0.1), math.min(1, color.B + 0.1))),
+                    ColorSequenceKeypoint.new(1, Color3.new(math.max(0, color.R - 0.1), math.max(0, color.G - 0.1), math.max(0, color.B - 0.1)))
+                }
+            end)
+            
+            btn.MouseButton1Click:Connect(callback)
+            return btn
+        end
+        
+        -- Create action buttons
+        createActionButton("Kick", UDim2.new(0, 10, 0, 5), Color3.fromRGB(200, 60, 60), function()
+            pcall(function()
+                if GuiSettings and GuiSettings["Use_Cookie_block_method"] == true then
+                    blockPlayer(player.UserId)
+                    task.wait(2)
+                    unblockPlayer(player.UserId)
+                else
+                    game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Kick", player)
+                end
+            end)
+        end)
+        
+        createActionButton("TP", UDim2.new(0, 100, 0, 5), Color3.fromRGB(60, 120, 200), function()
+            pcall(function()
+                local localPlayer = game.Players.LocalPlayer
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    localPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+                end
+            end)
+        end)
+        
+        createActionButton("Bring", UDim2.new(0, 190, 0, 5), Color3.fromRGB(60, 200, 120), function()
+            pcall(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
+            end)
+        end)
+        
+        -- Toggle actions panel
+        local panelOpen = false
+        actionsBtn.MouseButton1Click:Connect(function()
+            panelOpen = not panelOpen
+            actionsPanel.Visible = panelOpen
+            actionsBtn.Text = panelOpen and "Actions ▲" or "Actions ▼"
+            
+            -- Adjust player frame size
+            if panelOpen then
+                playerFrame.Size = UDim2.new(1, -20, 0, 145)
+            else
+                playerFrame.Size = UDim2.new(1, -20, 0, 100)
+            end
+        end)
+        
+        -- Hover effect for main frame
+        playerFrame.MouseEnter:Connect(function()
+            playerStroke.Transparency = 0.3
+            playerGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 50)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 35))
+            }
+        end)
+        
+        playerFrame.MouseLeave:Connect(function()
+            if not panelOpen then
+                playerStroke.Transparency = 0.8
+                playerGradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 45)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
+                }
+            end
+        end)
+        
+        return playerFrame
+    end
+    
+    -- Modern player card creation function (wrapper for compatibility)
+    
+    -- Create Players Frame (main content)
+    G2L["7"] = Instance.new("ScrollingFrame", contentArea)
+    G2L["7"]["Active"] = true
+    G2L["7"]["BorderSizePixel"] = 0
+    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(18, 18, 25)
+    G2L["7"]["ScrollBarImageTransparency"] = 0.3
+    G2L["7"]["Size"] = UDim2.new(1, -20, 1, -20)
+    G2L["7"]["Position"] = UDim2.new(0, 10, 0, 10)
+    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 150, 255)
+    G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["7"]["BackgroundTransparency"] = 0.1
+    G2L["7"]["ScrollBarThickness"] = 8
+    
+    -- Add modern corner to Players Frame
+    local playersFrameCorner = Instance.new("UICorner", G2L["7"])
+    playersFrameCorner.CornerRadius = UDim.new(0, 15)
+    
+    -- Add subtle gradient
+    local playersFrameGradient = Instance.new("UIGradient", G2L["7"])
+    playersFrameGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 22, 30)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 22))
+    }
+    playersFrameGradient.Rotation = 135
+    
+    -- Add subtle stroke
+    local playersFrameStroke = Instance.new("UIStroke", G2L["7"])
+    playersFrameStroke.Color = Color3.fromRGB(40, 40, 60)
+    playersFrameStroke.Thickness = 1
+    playersFrameStroke.Transparency = 0.5
     
     -- Add LDHC title label at top left
     local ldhcTitle = Instance.new("TextLabel", G2L["2"])
@@ -3848,8 +4316,10 @@ else -- SELLER GUI
     
     
     
+    -- Modern player card creation function
     local function createbox(player, THREE, LABEL1)
-    local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
+        return createPlayerCard(player)
+    end
     
     
     
