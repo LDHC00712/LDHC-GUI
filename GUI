@@ -1,19 +1,31 @@
 
 
 
-local exe_name, exe_version = identifyexecutor()
+local exe_name, exe_version = "Wave Windows", "1.0" -- Default values
+if identifyexecutor then
+    exe_name, exe_version = identifyexecutor()
+end
+
 local function home999() end
 local function home888() end
 
 if exe_name ~= "Wave Windows" then
-    hookfunction(home888, home999)
-    if isfunctionhooked(home888) == false then
-        game.Players.LocalPlayer:Destroy()
-        return LPH_CRASH()
+    if hookfunction and isfunctionhooked then
+        hookfunction(home888, home999)
+        if isfunctionhooked(home888) == false then
+            if game.Players.LocalPlayer then
+                game.Players.LocalPlayer:Destroy()
+            end
+            if LPH_CRASH then
+                return LPH_CRASH()
+            end
+        end
     end
 end 
 
 local function check_env(env)
+    if not isfunctionhooked then return end
+    
     for _, func in env do
         if type(func) ~= "function" then
             continue
@@ -22,24 +34,60 @@ local function check_env(env)
         local functionhook = isfunctionhooked(func)
 
         if functionhook then
-            game.Players.LocalPlayer:Destroy()
-            return LPH_CRASH()
+            if game.Players.LocalPlayer then
+                game.Players.LocalPlayer:Destroy()
+            end
+            if LPH_CRASH then
+                return LPH_CRASH()
+            end
         end
     end
 end
 
-check_env( getgenv() )
-check_env( getrenv() )
+if getgenv then
+    check_env( getgenv() )
+end
+if getrenv then
+    check_env( getrenv() )
+end
 --
 
-local Lua_Fetch_Connections = getconnections
-local Lua_Fetch_Upvalues = getupvalues
-local Lua_Hook = hookfunction 
-local Lua_Hook_Method = hookmetamethod
-local Lua_Unhook = restorefunction
-local Lua_Replace_Function = replaceclosure
-local Lua_Set_Upvalue = setupvalue
-local Lua_Clone_Function = clonefunction
+local Lua_Fetch_Connections = getconnections or function() return {} end
+local Lua_Fetch_Upvalues = getupvalues or function() return {} end
+local Lua_Hook = hookfunction or function() end
+local Lua_Hook_Method = hookmetamethod or function() end
+local Lua_Unhook = restorefunction or function() end
+local Lua_Replace_Function = replaceclosure or function() end
+local Lua_Set_Upvalue = setupvalue or function() end
+local Lua_Clone_Function = clonefunction or function(func) return func end
+
+-- Add fallbacks for executor-specific functions
+local setfpscap = setfpscap or function() end
+local gethui = gethui or function() return game:GetService("CoreGui") end
+local fireclickdetector = fireclickdetector or function() end
+
+-- Create fallback getgenv if it doesn't exist
+if not getgenv then
+    getgenv = function()
+        if not _G._GETGENV_FALLBACK then
+            _G._GETGENV_FALLBACK = {
+                DEBUG = false,
+                scriptinject = false,
+                sendingMessage = false,
+                alts = {},
+                mainId = 0
+            }
+        end
+        return _G._GETGENV_FALLBACK
+    end
+end
+
+-- Create fallback getrenv if it doesn't exist
+if not getrenv then
+    getrenv = function()
+        return _G
+    end
+end
 
 local Game_RunService = game:GetService("RunService")
 local Game_LogService = game:GetService("LogService")
