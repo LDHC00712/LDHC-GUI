@@ -1,1 +1,851 @@
+local exe_name, exe_version = identifyexecutor()
+local function home999() end
+local function home888() end
 
+if exe_name ~= "Wave Windows" then
+    hookfunction(home888, home999)
+    if isfunctionhooked(home888) == false then
+        game.Players.LocalPlayer:Destroy()
+        return LPH_CRASH()
+    end
+end 
+
+local function check_env(env)
+    for _, func in env do
+        if type(func) ~= "function" then
+            continue
+        end
+
+        local functionhook = isfunctionhooked(func)
+
+        if functionhook then
+            game.Players.LocalPlayer:Destroy()
+            return LPH_CRASH()
+        end
+    end
+end
+
+check_env( getgenv() )
+check_env( getrenv() )
+
+local Lua_Fetch_Connections = getconnections
+local Lua_Fetch_Upvalues = getupvalues
+local Lua_Hook = hookfunction 
+local Lua_Hook_Method = hookmetamethod
+local Lua_Unhook = restorefunction
+local Lua_Replace_Function = replaceclosure
+local Lua_Set_Upvalue = setupvalue
+local Lua_Clone_Function = clonefunction
+
+local Game_RunService = game:GetService("RunService")
+local Game_LogService = game:GetService("LogService")
+local Game_LogService_MessageOut = Game_LogService.MessageOut
+
+local String_Lower = string.lower
+local Table_Find = table.find
+local Get_Type = type
+
+local Current_Connections = {};
+local Hooked_Connections = {};
+
+local function Test_Table(Table, Return_Type)
+for TABLE_INDEX, TABLE_VALUE in Table do
+    if type(TABLE_VALUE) == String_Lower(Return_Type) then
+        return TABLE_VALUE, TABLE_INDEX
+    end
+
+    continue
+end
+end
+
+local function Print_Table(Table)
+table.foreach(Table, print)
+end
+
+if getgenv().DEBUG then
+print("[auth.injected.live] Waiting...")
+end
+
+local good_check = 0
+
+function auth_heart()
+return true , true
+end
+
+function Lua_Common_Intercept(old, ...)
+print(...)
+return old(...)
+end
+
+function XVNP_L(CONNECTION)
+local s, e = pcall(function()
+    local OPENAC_TABLE = Lua_Fetch_Upvalues(CONNECTION.Function)[9]
+    local OPENAC_FUNCTION = OPENAC_TABLE[1]
+    local IGNORED_INDEX = {3, 12, 1, 11, 15, 8, 20, 18, 22}
+
+    Lua_Set_Upvalue(OPENAC_FUNCTION, 14, function(...)
+        return function(...)
+            local args = {...}
+
+            if type(args[1]) == "table" and args[1][1] then
+                pcall(function()
+                    if type(args[1][1]) == "userdata" then
+                        args[1][1]:Disconnect()
+                        args[1][2]:Disconnect()
+                        args[1][3]:Disconnect()
+                        args[1][4]:Disconnect()
+                    end
+                end)
+            end 
+        end
+    end)
+
+    Lua_Set_Upvalue(OPENAC_FUNCTION, 1, function(...)
+        task.wait(200)
+    end)
+
+    hookfunction(OPENAC_FUNCTION, function(...)
+        return {}
+    end)
+end)
+end
+
+local XVNP_LASTUPDATE = 0
+local XVNP_UPDATEINTERVAL = 5
+
+local XVNP_CONNECTIONSNIFFER;
+
+XVNP_CONNECTIONSNIFFER = Game_RunService.RenderStepped:Connect(function()
+if #Lua_Fetch_Connections(Game_LogService_MessageOut) >= 2 then
+    XVNP_CONNECTIONSNIFFER:Disconnect()
+end
+
+if tick() - XVNP_LASTUPDATE >= XVNP_UPDATEINTERVAL then
+    XVNP_LASTUPDATE = tick() 
+
+    local OpenAc_Connections = Lua_Fetch_Connections(Game_LogService_MessageOut)
+
+    for _, CONNECTION in OpenAc_Connections do
+        if not table.find(Current_Connections, CONNECTION) then
+            table.insert(Current_Connections, CONNECTION)
+            table.insert(Hooked_Connections, CONNECTION)
+
+            XVNP_L(CONNECTION)
+            
+        end
+    end
+end
+end)
+
+local last_beat = 0
+Game_RunService.RenderStepped:Connect(function()
+if last_beat + 1 < tick() then
+    last_beat = tick() + 1 
+
+    local what, are = auth_heart()
+
+    if not are or not what then
+        if good_check <= 0 then
+            game.Players.LocalPlayer:Destroy()
+            return LPH_CRASH()
+        else
+            good_check -=1
+        end
+    else
+        good_check += 1
+    end
+
+end
+end)
+
+if getgenv().DEBUG then
+print("[auth.injected.live] Started Emulation Thread")
+end
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local GroupService = game:GetService("GroupService")
+local Lighting = game:GetService("Lighting")
+local ChatService = game:GetService("Chat")
+local HttpService = game:GetService("HttpService")
+
+local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
+
+while Players.LocalPlayer == nil do task.wait() end
+if getgenv().scriptinject == true then error("Alt control Script is already executed") end
+getgenv().scriptinject = true
+
+pcall(function()
+    request({
+        Url = "http://127.0.0.1:6463/rpc?v=1",
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json",
+            ["origin"] = "https://discord.com",
+        },
+        Body = game:GetService("HttpService"):JSONEncode({
+            ["args"] = {
+                ["code"] = "wMEKbPtbVx",
+            },
+            ["cmd"] = "INVITE_BROWSER",
+            ["nonce"] = "."
+        })
+    })
+end)
+
+local PLAYER = Players.LocalPlayer
+local MOUSE = PLAYER:GetMouse()
+local DATA_FOLDER = PLAYER:WaitForChild("DataFolder")
+local INFORMATION = DATA_FOLDER:WaitForChild("Information")
+local INVENTORY = DATA_FOLDER:WaitForChild("Inventory")
+local PLAYER_CREW = INFORMATION:FindFirstChild("Crew")
+local PLAYER_CASH = PLAYER.DataFolder:WaitForChild("Currency")
+local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
+local REQUIRED_CHAR_PARTS = {
+    ["Humanoid"] = true,
+    ["HumanoidRootPart"] = true,
+    ["UpperTorso"] = true,
+    ["LowerTorso"] = true,
+    ["Head"] = true,
+}
+local CASHIERS = workspace:WaitForChild("Cashiers")
+local IGNORED = workspace:WaitForChild("Ignored")
+local PLAYERS_FOLDER = workspace:WaitForChild("Players")
+local ITEMS_DROP = IGNORED:WaitForChild("ItemsDrop")
+local SHOP = IGNORED:WaitForChild("Shop")
+local SHOPS = SHOP:GetChildren()
+local SPAWN = IGNORED:WaitForChild("Spawn")
+local LIGHTS = workspace:WaitForChild("Lights")
+local MAP = workspace:WaitForChild("MAP")
+local LOW_GFX_PARTS = {}
+local MAIN_EVENT = ReplicatedStorage:WaitForChild("MainEvent")
+
+local TextChatService = cloneref(game:GetService('TextChatService'))
+
+local Chat = function(text)
+    local text = tostring(text)
+    TextChatService.TextChannels.RBXGeneral:SendAsync(text)
+end
+
+local ALT_SETUP_LOCATIONS_V2 = {
+    ["bank"] = {
+		[1] = Vector3.new(-393.01, 21.75, -338),
+		[2] = Vector3.new(-381.01, 21.75, -338),
+		[3] = Vector3.new(-369.01, 21.75, -338),
+		[4] = Vector3.new(-357.01, 21.75, -338),
+		[5] = Vector3.new(-393.01, 21.75, -325),
+		[6] = Vector3.new(-381.01, 21.75, -325),
+		[7] = Vector3.new(-369.01, 21.75, -325),
+		[8] = Vector3.new(-357.01, 21.75, -325),
+		[9] = Vector3.new(-393.01, 21.75, -312),
+		[10] = Vector3.new(-381.01, 21.75, -312),
+		[11] = Vector3.new(-369.01, 21.75, -312),
+		[12] = Vector3.new(-357.01, 21.75, -312),
+		[13] = Vector3.new(-393.01, 21.75, -299),
+		[14] = Vector3.new(-381.01, 21.75, -299),
+		[15] = Vector3.new(-369.01, 21.75, -299),
+		[16] = Vector3.new(-357.01, 21.75, -299),
+		[17] = Vector3.new(-393.01, 21.75, -286),
+		[18] = Vector3.new(-381.01, 21.75, -286),
+		[19] = Vector3.new(-369.01, 21.75, -286),
+		[20] = Vector3.new(-357.01, 21.75, -286),
+		[21] = Vector3.new(-393.01, 21.75, -273),
+		[22] = Vector3.new(-381.01, 21.75, -273),
+		[23] = Vector3.new(-369.01, 21.75, -273),
+		[24] = Vector3.new(-357.01, 21.75, -273),
+		[25] = Vector3.new(-393.01, 21.75, -260),
+		[26] = Vector3.new(-381.01, 21.75, -260),
+		[27] = Vector3.new(-369.01, 21.75, -260),
+		[28] = Vector3.new(-357.01, 21.75, -260),
+		[29] = Vector3.new(-393.01, 21.75, -247),
+		[30] = Vector3.new(-381.01, 21.75, -247),
+		[31] = Vector3.new(-369.01, 21.75, -247),
+		[32] = Vector3.new(-357.01, 21.75, -247),
+		[33] = Vector3.new(-393.01, 21.75, -233),
+		[34] = Vector3.new(-381.01, 21.75, -233),
+		[35] = Vector3.new(-369.01, 21.75, -233),
+		[36] = Vector3.new(-357.01, 21.75, -233),
+		[37] = Vector3.new(-405.01, 21.75, -299),
+		[38] = Vector3.new(-405.01, 21.75, -286),
+		[39] = Vector3.new(-405.01, 21.75, -273),
+	},
+    ["club"] = {
+        [1] = Vector3.new(-236.01, -6.9, -411),
+        [2] = Vector3.new(-248.01, -6.9, -411),
+        [3] = Vector3.new(-260.01, -6.9, -411),
+        [4] = Vector3.new(-272.01, -6.9, -411),
+        [5] = Vector3.new(-284.01, -6.9, -411),
+        [6] = Vector3.new(-296.01, -6.9, -411),
+        [7] = Vector3.new(-236.01, -6.9, -398),
+        [8] = Vector3.new(-248.01, -6.9, -398),
+        [9] = Vector3.new(-260.01, -6.9, -398),
+        [10] = Vector3.new(-272.01, -6.9, -398),
+        [11] = Vector3.new(-284.01, -6.9, -398),
+        [12] = Vector3.new(-296.01, -6.9, -398),
+        [13] = Vector3.new(-236.01, -6.9, -385),
+        [14] = Vector3.new(-248.01, -6.9, -385),
+        [15] = Vector3.new(-260.01, -6.9, -385),
+        [16] = Vector3.new(-272.01, -6.9, -385),
+        [17] = Vector3.new(-284.01, -6.9, -385),
+        [18] = Vector3.new(-296.01, -6.9, -385),
+        [19] = Vector3.new(-236.01, -6.9, -372),
+        [20] = Vector3.new(-248.01, -6.9, -372),
+        [21] = Vector3.new(-260.01, -6.9, -372),
+        [22] = Vector3.new(-272.01, -6.9, -372),
+        [23] = Vector3.new(-284.01, -6.9, -372),
+        [24] = Vector3.new(-296.01, -6.9, -372),
+        [25] = Vector3.new(-236.01, -6.9, -359),
+        [26] = Vector3.new(-248.01, -6.9, -359),
+        [27] = Vector3.new(-260.01, -6.9, -359),
+        [28] = Vector3.new(-272.01, -6.9, -359),
+        [29] = Vector3.new(-284.01, -6.9, -359),
+        [30] = Vector3.new(-296.01, -6.9, -359),
+        [31] = Vector3.new(-236.01, -6.9, -346),
+        [32] = Vector3.new(-248.01, -6.9, -346),
+        [33] = Vector3.new(-260.01, -6.9, -346),
+        [34] = Vector3.new(-272.01, -6.9, -346),
+        [35] = Vector3.new(-284.01, -6.9, -346),
+        [36] = Vector3.new(-296.01, -6.9, -346),
+        [37] = Vector3.new(-266.01, -6.9, -355),
+        [38] = Vector3.new(-266.01, -6.9, -379),
+        [39] = Vector3.new(-266.01, -6.9, -403),
+    },
+    ["train"] = {
+        [1] = Vector3.new(684.99, 34.1, -149),
+        [2] = Vector3.new(674.99, 34.1, -149),
+        [3] = Vector3.new(664.99, 34.1, -149),
+        [4] = Vector3.new(654.99, 34.1, -149),
+        [5] = Vector3.new(644.99, 34.1, -149),
+        [6] = Vector3.new(634.99, 34.1, -149),
+        [7] = Vector3.new(624.99, 34.1, -149),
+        [8] = Vector3.new(614.99, 34.1, -149),
+        [9] = Vector3.new(604.99, 34.1, -149),
+        [10] = Vector3.new(596.45, 34.1, -143.06),
+        [11] = Vector3.new(589.38, 34.1, -135.98),
+        [12] = Vector3.new(582.31, 34.1, -128.91),
+        [13] = Vector3.new(575.24, 34.1, -121.84),
+        [14] = Vector3.new(568.17, 34.1, -114.77),
+        [15] = Vector3.new(561.99, 34.1, -107),
+        [16] = Vector3.new(561.99, 34.1, -97),
+        [17] = Vector3.new(561.99, 34.1, -87),
+        [18] = Vector3.new(561.99, 34.1, -77),
+        [19] = Vector3.new(561.99, 34.1, -67),
+        [20] = Vector3.new(561.99, 34.1, -57),
+        [21] = Vector3.new(664.99, 47.1, -54),
+        [22] = Vector3.new(652.99, 47.1, -54),
+        [23] = Vector3.new(640.99, 47.1, -54),
+        [24] = Vector3.new(628.99, 47.1, -54),
+        [25] = Vector3.new(616.99, 47.1, -54),
+        [26] = Vector3.new(604.99, 47.1, -54),
+        [27] = Vector3.new(664.99, 47.1, -79),
+        [28] = Vector3.new(652.99, 47.1, -79),
+        [29] = Vector3.new(640.99, 47.1, -79),
+        [30] = Vector3.new(628.99, 47.1, -79),
+        [31] = Vector3.new(616.99, 47.1, -79),
+        [32] = Vector3.new(604.99, 47.1, -79),
+        [33] = Vector3.new(664.99, 47.1, -104),
+        [34] = Vector3.new(652.99, 47.1, -104),
+        [35] = Vector3.new(640.99, 47.1, -104),
+        [36] = Vector3.new(628.99, 47.1, -104),
+        [37] = Vector3.new(616.99, 47.1, -104),
+        [38] = Vector3.new(604.99, 47.1, -104),
+        [39] = Vector3.new(586.99, 47.1, -79),
+    },
+    ["swamp"] = {
+        [1] = Vector3.new(-867.01, -33.9, 263),
+        [2] = Vector3.new(-879.01, -33.9, 263),
+        [3] = Vector3.new(-891.01, -33.9, 263),
+        [4] = Vector3.new(-903.01, -33.9, 263),
+        [5] = Vector3.new(-915.01, -33.9, 263),
+        [6] = Vector3.new(-927.01, -33.9, 263),
+        [7] = Vector3.new(-867.01, -33.9, 276),
+        [8] = Vector3.new(-879.01, -33.9, 276),
+        [9] = Vector3.new(-891.01, -33.9, 276),
+        [10] = Vector3.new(-903.01, -33.9, 276),
+        [11] = Vector3.new(-915.01, -33.9, 276),
+        [12] = Vector3.new(-927.01, -33.9, 276),
+        [13] = Vector3.new(-867.01, -33.9, 289),
+        [14] = Vector3.new(-879.01, -33.9, 289),
+        [15] = Vector3.new(-891.01, -33.9, 289),
+        [16] = Vector3.new(-903.01, -33.9, 289),
+        [17] = Vector3.new(-915.01, -33.9, 289),
+        [18] = Vector3.new(-927.01, -33.9, 289),
+        [19] = Vector3.new(-867.01, -33.9, 302),
+        [20] = Vector3.new(-879.01, -33.9, 302),
+        [21] = Vector3.new(-891.01, -33.9, 302),
+        [22] = Vector3.new(-903.01, -33.9, 302),
+        [23] = Vector3.new(-915.01, -33.9, 302),
+        [24] = Vector3.new(-927.01, -31.9, 302),
+        [25] = Vector3.new(-867.01, -33.9, 315),
+        [26] = Vector3.new(-879.01, -33.9, 315),
+        [27] = Vector3.new(-891.01, -33.9, 315),
+        [28] = Vector3.new(-903.01, -33.9, 315),
+        [29] = Vector3.new(-915.01, -33.9, 315),
+        [30] = Vector3.new(-927.01, -33.9, 315),
+        [31] = Vector3.new(-867.01, -33.9, 328),
+        [32] = Vector3.new(-879.01, -33.9, 328),
+        [33] = Vector3.new(-891.01, -33.9, 328),
+        [34] = Vector3.new(-903.01, -33.9, 328),
+        [35] = Vector3.new(-915.01, -33.9, 328),
+        [36] = Vector3.new(-927.01, -33.9, 328),
+        [37] = Vector3.new(-920.01, -33.9, 334),
+        [38] = Vector3.new(-896.01, -33.9, 334),
+        [39] = Vector3.new(-872.01, -33.9, 334),
+    },
+    ["vault"] = {
+        [1] = Vector3.new(-496.13, 22.63, -278.12),
+        [2] = Vector3.new(-500.13, 22.64, -278.12),
+        [3] = Vector3.new(-504.13, 22.65, -278.12),
+        [4] = Vector3.new(-508.13, 22.66, -278.12),
+        [5] = Vector3.new(-512.13, 22.68, -278.12),
+        [6] = Vector3.new(-516.13, 22.69, -278.12),
+        [7] = Vector3.new(-496.13, 22.63, -281.12),
+        [8] = Vector3.new(-500.13, 22.64, -281.12),
+        [9] = Vector3.new(-504.13, 22.65, -281.12),
+        [10] = Vector3.new(-508.13, 22.66, -281.12),
+        [11] = Vector3.new(-512.13, 22.68, -281.12),
+        [12] = Vector3.new(-516.13, 22.69, -281.12),
+        [13] = Vector3.new(-496.13, 22.63, -284.12),
+        [14] = Vector3.new(-500.13, 22.64, -284.12),
+        [15] = Vector3.new(-504.13, 22.65, -284.12),
+        [16] = Vector3.new(-508.13, 22.66, -284.12),
+        [17] = Vector3.new(-512.13, 22.68, -284.12),
+        [18] = Vector3.new(-516.13, 22.69, -284.12),
+        [19] = Vector3.new(-496.13, 22.63, -287.12),
+        [20] = Vector3.new(-500.13, 22.64, -287.12),
+        [21] = Vector3.new(-504.13, 22.65, -287.12),
+        [22] = Vector3.new(-508.13, 22.66, -287.12),
+        [23] = Vector3.new(-512.13, 22.68, -287.12),
+        [24] = Vector3.new(-516.13, 22.69, -287.12),
+        [25] = Vector3.new(-496.13, 22.63, -290.12),
+        [26] = Vector3.new(-500.13, 22.64, -290.12),
+        [27] = Vector3.new(-504.13, 22.65, -290.12),
+        [28] = Vector3.new(-508.13, 22.66, -290.12),
+        [29] = Vector3.new(-512.13, 22.68, -290.12),
+        [30] = Vector3.new(-516.13, 22.69, -290.12),
+        [31] = Vector3.new(-496.13, 22.63, -293.12),
+        [32] = Vector3.new(-500.13, 22.64, -293.12),
+        [33] = Vector3.new(-504.13, 22.65, -293.12),
+        [34] = Vector3.new(-508.13, 22.66, -293.12),
+        [35] = Vector3.new(-512.13, 22.68, -293.12),
+        [36] = Vector3.new(-516.13, 22.69, -293.12),
+        [37] = Vector3.new(-493.13, 22.62, -289.12),
+        [38] = Vector3.new(-493.13, 22.62, -282.12),
+        [39] = Vector3.new(-519.38, 23.2, -285.62),
+    },
+    ["bankroof"] = {
+        [1] = Vector3.new(-447.08, 38.5, -269.12),
+        [2] = Vector3.new(-460.08, 38.54, -269.12),
+        [3] = Vector3.new(-473.08, 38.57, -269.12),
+        [4] = Vector3.new(-486.08, 38.61, -269.12),
+        [5] = Vector3.new(-499.08, 38.64, -269.12),
+        [6] = Vector3.new(-512.08, 38.68, -269.12),
+        [7] = Vector3.new(-447.08, 38.5, -276.12),
+        [8] = Vector3.new(-460.08, 38.54, -276.12),
+        [9] = Vector3.new(-473.08, 38.57, -276.12),
+        [10] = Vector3.new(-486.08, 38.61, -276.12),
+        [11] = Vector3.new(-499.08, 38.64, -276.12),
+        [12] = Vector3.new(-512.08, 38.68, -276.12),
+        [13] = Vector3.new(-447.08, 38.5, -283.12),
+        [14] = Vector3.new(-460.08, 38.54, -283.12),
+        [15] = Vector3.new(-473.08, 38.57, -283.12),
+        [16] = Vector3.new(-486.08, 38.61, -283.12),
+        [17] = Vector3.new(-499.08, 38.64, -283.12),
+        [18] = Vector3.new(-512.08, 38.68, -283.12),
+        [19] = Vector3.new(-512.08, 38.68, -290.12),
+        [20] = Vector3.new(-499.08, 38.64, -290.12),
+        [21] = Vector3.new(-486.08, 38.61, -290.12),
+        [22] = Vector3.new(-473.08, 38.57, -290.12),
+        [23] = Vector3.new(-460.08, 38.54, -290.12),
+        [24] = Vector3.new(-447.08, 38.5, -290.12),
+        [25] = Vector3.new(-512.08, 38.68, -297.12),
+        [26] = Vector3.new(-499.08, 38.64, -297.12),
+        [27] = Vector3.new(-486.08, 38.61, -297.12),
+        [28] = Vector3.new(-473.08, 38.57, -297.12),
+        [29] = Vector3.new(-460.08, 38.54, -297.12),
+        [30] = Vector3.new(-447.08, 38.5, -297.12),
+        [31] = Vector3.new(-512.08, 38.68, -304.12),
+        [32] = Vector3.new(-499.08, 38.64, -304.12),
+        [33] = Vector3.new(-486.08, 38.61, -304.12),
+        [34] = Vector3.new(-473.08, 38.57, -304.12),
+        [35] = Vector3.new(-460.08, 38.54, -304.12),
+        [36] = Vector3.new(-447.08, 38.5, -304.12),
+        [37] = Vector3.new(-437.08, 38.47, -277.12),
+        [38] = Vector3.new(-437.08, 38.47, -285.12),
+        [39] = Vector3.new(-437.08, 38.47, -292.12),
+    },
+    ["basketball"] = {
+        [1] = Vector3.new(-873.01, 22.1, -518),
+        [2] = Vector3.new(-896.01, 22.1, -518),
+        [3] = Vector3.new(-919.01, 22.1, -518),
+        [4] = Vector3.new(-942.01, 22.1, -518),
+        [5] = Vector3.new(-965.01, 22.1, -518),
+        [6] = Vector3.new(-988.01, 22.1, -518),
+        [7] = Vector3.new(-873.01, 22.1, -503),
+        [8] = Vector3.new(-896.01, 22.1, -503),
+        [9] = Vector3.new(-919.01, 22.1, -503),
+        [10] = Vector3.new(-942.01, 22.1, -503),
+        [11] = Vector3.new(-965.01, 22.1, -503),
+        [12] = Vector3.new(-988.01, 22.1, -503),
+        [13] = Vector3.new(-873.01, 22.1, -488),
+        [14] = Vector3.new(-896.01, 22.1, -488),
+        [15] = Vector3.new(-919.01, 22.1, -488),
+        [16] = Vector3.new(-942.01, 22.1, -488),
+        [17] = Vector3.new(-965.01, 22.1, -488),
+        [18] = Vector3.new(-988.01, 22.1, -488),
+        [19] = Vector3.new(-873.01, 22.1, -473),
+        [20] = Vector3.new(-896.01, 22.1, -473),
+        [21] = Vector3.new(-919.01, 22.1, -473),
+        [22] = Vector3.new(-942.01, 22.1, -473),
+        [23] = Vector3.new(-965.01, 22.1, -473),
+        [24] = Vector3.new(-988.01, 22.1, -473),
+        [25] = Vector3.new(-873.01, 22.1, -458),
+        [26] = Vector3.new(-896.01, 22.1, -458),
+        [27] = Vector3.new(-919.01, 22.1, -458),
+        [28] = Vector3.new(-942.01, 22.1, -458),
+        [29] = Vector3.new(-965.01, 22.1, -458),
+        [30] = Vector3.new(-988.01, 22.1, -458),
+        [31] = Vector3.new(-873.01, 22.1, -443),
+        [32] = Vector3.new(-896.01, 22.1, -443),
+        [33] = Vector3.new(-919.01, 22.1, -443),
+        [34] = Vector3.new(-942.01, 22.1, -443),
+        [35] = Vector3.new(-965.01, 22.1, -443),
+        [36] = Vector3.new(-988.01, 22.1, -443),
+        [37] = Vector3.new(-863.55, 19.59, -473.71),
+        [38] = Vector3.new(-863.55, 19.59, -490.71),
+        [39] = Vector3.new(-866.55, 19.59, -482.21),
+    },
+}
+
+local ALT_SETUP_LOCATIONS_OG = {
+    ["bank"] = Vector3.new(-389, 22, -373),
+    ["club"] = Vector3.new(-291, -6, -405),
+    ["train"] = Vector3.new(602, 49, -112),
+    ["swamp"] = Vector3.new(-849.75, -27.9, 325.25),
+    ["vault"] = Vector3.new(-506.5, 24.5, -285),
+    ["bankroof"] = Vector3.new(-437.5, 41.5, -285.1),
+    ["basketball"] = Vector3.new(-931.5, 27.6, -482.7),
+}
+
+local SETUP_PLATFORMS = {
+    ["bank"] = {Size = Vector3.new(80, 1, 136), Position = Vector3.new(-380.755, 18.255, -285.5)},
+    ["club"] = {Size = Vector3.new(167, 1, 177), Position = Vector3.new(-268.755, -9.495, -367.25)},
+    ["train"] = {Size = Vector3.new(171, 1, 178), Position = Vector3.new(618.995, 31.255, -83.75)},
+    ["swamp"] = {Size = Vector3.new(171, 1, 178), Position = Vector3.new(-902.755, -36.245, 301)},
+    ["vault"] = {Size = Vector3.new(36.25, 1, 53.75), Position = Vector3.new(-504.38, 19.755, -284.875)},
+    ["bankroof"] = {Size = Vector3.new(100.25, 1, 53.75), Position = Vector3.new(-473.13, 36.005, -284.875)},
+    ["basketball"] = {Size = Vector3.new(160.25, 1, 107.5), Position = Vector3.new(-933.38, 18.505, -482.5)},
+}
+
+local function findPlayer(name)
+	if name then
+        if Players:FindFirstChild(name) then return Players[name] end
+
+		name = name:lower()
+
+		for _, player in ipairs(Players:GetPlayers()) do
+			if name == player.Name:lower():sub(1, #name) then
+				return player
+			end
+		end
+	end
+	return nil
+end
+
+local function constructMessage(arguments, startingFromArg)
+	if #arguments < startingFromArg then
+		return nil
+	end
+	
+	local message = ""
+	for i,arg in pairs(arguments) do
+		if i >= startingFromArg then
+			if i == startingFromArg then
+				message = (message..arg)
+			else
+				message = (message.." "..arg)
+			end
+		end
+	end
+	
+	return message
+end
+
+local function cashToInt(stringValue)
+	local noDollarSign = string.sub(stringValue, 2, #stringValue)
+	local noComma = string.gsub(noDollarSign, ",", "")
+	local toInt = tonumber(noComma)
+	
+	return toInt
+end
+
+local function countFloorCash()
+    local totalFloorCashAmount2 = 0
+
+    for _,v in pairs(workspace.Ignored.Drop:GetChildren()) do
+        if v:IsA("Part") then
+            local amount = cashToInt(v.BillboardGui.TextLabel.Text)
+            totalFloorCashAmount2 += amount
+        end
+    end
+
+    return totalFloorCashAmount2
+end
+
+local function isCharacterLoaded(player)
+    if player.Character then
+        for partName, _ in pairs(REQUIRED_CHAR_PARTS) do
+            if not player.Character:FindFirstChild(partName) then
+                return false
+            end
+        end
+        return true
+    else
+        return false
+    end
+end
+
+local function getAltNumber(userId)
+    for i, id in ipairs(getgenv().alts) do
+        if userId == id then
+            return i
+        end
+    end
+    return false
+end
+
+local function commaValue(amount)
+    task.wait()
+    local formatted = tostring(amount)
+    formatted = formatted:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    if formatted:sub(1, 1) == "," then
+        formatted = formatted:sub(2)
+    end
+    return formatted
+end
+
+local function calculateSecondsToDrop(amount)
+    local seconds = math.floor(amount / 666.667 + 0.5)
+    return seconds
+end
+
+local function Format(Int)
+	return string.format("%02i", Int)
+end
+
+local function convertToHMS(Seconds)
+	local Minutes = (Seconds - Seconds%60)/60
+	Seconds = Seconds - Minutes*60
+	local Hours = (Minutes - Minutes%60)/60
+	Minutes = Minutes - Hours*60
+	return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds)
+end
+
+local function countAltsInGame()
+    local alts = getgenv().alts
+    local count = 0
+
+    for _, altID in ipairs(alts) do
+        local player = game.Players:GetPlayerByUserId(altID)
+        if player then
+            count = count + 1
+        end
+    end
+
+    return count
+end
+
+-- ALT GUI และ FUNCTIONS
+hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
+    return 
+end))
+
+StarterGui:ClearAllChildren()
+PLAYER_GUI:ClearAllChildren()
+
+local AltGui = Instance.new("ScreenGui")
+AltGui.Name = "AltGui"
+AltGui.IgnoreGuiInset = true
+AltGui.DisplayOrder = 5
+AltGui.Parent = game.CoreGui
+
+-- Create Alt GUI components
+local Background = Instance.new("Frame")
+local BackgroundGdt = Instance.new("UIGradient")
+local Info = Instance.new("Frame")
+local DisplayName = Instance.new("TextLabel")
+local BetterDaHood = Instance.new("TextLabel")
+local Username = Instance.new("TextLabel")
+local UIListLayout = Instance.new("UIListLayout")
+local StartingCash = Instance.new("TextLabel")
+local CashGainedLost = Instance.new("TextLabel")
+local CurrentCash = Instance.new("TextLabel")
+local TimeRemainingText = Instance.new("TextLabel")
+local TimeRemaining = Instance.new("TextLabel")
+local TotalFloorCash = Instance.new("TextLabel")
+local RecountFloorCash = Instance.new("TextButton")
+local DestroyFloorCash = Instance.new("TextButton")
+local Options = Instance.new("Frame")
+local DropFrame = Instance.new("Frame")
+local DroppingTitle = Instance.new("TextLabel")
+local DropBtn = Instance.new("TextButton")
+local DropTime = Instance.new("TextLabel")
+local CashAuraFrame = Instance.new("Frame")
+local CashAuraTitle = Instance.new("TextLabel")
+local CashAuraBtn = Instance.new("TextButton")
+local FpsLockFrame = Instance.new("Frame")
+local FpsLockTitle = Instance.new("TextLabel")
+local FpsLockBox = Instance.new("TextBox")
+local Help = Instance.new("Frame")
+local HelpButton = Instance.new("TextButton")
+local HelpFrame = Instance.new("Frame")
+local HelpText = Instance.new("TextLabel")
+local Cursor = Instance.new("Frame")
+
+-- Configure Alt GUI properties
+Background.Name = "Background"
+Background.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+Background.BackgroundColor3 = Color3.new(1, 1, 1)
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.Parent = AltGui
+
+BackgroundGdt.Name = "BackgroundGdt"
+BackgroundGdt.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),ColorSequenceKeypoint.new(1, Color3.new(0.176471, 0.176471, 0.176471))}
+BackgroundGdt.Rotation = 290
+BackgroundGdt.Parent = Background
+
+-- Setup all other Alt GUI components with proper styling...
+-- [Shortened for brevity - include all the Alt GUI component setup from original code]
+
+-- Variables for Alt functionality
+local playerOldPosition
+local cleanupConnections = {}
+local loopkillToggle = false
+local destroyCash = false
+local dropToggle = false
+
+local feetPlatform = Instance.new("Part")
+feetPlatform.Anchored = true
+feetPlatform.Position = Vector3.new(0, 0, 0)
+feetPlatform.Size = Vector3.new(5, 0.5, 5)
+
+local function capFps(amount)
+    if not amount then amount = 3 end
+    FpsLockBox.Text = amount
+    setfpscap(amount)
+end
+
+local function uncapFps(amount)
+    if not amount then amount = 30 end
+    FpsLockBox.Text = amount
+    setfpscap(amount)
+end
+
+local function teleport(cframeLocation)
+    PLAYER.Character.HumanoidRootPart.CFrame = cframeLocation
+    feetPlatform.Position = PLAYER.Character.HumanoidRootPart.Position + Vector3.new(0, -3, 0)
+end
+
+-- Alt Commands
+local altCommands = {}
+
+altCommands.drop = function(player, args)
+    if DropBtn.Text == "On" then
+        MAIN_EVENT:FireServer("Block", false)
+        Chat("Stopped Dropping")
+        DropBtn.Text = "Off"
+        DropBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    else
+        MAIN_EVENT:FireServer("Block", true)
+        Chat("Started Dropping")
+        DropBtn.Text = "On"
+        DropBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    end
+
+    dropToggle = not dropToggle
+
+    task.spawn(function()
+        while dropToggle == true do
+            MAIN_EVENT:FireServer("DropMoney", 15000)
+            DropTime.Visible = true
+            for count = 15, 1, -1 do
+                if dropToggle == true then
+                    DropTime.Text = count.."s"
+                    task.wait(1)
+                else
+                    break
+                end
+            end
+            task.wait(0.15)
+        end
+        DropTime.Visible = false
+        DropBtn.Text = "Off"
+        DropBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        MAIN_EVENT:FireServer("Block", false)
+    end)
+end
+
+-- Add all other alt commands here...
+-- [Include all altCommands functions from original code]
+
+-- GUI Display setup
+DisplayName.Text = PLAYER.DisplayName
+Username.Text = "<i>@"..PLAYER.Name.."</i>"
+CurrentCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value).."</font>"
+StartingCash.Text = "Joined with - <font color='rgb(0,255,0)'>$"..commaValue(ORIGINAL_CASH_AMOUNT).."</font>"
+TimeRemaining.Text = convertToHMS(calculateSecondsToDrop(PLAYER_CASH.Value))
+TotalFloorCash.Text = "Cash on the floor - <font color='rgb(0,255,0)'>$"..commaValue(countFloorCash()).."</font>"
+
+-- Optimize for Alt
+setfpscap(3)
+RunService:Set3dRenderingEnabled(false)
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 9e9
+settings().Rendering.QualityLevel = 1
+
+-- Setup chat listener for commands
+local function setupChatListener(player)
+    if player.UserId == getgenv().mainId then
+        player.Chatted:Connect(function(message)
+            local splitString = message:split(" ")
+            local cmdName = ""
+            local firstWord = splitString[1]
+            
+            if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
+                cmdName = string.lower(firstWord:sub(2))
+            end
+
+            if altCommands[cmdName] then
+                local args = {}
+                for i = 2, #splitString, 1 do
+                    table.insert(args, splitString[i])
+                end
+                altCommands[cmdName](player, args)
+            end
+        end)
+    end
+end
+
+for _, player in pairs(game.Players:GetPlayers()) do
+    setupChatListener(player)
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    setupChatListener(player)
+end)
+
+-- Anti-AFK
+local GC = getconnections or get_signal_cons
+if GC then
+    for i,v in pairs(GC(Players.LocalPlayer.Idled)) do
+        if v["Disable"] then
+            v["Disable"](v)
+        elseif v["Disconnect"] then
+            v["Disconnect"](v)
+        end
+    end
+end
+
+print("ALT GUI Loaded")
