@@ -1,592 +1,842 @@
-local exe_name, exe_version = identifyexecutor()
-local function home999() end
-local function home888() end
-
-if exe_name ~= "Wave Windows" then
-    hookfunction(home888, home999)
-    if isfunctionhooked(home888) == false then
-        game.Players.LocalPlayer:Destroy()
-        return LPH_CRASH()
-    end
-end 
-
-local function check_env(env)
-    for _, func in env do
-        if type(func) ~= "function" then
-            continue
-        end
-
-        local functionhook = isfunctionhooked(func)
-
-        if functionhook then
-            game.Players.LocalPlayer:Destroy()
-            return LPH_CRASH()
-        end
-    end
-end
-
-check_env( getgenv() )
-check_env( getrenv() )
---
-
-local Lua_Fetch_Connections = getconnections
-local Lua_Fetch_Upvalues = getupvalues
-local Lua_Hook = hookfunction 
-local Lua_Hook_Method = hookmetamethod
-local Lua_Unhook = restorefunction
-local Lua_Replace_Function = replaceclosure
-local Lua_Set_Upvalue = setupvalue
-local Lua_Clone_Function = clonefunction
-
-local Game_RunService = game:GetService("RunService")
-local Game_LogService = game:GetService("LogService")
-local Game_LogService_MessageOut = Game_LogService.MessageOut
-
-local String_Lower = string.lower
-local Table_Find = table.find
-local Get_Type = type
-
-local Current_Connections = {};
-local Hooked_Connections = {};
-
-local function Test_Table(Table, Return_Type)
-for TABLE_INDEX, TABLE_VALUE in Table do
-    if type(TABLE_VALUE) == String_Lower(Return_Type) then
-        return TABLE_VALUE, TABLE_INDEX
-    end
-
-    continue
-end
-end
-
-local function Print_Table(Table)
-table.foreach(Table, print)
-end
-
-if getgenv().DEBUG then
-print("[auth.injected.live] Waiting...")
-end
-
-local good_check = 0
-
-function auth_heart()
--- local avalible = pcall(function() return loadstring(game:HttpGet("https://auth.injected.live/" .. directory))() end)
-
--- if (not avalible or not game:HttpGet("https://auth.injected.live/" .. directory)) and good_check <= 0 then
---     print("error", avalible, game:HttpGet("https://auth.injected.live/" .. directory))
---     game.Players.LocalPlayer:Destroy()
---     return LPH_CRASH()
--- end
-
-return true , true
-end
-
-function Lua_Common_Intercept(old, ...)
-print(...)
-return old(...)
-end
-
-function XVNP_L(CONNECTION)
-local s, e = pcall(function()
-    local OPENAC_TABLE = Lua_Fetch_Upvalues(CONNECTION.Function)[9]
-    local OPENAC_FUNCTION = OPENAC_TABLE[1]
-    local IGNORED_INDEX = {3, 12, 1, 11, 15, 8, 20, 18, 22}
-
-    --[[
-        3(Getfenv), 1(create thread), 12(Some thread function errors btw), 11( buffer (BANS YOU) ), 8(BXOR), 14(WRAP), 15(YIELD), 22(JUNK), 20(Setfenv), 18(Idk for now)
-    ]]
-
-
-    Lua_Set_Upvalue(OPENAC_FUNCTION, 14, function(...)
-        return function(...)
-            local args = {...}
-
-            if type(args[1]) == "table" and args[1][1] then
-                pcall(function()
-                    if type(args[1][1]) == "userdata" then
-                        args[1][1]:Disconnect()
-                        args[1][2]:Disconnect()
-                        args[1][3]:Disconnect()
-                        args[1][4]:Disconnect()
-                        --warn("[XVNP] DISCONNECTING CURRENT FUNCTIONS")
-                    end
-
-                    --Print_Table(args[1])
-                end)
-            end 
-        end
-    end)
-
-    Lua_Set_Upvalue(OPENAC_FUNCTION, 1, function(...)
-        task.wait(200)
-    end)
-
-    hookfunction(OPENAC_FUNCTION, function(...)
-        --warn("[XVNP DEBUG]", ...)
-        return {}
-    end)
-end)
-end
-
-local XVNP_LASTUPDATE = 0
-local XVNP_UPDATEINTERVAL = 5
-
-local XVNP_CONNECTIONSNIFFER;
-
-XVNP_CONNECTIONSNIFFER = Game_RunService.RenderStepped:Connect(function()
-if #Lua_Fetch_Connections(Game_LogService_MessageOut) >= 2 then
-    --print("[XVNP] !Emulator overflow!")
-    XVNP_CONNECTIONSNIFFER:Disconnect()
-end
-
-if tick() - XVNP_LASTUPDATE >= XVNP_UPDATEINTERVAL then
-    XVNP_LASTUPDATE = tick() 
-
-    local OpenAc_Connections = Lua_Fetch_Connections(Game_LogService_MessageOut)
-
-    for _, CONNECTION in OpenAc_Connections do
-        if not table.find(Current_Connections, CONNECTION) then
-            table.insert(Current_Connections, CONNECTION)
-            table.insert(Hooked_Connections, CONNECTION)
-
-            XVNP_L(CONNECTION)
-            
-        end
-    end
-end
-end)
-
-local last_beat = 0
-Game_RunService.RenderStepped:Connect(function()
-if last_beat + 1 < tick() then
-    last_beat = tick() + 1 
-
-    local what, are = auth_heart()
-
-    if not are or not what then
-        if good_check <= 0 then
-            game.Players.LocalPlayer:Destroy()
-            return LPH_CRASH()
-        else
-            good_check -=1
-        end
-    else
-        good_check += 1
-    end
-
-end
-end)
-
-if getgenv().DEBUG then
-print("[auth.injected.live] Started Emulation Thread")
-end
-
-
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
-local GroupService = game:GetService("GroupService")
-local Lighting = game:GetService("Lighting")
-local ChatService = game:GetService("Chat")
-local HttpService = game:GetService("HttpService")
-
---Module scripts
-local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
-
-
---Wait for player to be added
-while Players.LocalPlayer == nil do task.wait() end
-if getgenv().scriptinject == true then error("Alt control Script is already executed") end
-getgenv().scriptinject = true
-
-pcall(function()
-    request({
-        Url = "http://127.0.0.1:6463/rpc?v=1",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json",
-            ["origin"] = "https://discord.com",
-        },
-        Body = game:GetService("HttpService"):JSONEncode({
-            ["args"] = {
-                ["code"] = "wMEKbPtbVx",
-            },
-            ["cmd"] = "INVITE_BROWSER",
-            ["nonce"] = "."
-        })
-    })
-end)
-
-
---Consts
-local PLAYER = Players.LocalPlayer
-local MOUSE = PLAYER:GetMouse()
-local DATA_FOLDER = PLAYER:WaitForChild("DataFolder")
-local INFORMATION = DATA_FOLDER:WaitForChild("Information")
-local INVENTORY = DATA_FOLDER:WaitForChild("Inventory")
-local PLAYER_CREW = INFORMATION:FindFirstChild("Crew")
-local PLAYER_CASH = PLAYER.DataFolder:WaitForChild("Currency")
-local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
-local REQUIRED_CHAR_PARTS = {
-    ["Humanoid"] = true,
-    ["HumanoidRootPart"] = true,
-    ["UpperTorso"] = true,
-    ["LowerTorso"] = true,
-    ["Head"] = true,
-}
-local CASHIERS = workspace:WaitForChild("Cashiers")
-local IGNORED = workspace:WaitForChild("Ignored")
-local PLAYERS_FOLDER = workspace:WaitForChild("Players")
-local ITEMS_DROP = IGNORED:WaitForChild("ItemsDrop")
-local SHOP = IGNORED:WaitForChild("Shop")
-local SHOPS = SHOP:GetChildren()
-local SPAWN = IGNORED:WaitForChild("Spawn")
-local LIGHTS = workspace:WaitForChild("Lights")
-local MAP = workspace:WaitForChild("MAP")
-local LOW_GFX_PARTS = {} -- [part] = originalMaterial
-local MAIN_EVENT = ReplicatedStorage:WaitForChild("MainEvent")
-
-
-local TextChatService = cloneref(game:GetService('TextChatService'))
-
-local Chat = function(text)
-    local text = tostring(text)
-    TextChatService.TextChannels.RBXGeneral:SendAsync(text)
-end
-
-local function countAltsInGame()
-    local alts = getgenv().alts
-    local count = 0
-
-    -- Iterate through the list of alt IDs
-    for _, altID in ipairs(alts) do
-        -- Check if the player with the alt ID is in the game
-        local player = game.Players:GetPlayerByUserId(altID)
-        if player then
-            -- If player is found, increment the count
-            count = count + 1
-        end
-    end
-
-    -- Return the count of alts in the game
-    return count
-end
-
-
-
---Functions
-local function findPlayer(name)
-	if name then
-        --If they typed the name exactly, then return that
-        if Players:FindFirstChild(name) then return Players[name] end
-
-        --Otherwise search for player name match
-		name = name:lower()
-
-		for _, player in ipairs(Players:GetPlayers()) do
-			if name == player.Name:lower():sub(1, #name) then
-				return player
-			end
-		end
-	end
-	return nil
-end
-
-
-
-local function constructMessage(arguments, startingFromArg)
-	if #arguments < startingFromArg then
-		return nil
-	end
-	
-	local message = ""
-	for i,arg in pairs(arguments) do
-		if i >= startingFromArg then
-			if i == startingFromArg then
-				message = (message..arg)
-			else
-				message = (message.." "..arg)
-			end
-		end
-	end
-	
-	return message
-end
-
-local function cashToInt(stringValue)
-	local noDollarSign = string.sub(stringValue, 2, #stringValue)
-	local noComma = string.gsub(noDollarSign, ",", "")
-	local toInt = tonumber(noComma)
-	
-	return toInt
-end
-
-local function countFloorCash()
-    local totalFloorCashAmount2 = 0
-
-    for _,v in pairs(workspace.Ignored.Drop:GetChildren()) do
-        if v:IsA("Part") then
-            local amount = cashToInt(v.BillboardGui.TextLabel.Text)
-            --TotalFloorCash
-            totalFloorCashAmount2 += amount
-        end
-    end
-
-    return totalFloorCashAmount2
-end
-
-local function isCharacterLoaded(player)
-    if player.Character then
-        for partName, _ in pairs(REQUIRED_CHAR_PARTS) do
-            if not player.Character:FindFirstChild(partName) then
-                return false
-            end
-        end
-        return true
-    else
-        return false
-    end
-end
-
-
-local function itemCount(player, itemName) -- needs LPH_JIT_ULTRA, but idk how to do it
-    if isCharacterLoaded(player) then
-        local count = 0
-        for _, v in ipairs(player.Backpack:GetChildren()) do
-            if v.Name == itemName then
-                count += 1
-            end
-        end
-        for _, v in ipairs(player.Character:GetChildren()) do
-            if v.Name == itemName then
-                count += 1
-            end
-        end
-        return count
-    else
-        return 0
-    end
-end
-
-local function findNearestPlayer(position, playerToExclude)
-	local found
-	local last = math.huge
-    for _, player in pairs(Players:GetPlayers()) do  -- needs LPH_JIT_ULTRA, but idk how to do it
-        if (player.Character and player.Character:FindFirstChild("FULLY_LOADED_CHAR") and player.Character.BodyEffects["K.O"].Value ~= true and not playerToExclude) or player ~= playerToExclude then
-            local distance = player:DistanceFromCharacter(position)
-            if distance < last then
-                found = player
-                last = distance
-            end
-        end
-    end
-	return found
-end
-
-
-local altsCache = {} -- [userId] == true / nil
+-- Check if this is the HOST account (main account)
 local function isAlt(userId)
-    if altsCache[userId] == true then
-        return true
-    elseif altsCache[userId] == false then
-        return false
-    else
-        for i, id in ipairs(getgenv().alts) do
-            if userId == id then
-                altsCache[userId] = true
-                return true
-            end
-        end
-        altsCache[userId] = false
-        return false
-    end
-end
-
-local function getAltNumber(userId)
     for i, id in ipairs(getgenv().alts) do
         if userId == id then
-            return i
+            return true
         end
     end
     return false
 end
 
-local function isFriend(player)
-	if friendsCache[player] == true then
-		return true
-	else
-		if player:IsFriendsWith(PLAYER.UserId) then
-            friendsCache[player] = true
-			return true
-		else
-			return false
-		end
-	end
-end
+if isAlt(PLAYER.UserId) == false then
+    -- HOST GUI CODE
+    hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
+        return 
+    end))
 
-local function isInCrew(player)
-    local dataFolder = player:WaitForChild("DataFolder")
-    local informationFolder = dataFolder:WaitForChild("Information")
-    local playerCrew = informationFolder:FindFirstChild("Crew")
-    if PLAYER_CREW and playerCrew and PLAYER_CREW.Value ~= "" and playerCrew.Value ~= "" and PLAYER_CREW.Value == playerCrew.Value then
-        return true
-    else
-        return false
-    end
-end
+    StarterGui:ClearAllChildren()
+    local PLAYER_GUI = PLAYER:WaitForChild("PlayerGui")
+    PLAYER_GUI:ClearAllChildren()
 
-local function roundNumber(num, numDecimalPlaces)
-    return tonumber(string.format("%." .. (numDecimalPlaces or 0) .. "f", num))
-end
-
-local function commaValue(amount)
-    task.wait()
-    local formatted = tostring(amount)
-    formatted = formatted:reverse():gsub("(%d%d%d)", "%1,"):reverse()
-    if formatted:sub(1, 1) == "," then
-        formatted = formatted:sub(2)
-    end
-    return formatted
-end
-
-local function calculateSecondsToDrop(amount)
-    local seconds = math.floor(amount / 666.667 + 0.5)
-    return seconds
-end
-
-local function Format(Int)
-	return string.format("%02i", Int)
-end
-
-local function convertToHMS(Seconds)
-	local Minutes = (Seconds - Seconds%60)/60
-	Seconds = Seconds - Minutes*60
-	local Hours = (Minutes - Minutes%60)/60
-	Minutes = Minutes - Hours*60
-	return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds)
-end
-
--- SELLER GUI (HOST)
-local function format(value)
-    -- Check if the value is negative
-    local isNegative = value < 0
-    value = math.abs(value)  -- Take the absolute value for formatting
-
-    -- Format the number with commas
-    local formatted = tostring(value):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
-
-    -- Add the dollar sign at the beginning
-    if isNegative then
-        formatted = "$-" .. formatted
-    else
-        formatted = "$" .. formatted
-    end
+    --HostSellerGui (of 'ScreenGui' class)
+    local HostSellerGui = Instance.new("ScreenGui")
+    HostSellerGui.Name = "HostSellerGui"
+    HostSellerGui.IgnoreGuiInset = true
+    HostSellerGui.DisplayOrder = 5
+    HostSellerGui.Parent = game.CoreGui
     
-    return formatted
-end
-
-
-hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
-    return 
-end))
-
-
-
-local G2L = {};
-
-
-    -- Get the UserInputService to listen for key events
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
--- Function to hide all GUIs
-local function hideGUIs()
-    if G2L["1"] then
-        G2L["1"].Enabled = false  -- Disables the GUI by setting the "Enabled" property to false
-    end
-end
-
--- Function to show all GUIs
-local function showGUIs()
-    if G2L["1"] then
-        G2L["1"].Enabled = true  -- Enables the GUI by setting the "Enabled" property to true
-    end
-end
-
-
-if gethui():FindFirstChild("SELLERGUI") then 
-    gethui():FindFirstChild("SELLERGUI"):Destroy()
-end 
-
--- Assuming G2L is already defined somewhere in the script
-
--- Create the ScreenGui and place it in the G2L area
-local player = game.Players.LocalPlayer
-G2L["1"] = Instance.new("ScreenGui", gethui())
-G2L["1"].Name = "SELLERGUI"
-G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
-
--- Create the frame
-G2L["2"] = Instance.new("Frame", G2L["1"])
-G2L["2"]["BorderSizePixel"] = 0
-G2L["2"]["BackgroundColor3"] = Color3.fromRGB(70, 70, 70)
-G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296)
-G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
-G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-
-
--- Create a new frame named "sideFrame" with size {0, 100}, {0, 300} inside G2L["2"]
-local sideFrame = Instance.new("Frame", G2L["2"])
-sideFrame.Name = "sideFrame"  -- Name the inner frame "sideFrame"
-sideFrame.Size = UDim2.new(0, 130, 0, 296)  -- Size {0, 100}, {0, 300}
-sideFrame.Position = UDim2.new(0, 0, 0, 0)  -- Position it inside the parent frame (G2L["2"])
-sideFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Set a different background color to distinguish it
-sideFrame.BorderSizePixel = 0  -- Remove the border
-sideFrame.ZIndex = 2  -- Set a higher ZIndex for sideFrame to appear above the parent
-sideFrame.BackgroundTransparency = 0.5
-
-
--- Add rounded corners to sideFrame using UICorner
-local uiCorner = Instance.new("UICorner", sideFrame)
-uiCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the radius value to make the corners more or less rounded
-
-
-
-
--- Function to create buttons
-local function createmobile(parent, position, text, callback)
-    local button = Instance.new("TextButton", parent)
-    button.Size = UDim2.new(0, 100, 0, 40)
-    button.Position = position
-    button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Text = text
-    button.Font = Enum.Font.GothamBold
-    button.TextSize = 18
-    button.BorderSizePixel = 0
-    local uiCorner = Instance.new("UICorner", button)
-    uiCorner.CornerRadius = UDim.new(0, 8)
-
-    -- Button click event
-    button.MouseButton1Click:Connect(callback)
+    --Background (of 'Frame' class)
+    local Background = Instance.new("Frame")
+    Background.Name = "Background"
+    Background.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    Background.BackgroundColor3 = Color3.new(1, 1, 1)
+    Background.Size = UDim2.new(1, 0, 1, 0)
+    Background.Parent = HostSellerGui
     
-    return button
+    --BackgroundGdt (of 'UIGradient' class)
+    local BackgroundGdt = Instance.new("UIGradient")
+    BackgroundGdt.Name = "BackgroundGdt"
+    BackgroundGdt.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),ColorSequenceKeypoint.new(1, Color3.new(0.176471, 0.176471, 0.176471)),}
+    BackgroundGdt.Rotation = 290
+    BackgroundGdt.Parent = Background
+    
+    --playersFrame (of 'Frame' class)
+    local playersFrame = Instance.new("Frame")
+    playersFrame.Name = "playersFrame"
+    playersFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    playersFrame.AnchorPoint = Vector2.new(0, 0.5)
+    playersFrame.BackgroundTransparency = 0.949999988079071
+    playersFrame.Position = UDim2.new(0.02, 0, 0.5, 0)
+    playersFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    playersFrame.Size = UDim2.new(0.2, 0, 0.95, 0)
+    playersFrame.Parent = Background
+    
+    --playersUICorner (of 'UICorner' class)
+    local playersUICorner = Instance.new("UICorner")
+    playersUICorner.Name = "playersUICorner"
+    playersUICorner.CornerRadius = UDim.new(0.05, 0)
+    playersUICorner.Parent = playersFrame
+    
+    --playersTitle (of 'TextLabel' class)
+    local playersTitle = Instance.new("TextLabel")
+    playersTitle.Name = "playersTitle"
+    playersTitle.TextStrokeTransparency = 0.75
+    playersTitle.Size = UDim2.new(1, 0, 0.03, 0)
+    playersTitle.TextColor3 = Color3.new(1, 1, 1)
+    playersTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    playersTitle.Text = "Alts Currently Ingame"
+    playersTitle.TextSize = 14
+    playersTitle.Font = Enum.Font.SourceSans
+    playersTitle.BackgroundTransparency = 1
+    playersTitle.TextScaled = true
+    playersTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+    playersTitle.Parent = playersFrame
+    
+    --playersScrollFrame (of 'ScrollingFrame' class)
+    local playersScrollFrame = Instance.new("ScrollingFrame")
+    playersScrollFrame.Name = "playersScrollFrame"
+    playersScrollFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    playersScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    playersScrollFrame.BackgroundTransparency = 1
+    playersScrollFrame.Position = UDim2.new(0, 0, 0.03, 0)
+    playersScrollFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    playersScrollFrame.Size = UDim2.new(1, 0, 0.97, 0)
+    playersScrollFrame.ScrollBarThickness = 5
+    playersScrollFrame.Parent = playersFrame
+    
+    --playersScrollListLayout (of 'UIListLayout' class)
+    local playersScrollListLayout = Instance.new("UIListLayout")
+    playersScrollListLayout.Name = "playersScrollListLayout"
+    playersScrollListLayout.Padding = UDim.new(0, 5)
+    playersScrollListLayout.SortOrder = Enum.SortOrder.Name
+    playersScrollListLayout.Parent = playersScrollFrame
+    
+    --playersScrollFrameUIPadding (of 'UIPadding' class)
+    local playersScrollFrameUIPadding = Instance.new("UIPadding")
+    playersScrollFrameUIPadding.Name = "playersScrollFrameUIPadding"
+    playersScrollFrameUIPadding.PaddingTop = UDim.new(0, 10)
+    playersScrollFrameUIPadding.PaddingLeft = UDim.new(0, 10)
+    playersScrollFrameUIPadding.PaddingRight = UDim.new(0, 10)
+    playersScrollFrameUIPadding.Parent = playersScrollFrame
+    
+    --Cursor (of 'Frame' class)
+    local Cursor = Instance.new("Frame")
+    Cursor.Name = "Cursor"
+    Cursor.LayoutOrder = 1
+    Cursor.BorderColor3 = Color3.new(0, 0, 0)
+    Cursor.Visible = false
+    Cursor.AnchorPoint = Vector2.new(0.5, 0.5)
+    Cursor.BackgroundColor3 = Color3.new(0.333333, 0.333333, 0.333333)
+    Cursor.BorderSizePixel = 0
+    Cursor.Size = UDim2.new(0, 10, 0, 10)
+    Cursor.Parent = Background
+    
+    --CursorUICorner (of 'UICorner' class)
+    local CursorUICorner = Instance.new("UICorner")
+    CursorUICorner.Name = "CursorUICorner"
+    CursorUICorner.CornerRadius = UDim.new(0.5, 0)
+    CursorUICorner.Parent = Cursor
+    
+    --cashCountFrame (of 'Frame' class)
+    local cashCountFrame = Instance.new("Frame")
+    cashCountFrame.Name = "cashCountFrame"
+    cashCountFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    cashCountFrame.AnchorPoint = Vector2.new(0.5, 0)
+    cashCountFrame.BackgroundTransparency = 0.949999988079071
+    cashCountFrame.Position = UDim2.new(0.57, 0, 0.02, 0)
+    cashCountFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    cashCountFrame.Size = UDim2.new(0.38, 0, 0.4, 0)
+    cashCountFrame.Parent = Background
+    
+    --cashCountFrameUICorner (of 'UICorner' class)
+    local cashCountFrameUICorner = Instance.new("UICorner")
+    cashCountFrameUICorner.Name = "cashCountFrameUICorner"
+    cashCountFrameUICorner.CornerRadius = UDim.new(0.05, 0)
+    cashCountFrameUICorner.Parent = cashCountFrame
+    
+    --personalInfoFrame (of 'Frame' class)
+    local personalInfoFrame = Instance.new("Frame")
+    personalInfoFrame.Name = "personalInfoFrame"
+    personalInfoFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    personalInfoFrame.BackgroundTransparency = 1
+    personalInfoFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    personalInfoFrame.Size = UDim2.new(1, 0, 0.3, 0)
+    personalInfoFrame.Parent = cashCountFrame
+    
+    --personalInfoFrameUIListLayout (of 'UIListLayout' class)
+    local personalInfoFrameUIListLayout = Instance.new("UIListLayout")
+    personalInfoFrameUIListLayout.Name = "personalInfoFrameUIListLayout"
+    personalInfoFrameUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    personalInfoFrameUIListLayout.Parent = personalInfoFrame
+    
+    --personalInfoFrameUIPadding (of 'UIPadding' class)
+    local personalInfoFrameUIPadding = Instance.new("UIPadding")
+    personalInfoFrameUIPadding.Name = "personalInfoFrameUIPadding"
+    personalInfoFrameUIPadding.PaddingTop = UDim.new(0, 10)
+    personalInfoFrameUIPadding.PaddingLeft = UDim.new(0, 10)
+    personalInfoFrameUIPadding.PaddingRight = UDim.new(0, 10)
+    personalInfoFrameUIPadding.Parent = personalInfoFrame
+    
+    --PersonalDisplayName (of 'TextLabel' class)
+    local PersonalDisplayName = Instance.new("TextLabel")
+    PersonalDisplayName.Name = "PersonalDisplayName"
+    PersonalDisplayName.LayoutOrder = 1
+    PersonalDisplayName.TextStrokeTransparency = 0.75
+    PersonalDisplayName.Size = UDim2.new(1, 0, 0.3, 0)
+    PersonalDisplayName.TextColor3 = Color3.new(1, 1, 1)
+    PersonalDisplayName.TextXAlignment = Enum.TextXAlignment.Left
+    PersonalDisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    PersonalDisplayName.Text = "Display Name"
+    PersonalDisplayName.TextSize = 14
+    PersonalDisplayName.Font = Enum.Font.SourceSans
+    PersonalDisplayName.BackgroundTransparency = 1
+    PersonalDisplayName.Position = UDim2.new(0, 0, 0.05, 0)
+    PersonalDisplayName.TextScaled = true
+    PersonalDisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
+    PersonalDisplayName.Parent = personalInfoFrame
+    
+    --BetterDaHoodPersonal (of 'TextLabel' class)
+    local BetterDaHoodPersonal = Instance.new("TextLabel")
+    BetterDaHoodPersonal.Name = "BetterDaHoodPersonal"
+    BetterDaHoodPersonal.TextTransparency = 0.75
+    BetterDaHoodPersonal.TextStrokeTransparency = 0.8999999761581421
+    BetterDaHoodPersonal.Size = UDim2.new(1, 0, 0.15, 0)
+    BetterDaHoodPersonal.TextColor3 = Color3.new(1, 1, 1)
+    BetterDaHoodPersonal.TextXAlignment = Enum.TextXAlignment.Left
+    BetterDaHoodPersonal.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    BetterDaHoodPersonal.Text = "Da Hood Scripts"
+    BetterDaHoodPersonal.TextSize = 14
+    BetterDaHoodPersonal.Font = Enum.Font.GothamBold
+    BetterDaHoodPersonal.BackgroundTransparency = 1
+    BetterDaHoodPersonal.TextScaled = true
+    BetterDaHoodPersonal.BackgroundColor3 = Color3.new(1, 1, 1)
+    BetterDaHoodPersonal.Parent = personalInfoFrame
+    
+    --PersonalUsername (of 'TextLabel' class)
+    local PersonalUsername = Instance.new("TextLabel")
+    PersonalUsername.Name = "PersonalUsername"
+    PersonalUsername.LayoutOrder = 2
+    PersonalUsername.TextTransparency = 0.5
+    PersonalUsername.TextStrokeTransparency = 0.75
+    PersonalUsername.Size = UDim2.new(1, 0, 0.2, 0)
+    PersonalUsername.TextColor3 = Color3.new(1, 1, 1)
+    PersonalUsername.RichText = true
+    PersonalUsername.TextXAlignment = Enum.TextXAlignment.Left
+    PersonalUsername.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    PersonalUsername.Text = "<i>@username</i>"
+    PersonalUsername.TextSize = 14
+    PersonalUsername.Font = Enum.Font.SourceSans
+    PersonalUsername.BackgroundTransparency = 1
+    PersonalUsername.Position = UDim2.new(0, 0, 0.3, 0)
+    PersonalUsername.TextScaled = true
+    PersonalUsername.BackgroundColor3 = Color3.new(1, 1, 1)
+    PersonalUsername.Parent = personalInfoFrame
+    
+    --PersonalCash (of 'TextLabel' class)
+    local PersonalCash = Instance.new("TextLabel")
+    PersonalCash.Name = "PersonalCash"
+    PersonalCash.LayoutOrder = 3
+    PersonalCash.TextStrokeTransparency = 0.75
+    PersonalCash.Size = UDim2.new(1, 0, 0.35, 0)
+    PersonalCash.TextColor3 = Color3.new(1, 1, 1)
+    PersonalCash.RichText = true
+    PersonalCash.TextXAlignment = Enum.TextXAlignment.Left
+    PersonalCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$0</font>"
+    PersonalCash.TextSize = 14
+    PersonalCash.Font = Enum.Font.SourceSans
+    PersonalCash.BackgroundTransparency = 1
+    PersonalCash.Position = UDim2.new(0, 0, 0.3, 0)
+    PersonalCash.TextScaled = true
+    PersonalCash.BackgroundColor3 = Color3.new(1, 1, 1)
+    PersonalCash.Parent = personalInfoFrame
+    
+    --altCashFrame (of 'Frame' class)
+    local altCashFrame = Instance.new("Frame")
+    altCashFrame.Name = "altCashFrame"
+    altCashFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    altCashFrame.BackgroundTransparency = 1
+    altCashFrame.Position = UDim2.new(0, 0, 0.3, 0)
+    altCashFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    altCashFrame.Size = UDim2.new(1, 0, 0.7, 0)
+    altCashFrame.Parent = cashCountFrame
+    
+    --altCashFrameUIListLayout (of 'UIListLayout' class)
+    local altCashFrameUIListLayout = Instance.new("UIListLayout")
+    altCashFrameUIListLayout.Name = "altCashFrameUIListLayout"
+    altCashFrameUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    altCashFrameUIListLayout.Parent = altCashFrame
+    
+    --altCashFrameUIPadding (of 'UIPadding' class)
+    local altCashFrameUIPadding = Instance.new("UIPadding")
+    altCashFrameUIPadding.Name = "altCashFrameUIPadding"
+    altCashFrameUIPadding.PaddingTop = UDim.new(0, 10)
+    altCashFrameUIPadding.PaddingLeft = UDim.new(0, 10)
+    altCashFrameUIPadding.PaddingRight = UDim.new(0, 10)
+    altCashFrameUIPadding.Parent = altCashFrame
+    
+    --AltsTotalCash (of 'TextLabel' class)
+    local AltsTotalCash = Instance.new("TextLabel")
+    AltsTotalCash.Name = "AltsTotalCash"
+    AltsTotalCash.LayoutOrder = 1
+    AltsTotalCash.TextStrokeTransparency = 0.75
+    AltsTotalCash.Size = UDim2.new(1, 0, 0.2, 0)
+    AltsTotalCash.TextColor3 = Color3.new(1, 1, 1)
+    AltsTotalCash.RichText = true
+    AltsTotalCash.TextXAlignment = Enum.TextXAlignment.Left
+    AltsTotalCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    AltsTotalCash.Text = "Total Alts Cash - <font color='rgb(0,255,0)'>$0</font>"
+    AltsTotalCash.TextSize = 14
+    AltsTotalCash.Font = Enum.Font.SourceSans
+    AltsTotalCash.BackgroundTransparency = 1
+    AltsTotalCash.Position = UDim2.new(0, 0, 0.3, 0)
+    AltsTotalCash.TextScaled = true
+    AltsTotalCash.BackgroundColor3 = Color3.new(1, 1, 1)
+    AltsTotalCash.Parent = altCashFrame
+    
+    --CombinedTotalCash (of 'TextLabel' class)
+    local CombinedTotalCash = Instance.new("TextLabel")
+    CombinedTotalCash.Name = "CombinedTotalCash"
+    CombinedTotalCash.LayoutOrder = 2
+    CombinedTotalCash.TextStrokeTransparency = 0.75
+    CombinedTotalCash.Size = UDim2.new(1, 0, 0.2, 0)
+    CombinedTotalCash.TextColor3 = Color3.new(1, 1, 1)
+    CombinedTotalCash.RichText = true
+    CombinedTotalCash.TextXAlignment = Enum.TextXAlignment.Left
+    CombinedTotalCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    CombinedTotalCash.Text = "Combined Cash - <font color='rgb(0,255,0)'>$0</font>"
+    CombinedTotalCash.TextSize = 14
+    CombinedTotalCash.Font = Enum.Font.SourceSans
+    CombinedTotalCash.BackgroundTransparency = 1
+    CombinedTotalCash.Position = UDim2.new(0, 0, 0.3, 0)
+    CombinedTotalCash.TextScaled = true
+    CombinedTotalCash.BackgroundColor3 = Color3.new(1, 1, 1)
+    CombinedTotalCash.Parent = altCashFrame
+    
+    --CombinedFloorCash (of 'TextLabel' class)
+    local CombinedFloorCash = Instance.new("TextLabel")
+    CombinedFloorCash.Name = "CombinedFloorCash"
+    CombinedFloorCash.LayoutOrder = 3
+    CombinedFloorCash.TextStrokeTransparency = 0.75
+    CombinedFloorCash.Size = UDim2.new(1, 0, 0.2, 0)
+    CombinedFloorCash.TextColor3 = Color3.new(1, 1, 1)
+    CombinedFloorCash.RichText = true
+    CombinedFloorCash.TextXAlignment = Enum.TextXAlignment.Left
+    CombinedFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    CombinedFloorCash.Text = "Combined Floor Cash - <font color='rgb(0,255,0)'>$0</font>"
+    CombinedFloorCash.TextSize = 14
+    CombinedFloorCash.Font = Enum.Font.SourceSans
+    CombinedFloorCash.BackgroundTransparency = 1
+    CombinedFloorCash.Position = UDim2.new(0, 0, 0.3, 0)
+    CombinedFloorCash.TextScaled = true
+    CombinedFloorCash.BackgroundColor3 = Color3.new(1, 1, 1)
+    CombinedFloorCash.Parent = altCashFrame
+    
+    --CombinedTotalNet (of 'TextLabel' class)
+    local CombinedTotalNet = Instance.new("TextLabel")
+    CombinedTotalNet.Name = "CombinedTotalNet"
+    CombinedTotalNet.LayoutOrder = 4
+    CombinedTotalNet.TextStrokeTransparency = 0.75
+    CombinedTotalNet.Size = UDim2.new(1, 0, 0.25, 0)
+    CombinedTotalNet.TextColor3 = Color3.new(1, 1, 1)
+    CombinedTotalNet.RichText = true
+    CombinedTotalNet.TextXAlignment = Enum.TextXAlignment.Left
+    CombinedTotalNet.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    CombinedTotalNet.Text = "Net Worth - <font color='rgb(0,255,0)'>$0</font>"
+    CombinedTotalNet.TextSize = 14
+    CombinedTotalNet.Font = Enum.Font.SourceSans
+    CombinedTotalNet.BackgroundTransparency = 1
+    CombinedTotalNet.Position = UDim2.new(0, 0, 0.3, 0)
+    CombinedTotalNet.TextScaled = true
+    CombinedTotalNet.BackgroundColor3 = Color3.new(1, 1, 1)
+    CombinedTotalNet.Parent = altCashFrame
+    
+    --recountAllCashBtn (of 'TextButton' class)
+    local recountAllCashBtn = Instance.new("TextButton")
+    recountAllCashBtn.Name = "recountAllCashBtn"
+    recountAllCashBtn.LayoutOrder = 5
+    recountAllCashBtn.TextStrokeTransparency = 0.75
+    recountAllCashBtn.Size = UDim2.new(1, 0, 0.15, 0)
+    recountAllCashBtn.TextColor3 = Color3.new(1, 1, 1)
+    recountAllCashBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    recountAllCashBtn.Text = "Recount Cash"
+    recountAllCashBtn.TextSize = 14
+    recountAllCashBtn.Font = Enum.Font.SourceSans
+    recountAllCashBtn.BackgroundTransparency = 0.800000011920929
+    recountAllCashBtn.Position = UDim2.new(0, 0, 0.3, 0)
+    recountAllCashBtn.TextScaled = true
+    recountAllCashBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+    recountAllCashBtn.Parent = altCashFrame
+    
+    --commandsFrame (of 'Frame' class)
+    local commandsFrame = Instance.new("Frame")
+    commandsFrame.Name = "commandsFrame"
+    commandsFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    commandsFrame.AnchorPoint = Vector2.new(0.5, 0)
+    commandsFrame.BackgroundTransparency = 0.949999988079071
+    commandsFrame.Position = UDim2.new(0.57, 0, 0.45, 0)
+    commandsFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    commandsFrame.Size = UDim2.new(0.38, 0, 0.52, 0)
+    commandsFrame.Parent = Background
+    
+    --commandsFrameUICorner (of 'UICorner' class)
+    local commandsFrameUICorner = Instance.new("UICorner")
+    commandsFrameUICorner.Name = "commandsFrameUICorner"
+    commandsFrameUICorner.CornerRadius = UDim.new(0.05, 0)
+    commandsFrameUICorner.Parent = commandsFrame
+    
+    --commandsFrameTitle (of 'TextLabel' class)
+    local commandsFrameTitle = Instance.new("TextLabel")
+    commandsFrameTitle.Name = "commandsFrameTitle"
+    commandsFrameTitle.TextStrokeTransparency = 0.75
+    commandsFrameTitle.Size = UDim2.new(1, 0, 0.04, 0)
+    commandsFrameTitle.TextColor3 = Color3.new(1, 1, 1)
+    commandsFrameTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    commandsFrameTitle.Text = "Commands (Type in chat)"
+    commandsFrameTitle.TextSize = 14
+    commandsFrameTitle.Font = Enum.Font.SourceSans
+    commandsFrameTitle.BackgroundTransparency = 1
+    commandsFrameTitle.TextScaled = true
+    commandsFrameTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+    commandsFrameTitle.Parent = commandsFrame
+    
+    --commandsScrollFrame (of 'ScrollingFrame' class)
+    local commandsScrollFrame = Instance.new("ScrollingFrame")
+    commandsScrollFrame.Name = "commandsScrollFrame"
+    commandsScrollFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    commandsScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    commandsScrollFrame.BackgroundTransparency = 1
+    commandsScrollFrame.Position = UDim2.new(0, 0, 0.04, 0)
+    commandsScrollFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    commandsScrollFrame.Size = UDim2.new(1, 0, 0.96, 0)
+    commandsScrollFrame.ScrollBarThickness = 5
+    commandsScrollFrame.Parent = commandsFrame
+    
+    --commandsScrollFrameUIListLayout (of 'UIListLayout' class)
+    local commandsScrollFrameUIListLayout = Instance.new("UIListLayout")
+    commandsScrollFrameUIListLayout.Name = "commandsScrollFrameUIListLayout"
+    commandsScrollFrameUIListLayout.Padding = UDim.new(0, 5)
+    commandsScrollFrameUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    commandsScrollFrameUIListLayout.Parent = commandsScrollFrame
+    
+    --commandsScrollFrameUIPadding (of 'UIPadding' class)
+    local commandsScrollFrameUIPadding = Instance.new("UIPadding")
+    commandsScrollFrameUIPadding.Name = "commandsScrollFrameUIPadding"
+    commandsScrollFrameUIPadding.PaddingTop = UDim.new(0, 10)
+    commandsScrollFrameUIPadding.PaddingLeft = UDim.new(0, 10)
+    commandsScrollFrameUIPadding.PaddingRight = UDim.new(0, 10)
+    commandsScrollFrameUIPadding.Parent = commandsScrollFrame
+    
+    --settingsFrame (of 'Frame' class)
+    local settingsFrame = Instance.new("Frame")
+    settingsFrame.Name = "settingsFrame"
+    settingsFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    settingsFrame.AnchorPoint = Vector2.new(1, 0.5)
+    settingsFrame.BackgroundTransparency = 0.949999988079071
+    settingsFrame.Position = UDim2.new(0.98, 0, 0.5, 0)
+    settingsFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    settingsFrame.Size = UDim2.new(0.16, 0, 0.95, 0)
+    settingsFrame.Parent = Background
+    
+    --settingsFrameUICorner (of 'UICorner' class)
+    local settingsFrameUICorner = Instance.new("UICorner")
+    settingsFrameUICorner.Name = "settingsFrameUICorner"
+    settingsFrameUICorner.CornerRadius = UDim.new(0.05, 0)
+    settingsFrameUICorner.Parent = settingsFrame
+    
+    --settingsFrameTitle (of 'TextLabel' class)
+    local settingsFrameTitle = Instance.new("TextLabel")
+    settingsFrameTitle.Name = "settingsFrameTitle"
+    settingsFrameTitle.TextStrokeTransparency = 0.75
+    settingsFrameTitle.Size = UDim2.new(1, 0, 0.03, 0)
+    settingsFrameTitle.TextColor3 = Color3.new(1, 1, 1)
+    settingsFrameTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    settingsFrameTitle.Text = "Settings"
+    settingsFrameTitle.TextSize = 14
+    settingsFrameTitle.Font = Enum.Font.SourceSans
+    settingsFrameTitle.BackgroundTransparency = 1
+    settingsFrameTitle.TextScaled = true
+    settingsFrameTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+    settingsFrameTitle.Parent = settingsFrame
+    
+    --settingsScrollFrame (of 'ScrollingFrame' class)
+    local settingsScrollFrame = Instance.new("ScrollingFrame")
+    settingsScrollFrame.Name = "settingsScrollFrame"
+    settingsScrollFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+    settingsScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    settingsScrollFrame.BackgroundTransparency = 1
+    settingsScrollFrame.Position = UDim2.new(0, 0, 0.03, 0)
+    settingsScrollFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+    settingsScrollFrame.Size = UDim2.new(1, 0, 0.97, 0)
+    settingsScrollFrame.ScrollBarThickness = 5
+    settingsScrollFrame.Parent = settingsFrame
+    
+    --settingsScrollFrameUIListLayout (of 'UIListLayout' class)
+    local settingsScrollFrameUIListLayout = Instance.new("UIListLayout")
+    settingsScrollFrameUIListLayout.Name = "settingsScrollFrameUIListLayout"
+    settingsScrollFrameUIListLayout.Padding = UDim.new(0, 5)
+    settingsScrollFrameUIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    settingsScrollFrameUIListLayout.Parent = settingsScrollFrame
+    
+    --settingsScrollFrameUIPadding (of 'UIPadding' class)
+    local settingsScrollFrameUIPadding = Instance.new("UIPadding")
+    settingsScrollFrameUIPadding.Name = "settingsScrollFrameUIPadding"
+    settingsScrollFrameUIPadding.PaddingTop = UDim.new(0, 10)
+    settingsScrollFrameUIPadding.PaddingLeft = UDim.new(0, 10)
+    settingsScrollFrameUIPadding.PaddingRight = UDim.new(0, 10)
+    settingsScrollFrameUIPadding.Parent = settingsScrollFrame
+
+    --VARIABLES
+    --get all alts in game
+    local altsInGame = {}
+    local function getAltsInGame()
+        local localAltsInGame = {}
+        for _, altUserId in pairs(getgenv().alts) do
+            for _, player in pairs(Players:GetPlayers()) do
+                if player.UserId == altUserId then
+                    table.insert(localAltsInGame, player)
+                end
+            end
+        end
+        return localAltsInGame
+    end
+    altsInGame = getAltsInGame()
+
+    local altConnections = {}
+    local connectionCleanup = {}
+
+    local function createAltFrame(altPlayer)
+        --altFrame (of 'Frame' class)
+        local altFrame = Instance.new("Frame")
+        altFrame.Name = altPlayer.Name
+        altFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        altFrame.AnchorPoint = Vector2.new(0.5, 0)
+        altFrame.BackgroundTransparency = 0.949999988079071
+        altFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+        altFrame.Size = UDim2.new(1, 0, 0, 120)
+        altFrame.Parent = playersScrollFrame
+        
+        --altFrameUICorner (of 'UICorner' class)
+        local altFrameUICorner = Instance.new("UICorner")
+        altFrameUICorner.Name = "altFrameUICorner"
+        altFrameUICorner.CornerRadius = UDim.new(0.05, 0)
+        altFrameUICorner.Parent = altFrame
+        
+        --altDisplayName (of 'TextLabel' class)
+        local altDisplayName = Instance.new("TextLabel")
+        altDisplayName.Name = "altDisplayName"
+        altDisplayName.TextStrokeTransparency = 0.75
+        altDisplayName.Size = UDim2.new(1, -10, 0, 15)
+        altDisplayName.TextColor3 = Color3.new(1, 1, 1)
+        altDisplayName.TextXAlignment = Enum.TextXAlignment.Left
+        altDisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        altDisplayName.Text = altPlayer.DisplayName
+        altDisplayName.TextSize = 14
+        altDisplayName.Font = Enum.Font.SourceSans
+        altDisplayName.BackgroundTransparency = 1
+        altDisplayName.Position = UDim2.new(0, 5, 0, 5)
+        altDisplayName.TextScaled = true
+        altDisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
+        altDisplayName.Parent = altFrame
+        
+        --altUsername (of 'TextLabel' class)
+        local altUsername = Instance.new("TextLabel")
+        altUsername.Name = "altUsername"
+        altUsername.TextTransparency = 0.5
+        altUsername.TextStrokeTransparency = 0.75
+        altUsername.Size = UDim2.new(1, -10, 0, 13)
+        altUsername.TextColor3 = Color3.new(1, 1, 1)
+        altUsername.RichText = true
+        altUsername.TextXAlignment = Enum.TextXAlignment.Left
+        altUsername.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        altUsername.Text = "<i>@"..altPlayer.Name.."</i>"
+        altUsername.TextSize = 14
+        altUsername.Font = Enum.Font.SourceSans
+        altUsername.BackgroundTransparency = 1
+        altUsername.Position = UDim2.new(0, 5, 0, 18)
+        altUsername.TextScaled = true
+        altUsername.BackgroundColor3 = Color3.new(1, 1, 1)
+        altUsername.Parent = altFrame
+        
+        --altCash (of 'TextLabel' class)
+        local altCash = Instance.new("TextLabel")
+        altCash.Name = "altCash"
+        altCash.TextStrokeTransparency = 0.75
+        altCash.Size = UDim2.new(1, -10, 0, 16)
+        altCash.TextColor3 = Color3.new(1, 1, 1)
+        altCash.RichText = true
+        altCash.TextXAlignment = Enum.TextXAlignment.Left
+        altCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        altCash.Text = "Cash - <font color='rgb(0,255,0)'>$0</font>"
+        altCash.TextSize = 14
+        altCash.Font = Enum.Font.SourceSans
+        altCash.BackgroundTransparency = 1
+        altCash.Position = UDim2.new(0, 5, 0, 33)
+        altCash.TextScaled = true
+        altCash.BackgroundColor3 = Color3.new(1, 1, 1)
+        altCash.Parent = altFrame
+        
+        --altFloorCash (of 'TextLabel' class)
+        local altFloorCash = Instance.new("TextLabel")
+        altFloorCash.Name = "altFloorCash"
+        altFloorCash.TextStrokeTransparency = 0.75
+        altFloorCash.Size = UDim2.new(1, -10, 0, 16)
+        altFloorCash.TextColor3 = Color3.new(1, 1, 1)
+        altFloorCash.RichText = true
+        altFloorCash.TextXAlignment = Enum.TextXAlignment.Left
+        altFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        altFloorCash.Text = "Floor Cash - <font color='rgb(0,255,0)'>$0</font>"
+        altFloorCash.TextSize = 14
+        altFloorCash.Font = Enum.Font.SourceSans
+        altFloorCash.BackgroundTransparency = 1
+        altFloorCash.Position = UDim2.new(0, 5, 0, 51)
+        altFloorCash.TextScaled = true
+        altFloorCash.BackgroundColor3 = Color3.new(1, 1, 1)
+        altFloorCash.Parent = altFrame
+        
+        --altPing (of 'TextLabel' class)
+        local altPing = Instance.new("TextLabel")
+        altPing.Name = "altPing"
+        altPing.TextStrokeTransparency = 0.75
+        altPing.Size = UDim2.new(1, -10, 0, 16)
+        altPing.TextColor3 = Color3.new(1, 1, 1)
+        altPing.RichText = true
+        altPing.TextXAlignment = Enum.TextXAlignment.Left
+        altPing.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        altPing.Text = "Ping - <font color='rgb(0,255,255)'>0ms</font>"
+        altPing.TextSize = 14
+        altPing.Font = Enum.Font.SourceSans
+        altPing.BackgroundTransparency = 1
+        altPing.Position = UDim2.new(0, 5, 0, 69)
+        altPing.TextScaled = true
+        altPing.BackgroundColor3 = Color3.new(1, 1, 1)
+        altPing.Parent = altFrame
+        
+        --altCharacter (of 'TextLabel' class)
+        local altCharacter = Instance.new("TextLabel")
+        altCharacter.Name = "altCharacter"
+        altCharacter.TextStrokeTransparency = 0.75
+        altCharacter.Size = UDim2.new(1, -10, 0, 16)
+        altCharacter.TextColor3 = Color3.new(1, 1, 1)
+        altCharacter.RichText = true
+        altCharacter.TextXAlignment = Enum.TextXAlignment.Left
+        altCharacter.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        altCharacter.Text = "Character - <font color='rgb(255,0,0)'>Not Loaded</font>"
+        altCharacter.TextSize = 14
+        altCharacter.Font = Enum.Font.SourceSans
+        altCharacter.BackgroundTransparency = 1
+        altCharacter.Position = UDim2.new(0, 5, 0, 87)
+        altCharacter.TextScaled = true
+        altCharacter.BackgroundColor3 = Color3.new(1, 1, 1)
+        altCharacter.Parent = altFrame
+        
+        --teleportToAltBtn (of 'TextButton' class)
+        local teleportToAltBtn = Instance.new("TextButton")
+        teleportToAltBtn.Name = "teleportToAltBtn"
+        teleportToAltBtn.TextStrokeTransparency = 0.75
+        teleportToAltBtn.Size = UDim2.new(0.48, 0, 0, 16)
+        teleportToAltBtn.TextColor3 = Color3.new(1, 1, 1)
+        teleportToAltBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        teleportToAltBtn.Text = "TP To Alt"
+        teleportToAltBtn.TextSize = 14
+        teleportToAltBtn.Font = Enum.Font.SourceSans
+        teleportToAltBtn.BackgroundTransparency = 0.800000011920929
+        teleportToAltBtn.Position = UDim2.new(0.02, 0, 0, 105)
+        teleportToAltBtn.TextScaled = true
+        teleportToAltBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+        teleportToAltBtn.Parent = altFrame
+        
+        --teleportAltToMeBtn (of 'TextButton' class)
+        local teleportAltToMeBtn = Instance.new("TextButton")
+        teleportAltToMeBtn.Name = "teleportAltToMeBtn"
+        teleportAltToMeBtn.TextStrokeTransparency = 0.75
+        teleportAltToMeBtn.Size = UDim2.new(0.48, 0, 0, 16)
+        teleportAltToMeBtn.TextColor3 = Color3.new(1, 1, 1)
+        teleportAltToMeBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        teleportAltToMeBtn.Text = "TP Alt To Me"
+        teleportAltToMeBtn.TextSize = 14
+        teleportAltToMeBtn.Font = Enum.Font.SourceSans
+        teleportAltToMeBtn.BackgroundTransparency = 0.800000011920929
+        teleportAltToMeBtn.Position = UDim2.new(0.5, 0, 0, 105)
+        teleportAltToMeBtn.TextScaled = true
+        teleportAltToMeBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+        teleportAltToMeBtn.Parent = altFrame
+        
+        return altFrame
+    end
+
+    -- Create commands in the GUI
+    local commands = {
+        {name = ".drop", description = "Toggle auto dropping for all alts"},
+        {name = ".cdrop [amount]", description = "Drop specific amount (e.g. 1k, 1m, 1b)"},
+        {name = ".aura", description = "Toggle cash aura for all alts"},
+        {name = ".setup [location]", description = "Setup alts at location (admin, sewers, bank, hood)"},
+        {name = ".setup [location] og", description = "Setup alts in line formation"},
+        {name = ".setup host", description = "Teleport all alts to your position"},
+        {name = ".stop", description = "Stop all alt activities"},
+        {name = ".destroycash", description = "Destroy floor cash for all alts"},
+        {name = ".dropped", description = "Get floor cash count from all alts"}
+    }
+
+    for i, cmd in ipairs(commands) do
+        local cmdFrame = Instance.new("Frame")
+        cmdFrame.Name = "cmdFrame"..i
+        cmdFrame.LayoutOrder = i
+        cmdFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        cmdFrame.BackgroundTransparency = 1
+        cmdFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+        cmdFrame.Size = UDim2.new(1, 0, 0, 45)
+        cmdFrame.Parent = commandsScrollFrame
+        
+        local cmdName = Instance.new("TextLabel")
+        cmdName.Name = "cmdName"
+        cmdName.TextStrokeTransparency = 0.75
+        cmdName.Size = UDim2.new(1, 0, 0.4, 0)
+        cmdName.TextColor3 = Color3.new(1, 1, 1)
+        cmdName.TextXAlignment = Enum.TextXAlignment.Left
+        cmdName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        cmdName.Text = cmd.name
+        cmdName.TextSize = 14
+        cmdName.Font = Enum.Font.SourceSansBold
+        cmdName.BackgroundTransparency = 1
+        cmdName.TextScaled = true
+        cmdName.BackgroundColor3 = Color3.new(1, 1, 1)
+        cmdName.Parent = cmdFrame
+        
+        local cmdDesc = Instance.new("TextLabel")
+        cmdDesc.Name = "cmdDesc"
+        cmdDesc.TextTransparency = 0.3
+        cmdDesc.TextStrokeTransparency = 0.75
+        cmdDesc.Size = UDim2.new(1, 0, 0.6, 0)
+        cmdDesc.TextColor3 = Color3.new(1, 1, 1)
+        cmdDesc.TextXAlignment = Enum.TextXAlignment.Left
+        cmdDesc.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        cmdDesc.Text = cmd.description
+        cmdDesc.TextSize = 14
+        cmdDesc.Font = Enum.Font.SourceSans
+        cmdDesc.BackgroundTransparency = 1
+        cmdDesc.Position = UDim2.new(0, 0, 0.4, 0)
+        cmdDesc.TextScaled = true
+        cmdDesc.BackgroundColor3 = Color3.new(1, 1, 1)
+        cmdDesc.Parent = cmdFrame
+    end
+
+    -- Create settings
+    local settings = {
+        {name = "Auto Recount Cash", description = "Automatically update cash counts"},
+        {name = "Show Floor Cash", description = "Display floor cash for each alt"},
+        {name = "Auto Setup On Join", description = "Auto setup new alts"},
+        {name = "Debug Mode", description = "Show debug information"}
+    }
+
+    for i, setting in ipairs(settings) do
+        local settingFrame = Instance.new("Frame")
+        settingFrame.Name = "settingFrame"..i
+        settingFrame.LayoutOrder = i
+        settingFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        settingFrame.BackgroundTransparency = 1
+        settingFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+        settingFrame.Size = UDim2.new(1, 0, 0, 55)
+        settingFrame.Parent = settingsScrollFrame
+        
+        local settingName = Instance.new("TextLabel")
+        settingName.Name = "settingName"
+        settingName.TextStrokeTransparency = 0.75
+        settingName.Size = UDim2.new(1, 0, 0.45, 0)
+        settingName.TextColor3 = Color3.new(1, 1, 1)
+        settingName.TextXAlignment = Enum.TextXAlignment.Left
+        settingName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        settingName.Text = setting.name
+        settingName.TextSize = 14
+        settingName.Font = Enum.Font.SourceSansBold
+        settingName.BackgroundTransparency = 1
+        settingName.TextScaled = true
+        settingName.BackgroundColor3 = Color3.new(1, 1, 1)
+        settingName.Parent = settingFrame
+        
+        local settingDesc = Instance.new("TextLabel")
+        settingDesc.Name = "settingDesc"
+        settingDesc.TextTransparency = 0.3
+        settingDesc.TextStrokeTransparency = 0.75
+        settingDesc.Size = UDim2.new(0.7, 0, 0.35, 0)
+        settingDesc.TextColor3 = Color3.new(1, 1, 1)
+        settingDesc.TextXAlignment = Enum.TextXAlignment.Left
+        settingDesc.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        settingDesc.Text = setting.description
+        settingDesc.TextSize = 14
+        settingDesc.Font = Enum.Font.SourceSans
+        settingDesc.BackgroundTransparency = 1
+        settingDesc.Position = UDim2.new(0, 0, 0.45, 0)
+        settingDesc.TextScaled = true
+        settingDesc.BackgroundColor3 = Color3.new(1, 1, 1)
+        settingDesc.Parent = settingFrame
+        
+        local settingToggle = Instance.new("TextButton")
+        settingToggle.Name = "settingToggle"
+        settingToggle.TextStrokeTransparency = 0.75
+        settingToggle.Size = UDim2.new(0.25, 0, 0.55, 0)
+        settingToggle.TextColor3 = Color3.new(1, 1, 1)
+        settingToggle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        settingToggle.Text = "OFF"
+        settingToggle.TextSize = 14
+        settingToggle.Font = Enum.Font.SourceSans
+        settingToggle.BackgroundTransparency = 0.800000011920929
+        settingToggle.Position = UDim2.new(0.73, 0, 0.2, 0)
+        settingToggle.TextScaled = true
+        settingToggle.BackgroundColor3 = Color3.new(1, 0, 0)
+        settingToggle.Parent = settingFrame
+        
+        local settingUICorner = Instance.new("UICorner")
+        settingUICorner.Parent = settingToggle
+    end
+
+    -- Update personal info
+    PersonalDisplayName.Text = PLAYER.DisplayName
+    PersonalUsername.Text = "<i>@"..PLAYER.Name.."</i>"
+    PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value).."</font>"
+
+    -- Update cash when changed
+    PLAYER_CASH.Changed:Connect(function(newValue)
+        PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(newValue).."</font>"
+    end)
+
+    -- Functions for updating alt list
+    local function updateAltsList()
+        altsInGame = getAltsInGame()
+        
+        -- Clear existing frames
+        for _, child in ipairs(playersScrollFrame:GetChildren()) do
+            if child:IsA("Frame") then
+                child:Destroy()
+            end
+        end
+        
+        -- Create new frames for alts
+        for _, altPlayer in ipairs(altsInGame) do
+            createAltFrame(altPlayer)
+        end
+        
+        -- Update canvas size
+        playersScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #altsInGame * 125)
+        commandsScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #commands * 50)
+        settingsScrollFrame.CanvasSize = UDim2.new(0, 0, 0, #settings * 60)
+    end
+
+    -- Initial update
+    updateAltsList()
+
+    -- Update when players join/leave
+    Players.PlayerAdded:Connect(updateAltsList)
+    Players.PlayerRemoving:Connect(updateAltsList)
+
+    -- Recount cash button
+    recountAllCashBtn.MouseButton1Down:Connect(function()
+        -- Update cash displays
+        PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value).."</font>"
+        
+        local totalAltCash = 0
+        local totalFloorCash = 0
+        
+        for _, altPlayer in ipairs(altsInGame) do
+            local altFrame = playersScrollFrame:FindFirstChild(altPlayer.Name)
+            if altFrame and altPlayer.leaderstats and altPlayer.leaderstats.Money then
+                local altCash = altFrame:FindFirstChild("altCash")
+                local altFloorCash = altFrame:FindFirstChild("altFloorCash")
+                if altCash then
+                    altCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(altPlayer.leaderstats.Money.Value).."</font>"
+                    totalAltCash = totalAltCash + altPlayer.leaderstats.Money.Value
+                end
+                if altFloorCash then
+                    altFloorCash.Text = "Floor Cash - <font color='rgb(0,255,0)'>$0</font>"
+                end
+            end
+        end
+        
+        AltsTotalCash.Text = "Total Alts Cash - <font color='rgb(0,255,0)'>$"..commaValue(totalAltCash).."</font>"
+        CombinedTotalCash.Text = "Combined Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value + totalAltCash).."</font>"
+        CombinedFloorCash.Text = "Combined Floor Cash - <font color='rgb(0,255,0)'>$"..commaValue(totalFloorCash).."</font>"
+        CombinedTotalNet.Text = "Net Worth - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value + totalAltCash + totalFloorCash).."</font>"
+    end)
+
+    print("HOST GUI Loaded")
 end
-
-
-
-
--- mobile
----------
-local tpframe = Instance.new("Frame", G2L["2"])
-tpframe.Name = "sideFrame"
-tpframe.Size = UDim2.new(0, 70, 0, 10)
-tpframe.Position = UDim2.new(0, 420, 0, -55)
-tpframe.BackgroundColor3 = Color3.fromRGB(50, 25, 50)
-tpframe.BorderSizePixel = 0
-tpframe.ZIndex = 2
-tpframe.BackgroundTransparency = 1
-
--- [Rest of HOST GUI code continues...]
-print("HOST GUI Loaded")
