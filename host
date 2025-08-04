@@ -1,1 +1,592 @@
+local exe_name, exe_version = identifyexecutor()
+local function home999() end
+local function home888() end
 
+if exe_name ~= "Wave Windows" then
+    hookfunction(home888, home999)
+    if isfunctionhooked(home888) == false then
+        game.Players.LocalPlayer:Destroy()
+        return LPH_CRASH()
+    end
+end 
+
+local function check_env(env)
+    for _, func in env do
+        if type(func) ~= "function" then
+            continue
+        end
+
+        local functionhook = isfunctionhooked(func)
+
+        if functionhook then
+            game.Players.LocalPlayer:Destroy()
+            return LPH_CRASH()
+        end
+    end
+end
+
+check_env( getgenv() )
+check_env( getrenv() )
+--
+
+local Lua_Fetch_Connections = getconnections
+local Lua_Fetch_Upvalues = getupvalues
+local Lua_Hook = hookfunction 
+local Lua_Hook_Method = hookmetamethod
+local Lua_Unhook = restorefunction
+local Lua_Replace_Function = replaceclosure
+local Lua_Set_Upvalue = setupvalue
+local Lua_Clone_Function = clonefunction
+
+local Game_RunService = game:GetService("RunService")
+local Game_LogService = game:GetService("LogService")
+local Game_LogService_MessageOut = Game_LogService.MessageOut
+
+local String_Lower = string.lower
+local Table_Find = table.find
+local Get_Type = type
+
+local Current_Connections = {};
+local Hooked_Connections = {};
+
+local function Test_Table(Table, Return_Type)
+for TABLE_INDEX, TABLE_VALUE in Table do
+    if type(TABLE_VALUE) == String_Lower(Return_Type) then
+        return TABLE_VALUE, TABLE_INDEX
+    end
+
+    continue
+end
+end
+
+local function Print_Table(Table)
+table.foreach(Table, print)
+end
+
+if getgenv().DEBUG then
+print("[auth.injected.live] Waiting...")
+end
+
+local good_check = 0
+
+function auth_heart()
+-- local avalible = pcall(function() return loadstring(game:HttpGet("https://auth.injected.live/" .. directory))() end)
+
+-- if (not avalible or not game:HttpGet("https://auth.injected.live/" .. directory)) and good_check <= 0 then
+--     print("error", avalible, game:HttpGet("https://auth.injected.live/" .. directory))
+--     game.Players.LocalPlayer:Destroy()
+--     return LPH_CRASH()
+-- end
+
+return true , true
+end
+
+function Lua_Common_Intercept(old, ...)
+print(...)
+return old(...)
+end
+
+function XVNP_L(CONNECTION)
+local s, e = pcall(function()
+    local OPENAC_TABLE = Lua_Fetch_Upvalues(CONNECTION.Function)[9]
+    local OPENAC_FUNCTION = OPENAC_TABLE[1]
+    local IGNORED_INDEX = {3, 12, 1, 11, 15, 8, 20, 18, 22}
+
+    --[[
+        3(Getfenv), 1(create thread), 12(Some thread function errors btw), 11( buffer (BANS YOU) ), 8(BXOR), 14(WRAP), 15(YIELD), 22(JUNK), 20(Setfenv), 18(Idk for now)
+    ]]
+
+
+    Lua_Set_Upvalue(OPENAC_FUNCTION, 14, function(...)
+        return function(...)
+            local args = {...}
+
+            if type(args[1]) == "table" and args[1][1] then
+                pcall(function()
+                    if type(args[1][1]) == "userdata" then
+                        args[1][1]:Disconnect()
+                        args[1][2]:Disconnect()
+                        args[1][3]:Disconnect()
+                        args[1][4]:Disconnect()
+                        --warn("[XVNP] DISCONNECTING CURRENT FUNCTIONS")
+                    end
+
+                    --Print_Table(args[1])
+                end)
+            end 
+        end
+    end)
+
+    Lua_Set_Upvalue(OPENAC_FUNCTION, 1, function(...)
+        task.wait(200)
+    end)
+
+    hookfunction(OPENAC_FUNCTION, function(...)
+        --warn("[XVNP DEBUG]", ...)
+        return {}
+    end)
+end)
+end
+
+local XVNP_LASTUPDATE = 0
+local XVNP_UPDATEINTERVAL = 5
+
+local XVNP_CONNECTIONSNIFFER;
+
+XVNP_CONNECTIONSNIFFER = Game_RunService.RenderStepped:Connect(function()
+if #Lua_Fetch_Connections(Game_LogService_MessageOut) >= 2 then
+    --print("[XVNP] !Emulator overflow!")
+    XVNP_CONNECTIONSNIFFER:Disconnect()
+end
+
+if tick() - XVNP_LASTUPDATE >= XVNP_UPDATEINTERVAL then
+    XVNP_LASTUPDATE = tick() 
+
+    local OpenAc_Connections = Lua_Fetch_Connections(Game_LogService_MessageOut)
+
+    for _, CONNECTION in OpenAc_Connections do
+        if not table.find(Current_Connections, CONNECTION) then
+            table.insert(Current_Connections, CONNECTION)
+            table.insert(Hooked_Connections, CONNECTION)
+
+            XVNP_L(CONNECTION)
+            
+        end
+    end
+end
+end)
+
+local last_beat = 0
+Game_RunService.RenderStepped:Connect(function()
+if last_beat + 1 < tick() then
+    last_beat = tick() + 1 
+
+    local what, are = auth_heart()
+
+    if not are or not what then
+        if good_check <= 0 then
+            game.Players.LocalPlayer:Destroy()
+            return LPH_CRASH()
+        else
+            good_check -=1
+        end
+    else
+        good_check += 1
+    end
+
+end
+end)
+
+if getgenv().DEBUG then
+print("[auth.injected.live] Started Emulation Thread")
+end
+
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local GroupService = game:GetService("GroupService")
+local Lighting = game:GetService("Lighting")
+local ChatService = game:GetService("Chat")
+local HttpService = game:GetService("HttpService")
+
+--Module scripts
+local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
+
+
+--Wait for player to be added
+while Players.LocalPlayer == nil do task.wait() end
+if getgenv().scriptinject == true then error("Alt control Script is already executed") end
+getgenv().scriptinject = true
+
+pcall(function()
+    request({
+        Url = "http://127.0.0.1:6463/rpc?v=1",
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json",
+            ["origin"] = "https://discord.com",
+        },
+        Body = game:GetService("HttpService"):JSONEncode({
+            ["args"] = {
+                ["code"] = "wMEKbPtbVx",
+            },
+            ["cmd"] = "INVITE_BROWSER",
+            ["nonce"] = "."
+        })
+    })
+end)
+
+
+--Consts
+local PLAYER = Players.LocalPlayer
+local MOUSE = PLAYER:GetMouse()
+local DATA_FOLDER = PLAYER:WaitForChild("DataFolder")
+local INFORMATION = DATA_FOLDER:WaitForChild("Information")
+local INVENTORY = DATA_FOLDER:WaitForChild("Inventory")
+local PLAYER_CREW = INFORMATION:FindFirstChild("Crew")
+local PLAYER_CASH = PLAYER.DataFolder:WaitForChild("Currency")
+local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
+local REQUIRED_CHAR_PARTS = {
+    ["Humanoid"] = true,
+    ["HumanoidRootPart"] = true,
+    ["UpperTorso"] = true,
+    ["LowerTorso"] = true,
+    ["Head"] = true,
+}
+local CASHIERS = workspace:WaitForChild("Cashiers")
+local IGNORED = workspace:WaitForChild("Ignored")
+local PLAYERS_FOLDER = workspace:WaitForChild("Players")
+local ITEMS_DROP = IGNORED:WaitForChild("ItemsDrop")
+local SHOP = IGNORED:WaitForChild("Shop")
+local SHOPS = SHOP:GetChildren()
+local SPAWN = IGNORED:WaitForChild("Spawn")
+local LIGHTS = workspace:WaitForChild("Lights")
+local MAP = workspace:WaitForChild("MAP")
+local LOW_GFX_PARTS = {} -- [part] = originalMaterial
+local MAIN_EVENT = ReplicatedStorage:WaitForChild("MainEvent")
+
+
+local TextChatService = cloneref(game:GetService('TextChatService'))
+
+local Chat = function(text)
+    local text = tostring(text)
+    TextChatService.TextChannels.RBXGeneral:SendAsync(text)
+end
+
+local function countAltsInGame()
+    local alts = getgenv().alts
+    local count = 0
+
+    -- Iterate through the list of alt IDs
+    for _, altID in ipairs(alts) do
+        -- Check if the player with the alt ID is in the game
+        local player = game.Players:GetPlayerByUserId(altID)
+        if player then
+            -- If player is found, increment the count
+            count = count + 1
+        end
+    end
+
+    -- Return the count of alts in the game
+    return count
+end
+
+
+
+--Functions
+local function findPlayer(name)
+	if name then
+        --If they typed the name exactly, then return that
+        if Players:FindFirstChild(name) then return Players[name] end
+
+        --Otherwise search for player name match
+		name = name:lower()
+
+		for _, player in ipairs(Players:GetPlayers()) do
+			if name == player.Name:lower():sub(1, #name) then
+				return player
+			end
+		end
+	end
+	return nil
+end
+
+
+
+local function constructMessage(arguments, startingFromArg)
+	if #arguments < startingFromArg then
+		return nil
+	end
+	
+	local message = ""
+	for i,arg in pairs(arguments) do
+		if i >= startingFromArg then
+			if i == startingFromArg then
+				message = (message..arg)
+			else
+				message = (message.." "..arg)
+			end
+		end
+	end
+	
+	return message
+end
+
+local function cashToInt(stringValue)
+	local noDollarSign = string.sub(stringValue, 2, #stringValue)
+	local noComma = string.gsub(noDollarSign, ",", "")
+	local toInt = tonumber(noComma)
+	
+	return toInt
+end
+
+local function countFloorCash()
+    local totalFloorCashAmount2 = 0
+
+    for _,v in pairs(workspace.Ignored.Drop:GetChildren()) do
+        if v:IsA("Part") then
+            local amount = cashToInt(v.BillboardGui.TextLabel.Text)
+            --TotalFloorCash
+            totalFloorCashAmount2 += amount
+        end
+    end
+
+    return totalFloorCashAmount2
+end
+
+local function isCharacterLoaded(player)
+    if player.Character then
+        for partName, _ in pairs(REQUIRED_CHAR_PARTS) do
+            if not player.Character:FindFirstChild(partName) then
+                return false
+            end
+        end
+        return true
+    else
+        return false
+    end
+end
+
+
+local function itemCount(player, itemName) -- needs LPH_JIT_ULTRA, but idk how to do it
+    if isCharacterLoaded(player) then
+        local count = 0
+        for _, v in ipairs(player.Backpack:GetChildren()) do
+            if v.Name == itemName then
+                count += 1
+            end
+        end
+        for _, v in ipairs(player.Character:GetChildren()) do
+            if v.Name == itemName then
+                count += 1
+            end
+        end
+        return count
+    else
+        return 0
+    end
+end
+
+local function findNearestPlayer(position, playerToExclude)
+	local found
+	local last = math.huge
+    for _, player in pairs(Players:GetPlayers()) do  -- needs LPH_JIT_ULTRA, but idk how to do it
+        if (player.Character and player.Character:FindFirstChild("FULLY_LOADED_CHAR") and player.Character.BodyEffects["K.O"].Value ~= true and not playerToExclude) or player ~= playerToExclude then
+            local distance = player:DistanceFromCharacter(position)
+            if distance < last then
+                found = player
+                last = distance
+            end
+        end
+    end
+	return found
+end
+
+
+local altsCache = {} -- [userId] == true / nil
+local function isAlt(userId)
+    if altsCache[userId] == true then
+        return true
+    elseif altsCache[userId] == false then
+        return false
+    else
+        for i, id in ipairs(getgenv().alts) do
+            if userId == id then
+                altsCache[userId] = true
+                return true
+            end
+        end
+        altsCache[userId] = false
+        return false
+    end
+end
+
+local function getAltNumber(userId)
+    for i, id in ipairs(getgenv().alts) do
+        if userId == id then
+            return i
+        end
+    end
+    return false
+end
+
+local function isFriend(player)
+	if friendsCache[player] == true then
+		return true
+	else
+		if player:IsFriendsWith(PLAYER.UserId) then
+            friendsCache[player] = true
+			return true
+		else
+			return false
+		end
+	end
+end
+
+local function isInCrew(player)
+    local dataFolder = player:WaitForChild("DataFolder")
+    local informationFolder = dataFolder:WaitForChild("Information")
+    local playerCrew = informationFolder:FindFirstChild("Crew")
+    if PLAYER_CREW and playerCrew and PLAYER_CREW.Value ~= "" and playerCrew.Value ~= "" and PLAYER_CREW.Value == playerCrew.Value then
+        return true
+    else
+        return false
+    end
+end
+
+local function roundNumber(num, numDecimalPlaces)
+    return tonumber(string.format("%." .. (numDecimalPlaces or 0) .. "f", num))
+end
+
+local function commaValue(amount)
+    task.wait()
+    local formatted = tostring(amount)
+    formatted = formatted:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    if formatted:sub(1, 1) == "," then
+        formatted = formatted:sub(2)
+    end
+    return formatted
+end
+
+local function calculateSecondsToDrop(amount)
+    local seconds = math.floor(amount / 666.667 + 0.5)
+    return seconds
+end
+
+local function Format(Int)
+	return string.format("%02i", Int)
+end
+
+local function convertToHMS(Seconds)
+	local Minutes = (Seconds - Seconds%60)/60
+	Seconds = Seconds - Minutes*60
+	local Hours = (Minutes - Minutes%60)/60
+	Minutes = Minutes - Hours*60
+	return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds)
+end
+
+-- SELLER GUI (HOST)
+local function format(value)
+    -- Check if the value is negative
+    local isNegative = value < 0
+    value = math.abs(value)  -- Take the absolute value for formatting
+
+    -- Format the number with commas
+    local formatted = tostring(value):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+
+    -- Add the dollar sign at the beginning
+    if isNegative then
+        formatted = "$-" .. formatted
+    else
+        formatted = "$" .. formatted
+    end
+    
+    return formatted
+end
+
+
+hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
+    return 
+end))
+
+
+
+local G2L = {};
+
+
+    -- Get the UserInputService to listen for key events
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Function to hide all GUIs
+local function hideGUIs()
+    if G2L["1"] then
+        G2L["1"].Enabled = false  -- Disables the GUI by setting the "Enabled" property to false
+    end
+end
+
+-- Function to show all GUIs
+local function showGUIs()
+    if G2L["1"] then
+        G2L["1"].Enabled = true  -- Enables the GUI by setting the "Enabled" property to true
+    end
+end
+
+
+if gethui():FindFirstChild("SELLERGUI") then 
+    gethui():FindFirstChild("SELLERGUI"):Destroy()
+end 
+
+-- Assuming G2L is already defined somewhere in the script
+
+-- Create the ScreenGui and place it in the G2L area
+local player = game.Players.LocalPlayer
+G2L["1"] = Instance.new("ScreenGui", gethui())
+G2L["1"].Name = "SELLERGUI"
+G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
+
+-- Create the frame
+G2L["2"] = Instance.new("Frame", G2L["1"])
+G2L["2"]["BorderSizePixel"] = 0
+G2L["2"]["BackgroundColor3"] = Color3.fromRGB(70, 70, 70)
+G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296)
+G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
+G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+
+
+-- Create a new frame named "sideFrame" with size {0, 100}, {0, 300} inside G2L["2"]
+local sideFrame = Instance.new("Frame", G2L["2"])
+sideFrame.Name = "sideFrame"  -- Name the inner frame "sideFrame"
+sideFrame.Size = UDim2.new(0, 130, 0, 296)  -- Size {0, 100}, {0, 300}
+sideFrame.Position = UDim2.new(0, 0, 0, 0)  -- Position it inside the parent frame (G2L["2"])
+sideFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Set a different background color to distinguish it
+sideFrame.BorderSizePixel = 0  -- Remove the border
+sideFrame.ZIndex = 2  -- Set a higher ZIndex for sideFrame to appear above the parent
+sideFrame.BackgroundTransparency = 0.5
+
+
+-- Add rounded corners to sideFrame using UICorner
+local uiCorner = Instance.new("UICorner", sideFrame)
+uiCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the radius value to make the corners more or less rounded
+
+
+
+
+-- Function to create buttons
+local function createmobile(parent, position, text, callback)
+    local button = Instance.new("TextButton", parent)
+    button.Size = UDim2.new(0, 100, 0, 40)
+    button.Position = position
+    button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Text = text
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 18
+    button.BorderSizePixel = 0
+    local uiCorner = Instance.new("UICorner", button)
+    uiCorner.CornerRadius = UDim.new(0, 8)
+
+    -- Button click event
+    button.MouseButton1Click:Connect(callback)
+    
+    return button
+end
+
+
+
+
+-- mobile
+---------
+local tpframe = Instance.new("Frame", G2L["2"])
+tpframe.Name = "sideFrame"
+tpframe.Size = UDim2.new(0, 70, 0, 10)
+tpframe.Position = UDim2.new(0, 420, 0, -55)
+tpframe.BackgroundColor3 = Color3.fromRGB(50, 25, 50)
+tpframe.BorderSizePixel = 0
+tpframe.ZIndex = 2
+tpframe.BackgroundTransparency = 1
+
+-- [Rest of HOST GUI code continues...]
+print("HOST GUI Loaded")
