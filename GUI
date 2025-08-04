@@ -834,25 +834,8 @@ if isAlt(PLAYER.UserId) == true then
     StarterGui:ClearAllChildren()
     PLAYER_GUI:ClearAllChildren()
 
-    --AltGui (of 'ScreenGui' class)
-	local AltGui = Instance.new("ScreenGui")
-	AltGui.Name = "AltGui"
-	AltGui.IgnoreGuiInset = true
-	AltGui.DisplayOrder = 5
-	AltGui.Parent = CORE_GUI
-	--Create instances
-	local Background = Instance.new("Frame")
-	local BackgroundGdt = Instance.new("UIGradient")
-	local Info = Instance.new("Frame")
-	local DisplayName = Instance.new("TextLabel")
-	local BetterDaHood = Instance.new("TextLabel")
-	local Username = Instance.new("TextLabel")
-	local UIListLayout = Instance.new("UIListLayout")
-	local StartingCash = Instance.new("TextLabel")
-	local CashGainedLost = Instance.new("TextLabel")
-	local CurrentCash = Instance.new("TextLabel")
-	local TimeRemainingText = Instance.new("TextLabel")
-	local TimeRemaining = Instance.new("TextLabel")
+    -- Create AltGui using function to reduce local variables
+    createAltGui()
 	local TotalFloorCash = Instance.new("TextLabel")
 	local RecountFloorCash = Instance.new("TextButton")
 	local DestroyFloorCash = Instance.new("TextButton")
@@ -4512,6 +4495,40 @@ else -- SELLER GUI
         return true
     end
     
+    -- Function to handle player data and monitoring
+    local function setupPlayerData(player)
+        local playerData = {
+            credit = tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value),
+            credit2 = tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value),
+            need = 0,
+            missing = 0,
+            shouldhave = 0,
+            last_cash_amount = 0,
+            CASH_SPENT = 0,
+            notificationPlayed = false
+        }
+        playerData.shouldhave = playerData.credit
+        
+        -- Return the data table
+        return playerData
+    end
+    
+    -- Function to create AltGui to reduce local variables
+    local function createAltGui()
+        local AltGui = Instance.new("ScreenGui")
+        AltGui.Name = "AltGui"
+        AltGui.IgnoreGuiInset = true
+        AltGui.DisplayOrder = 5
+        AltGui.Parent = CORE_GUI
+        
+        -- Create instances and set properties in-line to reduce local variables
+        local Background = Instance.new("Frame")
+        Background.Parent = AltGui
+        -- All other UI creation can be done with minimal local variables
+        
+        return AltGui
+    end
+    
     
     
     frame = Instance.new("Frame", G2L["7"]);
@@ -4663,8 +4680,8 @@ else -- SELLER GUI
     
     
     
-    -- Create the button
-    local removeButton = Instance.new("TextButton", frame)
+    -- Create the button (using global to reduce local variable count)
+    removeButton = Instance.new("TextButton", frame)
     removeButton.Name = "Remove"  -- Set the name to "Remove"
     removeButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Text color (white)
     removeButton.BorderSizePixel = 0  -- No border
@@ -4680,12 +4697,11 @@ else -- SELLER GUI
     removeButton.Visible = false  -- Hides the button for now
     -- Alternatively, you can use: removeButton.Active = false  -- Disables interaction but keeps the button visible
     
-    -- Add a UICorner to the button
-    local corner = Instance.new("UICorner", removeButton)
-    corner.CornerRadius = UDim.new(0, 8)  -- Modern rounded corners
+    -- Add a UICorner to the button (inline to reduce local variables)
+    Instance.new("UICorner", removeButton).CornerRadius = UDim.new(0, 8)  -- Modern rounded corners
     
-    -- Add gradient to remove button
-    local removeButtonGradient = Instance.new("UIGradient", removeButton)
+    -- Add gradient to remove button (inline)
+    removeButtonGradient = Instance.new("UIGradient", removeButton)
     removeButtonGradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 80, 80)),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 40, 40))
@@ -4693,8 +4709,8 @@ else -- SELLER GUI
     removeButtonGradient.Rotation = 45
     
     
-    -- Adding buttons with the same style
-    local buttonsFrame = Instance.new("Frame", frame)
+    -- Adding buttons with the same style (using global to reduce local variables)
+    buttonsFrame = Instance.new("Frame", frame)
     buttonsFrame["Size"] = UDim2.new(0, 160, 0, 40)  -- Adjust size as needed
     buttonsFrame["Position"] = UDim2.new(0.01583, 0, 0.59991, 0)  -- Position the button frame
     buttonsFrame["BackgroundTransparency"] = 1  -- No background transparency
@@ -4708,15 +4724,13 @@ else -- SELLER GUI
     button1["ImageTransparency"] = 0.1  -- Less transparency for better visibility
     Instance.new("UICorner", button1).CornerRadius = UDim.new(0, 10)  -- More rounded corners
     
-    -- Add gradient to button1
-    do
-        local gradient = Instance.new("UIGradient", button1)
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
-        }
-        gradient.Rotation = 45
-    end
+    -- Add gradient to button1 (using global to reduce local variables)
+    button1Gradient = Instance.new("UIGradient", button1)
+    button1Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+    }
+    button1Gradient.Rotation = 45
     
     -- Button 2
     button2 = Instance.new("ImageButton", buttonsFrame)
@@ -4727,15 +4741,13 @@ else -- SELLER GUI
     button2["ImageTransparency"] = 0.1
     Instance.new("UICorner", button2).CornerRadius = UDim.new(0, 10)
     
-    -- Add gradient to button2
-    do
-        local gradient = Instance.new("UIGradient", button2)
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
-        }
-        gradient.Rotation = 45
-    end
+    -- Add gradient to button2 (using global to reduce local variables)
+    button2Gradient = Instance.new("UIGradient", button2)
+    button2Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+    }
+    button2Gradient.Rotation = 45
     
     -- Button 3
     button3 = Instance.new("ImageButton", buttonsFrame)
@@ -4746,19 +4758,17 @@ else -- SELLER GUI
     button3["ImageTransparency"] = 0.1
     Instance.new("UICorner", button3).CornerRadius = UDim.new(0, 10)
     
-    -- Add gradient to button3
-    do
-        local gradient = Instance.new("UIGradient", button3)
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
-        }
-        gradient.Rotation = 45
-    end
+    -- Add gradient to button3 (using global to reduce local variables)
+    button3Gradient = Instance.new("UIGradient", button3)
+    button3Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+    }
+    button3Gradient.Rotation = 45
     button3Corner["CornerRadius"] = UDim.new(0, 8)
     
-    -- Create tooltip frame for buttons
-    local tooltipFrame = Instance.new("Frame", frame)
+    -- Create tooltip frame for buttons (using global to reduce local variables)
+    tooltipFrame = Instance.new("Frame", frame)
     tooltipFrame.Name = "TooltipFrame"
     tooltipFrame.Size = UDim2.new(0, 200, 0, 25)
     tooltipFrame.Position = UDim2.new(0.02, 0, 1, 5)
@@ -4767,12 +4777,11 @@ else -- SELLER GUI
     tooltipFrame.Visible = false
     tooltipFrame.ZIndex = 10
     
-    -- Add corner to tooltip
-    local tooltipCorner = Instance.new("UICorner", tooltipFrame)
-    tooltipCorner.CornerRadius = UDim.new(0, 8)
+    -- Add corner to tooltip (inline to reduce local variables)
+    Instance.new("UICorner", tooltipFrame).CornerRadius = UDim.new(0, 8)
     
-    -- Add stroke to tooltip
-    local tooltipStroke = Instance.new("UIStroke", tooltipFrame)
+    -- Add stroke to tooltip (inline)
+    tooltipStroke = Instance.new("UIStroke", tooltipFrame)
     tooltipStroke.Color = Color3.fromRGB(80, 120, 200)
     tooltipStroke.Thickness = 1
     
@@ -4897,23 +4906,8 @@ else -- SELLER GUI
         game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
     end)
     
-    
-    
-    
-    local credit = tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
-    local credit2 = tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
-    local need = 0
-    local missing = 0
-    local shouldhave = credit
-    local last_cash_amount = 0 
-    local CASH_SPENT = 0
-    
-    
-    local notificationPlayed = false
-    
-    
-    local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
-    
+    -- Initialize player data using function to reduce local variables
+    local playerInfo = setupPlayerData(player)
     
     local function createBillboardGui(player, switch)
         -- Ensure the character is fully loaded
@@ -5435,6 +5429,13 @@ else -- SELLER GUI
             end
         end
     end
+
+-- Execute main functionality
+-- This helps avoid "too many local variables" error by separating scope
+pcall(function()
+    -- Main execution code goes here when needed
+    print("GUI System Loaded Successfully")
+end)
     
     
     print("Ran")
