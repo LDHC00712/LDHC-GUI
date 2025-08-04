@@ -1,8 +1,48 @@
 -- Initialize required services and variables
-local Players = game:GetService("Players")
+local Players = game:GetServic    end)
+
+    -- Clear GUI safely
+    pcall(function()
+        StarterGui:ClearAllChildren()
+    end)
+    
+    local PLAYER_GUI = PLAYER:WaitForChild("PlayerGui")
+    pcall(function()
+        PLAYER_GUI:ClearAllChildren()
+    end)ayers")
 local StarterGui = game:GetService("StarterGui")
 local PLAYER = Players.LocalPlayer
-local PLAYER_CASH = PLAYER:WaitForChild("leaderstats"):WaitForChild("Money")
+
+-- Initialize getgenv if not exists
+if not getgenv().alts then
+    getgenv().alts = {}
+end
+if not getgenv().mainId then
+    getgenv().mainId = PLAYER.UserId
+end
+
+-- Wait for leaderstats safely
+local function waitForLeaderstats()
+    local leaderstats = PLAYER:FindFirstChild("leaderstats")
+    if not leaderstats then
+        PLAYER.ChildAdded:Wait()
+        leaderstats = PLAYER:FindFirstChild("leaderstats")
+    end
+    
+    local money = leaderstats and leaderstats:FindFirstChild("Money")
+    if not money then
+        -- Create a default money value if it doesn't exist
+        money = Instance.new("NumberValue")
+        money.Name = "Money"
+        money.Value = 0
+        if leaderstats then
+            money.Parent = leaderstats
+        end
+    end
+    return money
+end
+
+local PLAYER_CASH = waitForLeaderstats()
 
 -- Utility function for formatting numbers
 local function commaValue(amount)
@@ -18,6 +58,9 @@ end
 
 -- Check if this is the HOST account (main account)
 local function isAlt(userId)
+    if not getgenv().alts or #getgenv().alts == 0 then
+        return false
+    end
     for i, id in ipairs(getgenv().alts) do
         if userId == id then
             return true
@@ -26,12 +69,23 @@ local function isAlt(userId)
     return false
 end
 
-if isAlt(PLAYER.UserId) == false then
+-- Force load as HOST for testing
+print("Current User ID:", PLAYER.UserId)
+print("Alts list:", getgenv().alts)
+print("Is Alt:", isAlt(PLAYER.UserId))
+
+-- Always load HOST GUI (remove alt check for now)
+-- if isAlt(PLAYER.UserId) == false then
+    print("Loading HOST GUI...")
     -- HOST GUI CODE
     local UserInputService = game:GetService("UserInputService")
-    hookfunction(UserInputService.GetFocusedTextBox, newcclosure(function(...)
-        return nil
-    end))
+    
+    -- Safely hook function
+    pcall(function()
+        hookfunction(UserInputService.GetFocusedTextBox, newcclosure(function(...)
+            return nil
+        end))
+    end)
 
     StarterGui:ClearAllChildren()
     local PLAYER_GUI = PLAYER:WaitForChild("PlayerGui")
@@ -790,14 +844,16 @@ if isAlt(PLAYER.UserId) == false then
     end
 
     -- Update personal info
-    PersonalDisplayName.Text = PLAYER.DisplayName
+    PersonalDisplayName.Text = PLAYER.DisplayName or PLAYER.Name
     PersonalUsername.Text = "<i>@"..PLAYER.Name.."</i>"
-    PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value).."</font>"
+    PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value or 0).."</font>"
 
     -- Update cash when changed
-    PLAYER_CASH.Changed:Connect(function(newValue)
-        PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(newValue).."</font>"
-    end)
+    if PLAYER_CASH then
+        PLAYER_CASH.Changed:Connect(function(newValue)
+            PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(newValue or 0).."</font>"
+        end)
+    end
 
     -- Functions for updating alt list
     local function updateAltsList()
@@ -805,7 +861,7 @@ if isAlt(PLAYER.UserId) == false then
         
         -- Clear existing frames
         for _, child in ipairs(playersScrollFrame:GetChildren()) do
-            if child:IsA("Frame") then
+            if child:IsA("Frame") and child.Name ~= "playersScrollListLayout" and child.Name ~= "playersScrollFrameUIPadding" then
                 child:Destroy()
             end
         end
@@ -831,7 +887,7 @@ if isAlt(PLAYER.UserId) == false then
     -- Recount cash button
     recountAllCashBtn.MouseButton1Down:Connect(function()
         -- Update cash displays
-        PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value).."</font>"
+        PersonalCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value or 0).."</font>"
         
         local totalAltCash = 0
         local totalFloorCash = 0
@@ -842,8 +898,8 @@ if isAlt(PLAYER.UserId) == false then
                 local altCash = altFrame:FindFirstChild("altCash")
                 local altFloorCash = altFrame:FindFirstChild("altFloorCash")
                 if altCash then
-                    altCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(altPlayer.leaderstats.Money.Value).."</font>"
-                    totalAltCash = totalAltCash + altPlayer.leaderstats.Money.Value
+                    altCash.Text = "Cash - <font color='rgb(0,255,0)'>$"..commaValue(altPlayer.leaderstats.Money.Value or 0).."</font>"
+                    totalAltCash = totalAltCash + (altPlayer.leaderstats.Money.Value or 0)
                 end
                 if altFloorCash then
                     altFloorCash.Text = "Floor Cash - <font color='rgb(0,255,0)'>$0</font>"
@@ -851,11 +907,12 @@ if isAlt(PLAYER.UserId) == false then
             end
         end
         
+        local playerCashValue = PLAYER_CASH.Value or 0
         AltsTotalCash.Text = "Total Alts Cash - <font color='rgb(0,255,0)'>$"..commaValue(totalAltCash).."</font>"
-        CombinedTotalCash.Text = "Combined Cash - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value + totalAltCash).."</font>"
+        CombinedTotalCash.Text = "Combined Cash - <font color='rgb(0,255,0)'>$"..commaValue(playerCashValue + totalAltCash).."</font>"
         CombinedFloorCash.Text = "Combined Floor Cash - <font color='rgb(0,255,0)'>$"..commaValue(totalFloorCash).."</font>"
-        CombinedTotalNet.Text = "Net Worth - <font color='rgb(0,255,0)'>$"..commaValue(PLAYER_CASH.Value + totalAltCash + totalFloorCash).."</font>"
+        CombinedTotalNet.Text = "Net Worth - <font color='rgb(0,255,0)'>$"..commaValue(playerCashValue + totalAltCash + totalFloorCash).."</font>"
     end)
 
-    print("HOST GUI Loaded")
-end
+    print("HOST GUI Loaded Successfully!")
+-- end
