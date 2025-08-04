@@ -881,7 +881,7 @@ if isAlt(PLAYER.UserId) == true then
 		Info.BorderSizePixel = 0
 		Info.AnchorPoint = Vector2.new(0.5, 0.5)
 		Info.BackgroundTransparency = 0.05
-		Info.Position = UDim2.new(0.5, 0, 0.4, 0)
+		Info.Position = UDim2.new(0.2, 0, 0.3, 0)  -- Move to left side to avoid overlap
 		Info.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
 		Info.Size = UDim2.new(0.5625, 0, 0.5235, 0)
 		Info.Parent = Background
@@ -1070,7 +1070,7 @@ if isAlt(PLAYER.UserId) == true then
 		Options.BorderSizePixel = 0
 		Options.AnchorPoint = Vector2.new(0.5, 0.5)
 		Options.BackgroundTransparency = 0.05
-		Options.Position = UDim2.new(0.5, 0, 0.8, 0)
+		Options.Position = UDim2.new(0.2, 0, 0.85, 0)  -- Move to left bottom to avoid overlap
 		Options.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
 		Options.Size = UDim2.new(0.5, 0, 0.2, 0)
 		Options.Parent = Background
@@ -1331,6 +1331,15 @@ if isAlt(PLAYER.UserId) == true then
     --
     --
     --Create manual control Gui
+    
+    -- Clear any existing ManualGui first
+    pcall(function()
+        local existingManual = CORE_GUI:FindFirstChild("ManualGui")
+        if existingManual then
+            existingManual:Destroy()
+        end
+    end)
+    
     local ManualGui = Instance.new("ScreenGui")
     local UICorner = Instance.new("UICorner")
 
@@ -2180,11 +2189,36 @@ else -- SELLER GUI
     
     -- Assuming G2L is already defined somewhere in the script
     
+    -- Clear any existing GUI first to prevent overlapping
+    pcall(function()
+        -- Clear all possible existing GUIs
+        local playerGui = game.Players.LocalPlayer.PlayerGui
+        local coreGui = gethui()
+        
+        -- List of GUI names to clear
+        local guiNames = {"SELLERGUI", "ToggleGui", "ManualGui", "AltGui"}
+        
+        for _, guiName in pairs(guiNames) do
+            -- Clear from PlayerGui
+            local existingGui = playerGui:FindFirstChild(guiName)
+            if existingGui then
+                existingGui:Destroy()
+            end
+            
+            -- Clear from CoreGui
+            local existingGuiCore = coreGui:FindFirstChild(guiName)
+            if existingGuiCore then
+                existingGuiCore:Destroy()
+            end
+        end
+    end)
+    
     -- Create the ScreenGui and place it in the G2L area
     local player = game.Players.LocalPlayer
     G2L["1"] = Instance.new("ScreenGui", gethui())
     G2L["1"].Name = "SELLERGUI"
     G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
+    G2L["1"]["DisplayOrder"] = 100  -- High priority for main GUI
     
     -- Create the main frame with modern design
     G2L["2"] = Instance.new("Frame", G2L["1"])
@@ -4175,6 +4209,14 @@ else -- SELLER GUI
     
     
     if UserInputService.TouchEnabled then
+        -- Clear any existing ToggleGui first
+        pcall(function()
+            local existingToggle = game.Players.LocalPlayer.PlayerGui:FindFirstChild("ToggleGui")
+            if existingToggle then
+                existingToggle:Destroy()
+            end
+        end)
+        
         local screenGui = Instance.new("ScreenGui")
         screenGui.Name = "ToggleGui"
         screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -4515,6 +4557,14 @@ else -- SELLER GUI
     
     -- Function to create AltGui to reduce local variables
     local function createAltGui()
+        -- Clear any existing AltGui first
+        pcall(function()
+            local existingAlt = CORE_GUI:FindFirstChild("AltGui")
+            if existingAlt then
+                existingAlt:Destroy()
+            end
+        end)
+        
         local AltGui = Instance.new("ScreenGui")
         AltGui.Name = "AltGui"
         AltGui.IgnoreGuiInset = true
