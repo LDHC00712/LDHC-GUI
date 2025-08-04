@@ -1,3 +1,21 @@
+-- Initialize required services and variables
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local PLAYER = Players.LocalPlayer
+local PLAYER_CASH = PLAYER:WaitForChild("leaderstats"):WaitForChild("Money")
+
+-- Utility function for formatting numbers
+local function commaValue(amount)
+    local formatted = tostring(amount)
+    while true do
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+        if (k==0) then
+            break
+        end
+    end
+    return formatted
+end
+
 -- Check if this is the HOST account (main account)
 local function isAlt(userId)
     for i, id in ipairs(getgenv().alts) do
@@ -10,8 +28,9 @@ end
 
 if isAlt(PLAYER.UserId) == false then
     -- HOST GUI CODE
-    hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
-        return 
+    local UserInputService = game:GetService("UserInputService")
+    hookfunction(UserInputService.GetFocusedTextBox, newcclosure(function(...)
+        return nil
     end))
 
     StarterGui:ClearAllChildren()
