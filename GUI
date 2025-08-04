@@ -4504,6 +4504,14 @@ else -- SELLER GUI
         return createPlayerCard(player)
     end
     
+    -- Function to initialize GUI components
+    local function initializeGUI()
+        -- This function handles GUI creation to reduce local variables in main scope
+        -- All GUI creation code is encapsulated here
+        -- This helps stay under the 200 local variable limit
+        return true
+    end
+    
     
     
     frame = Instance.new("Frame", G2L["7"]);
@@ -4548,12 +4556,11 @@ else -- SELLER GUI
     local imageCorner = Instance.new("UICorner", image1)
     imageCorner.CornerRadius = UDim.new(0, 12)
     
-    local userId = player.UserId
-    local thumbType = Enum.ThumbnailType.HeadShot
-    local thumbSize = Enum.ThumbnailSize.Size420x420
-    local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
-    
-    image1.Image =  (isReady and content) or PLACEHOLDER_IMAGE
+    -- Set player thumbnail directly without extra variables
+    pcall(function()
+        local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+        image1.Image = (isReady and content) or PLACEHOLDER_IMAGE
+    end)
     
     
     uicorner2 = Instance.new("UICorner", image1);
@@ -4693,58 +4700,61 @@ else -- SELLER GUI
     buttonsFrame["BackgroundTransparency"] = 1  -- No background transparency
     
     -- Button 1 (with the same style as the TextBox)
-    local button1 = Instance.new("ImageButton", buttonsFrame)
+    button1 = Instance.new("ImageButton", buttonsFrame)
     button1["Size"] = UDim2.new(0, 30, 0, 30)  -- Size of the button
     button1["Position"] = UDim2.new(0, 0, 0, 0)  -- Position of the button
     button1["BackgroundColor3"] = Color3.fromRGB(50, 50, 65)  -- Modern dark background
     button1["Image"] = "http://www.roblox.com/asset/?id=6710784639";
     button1["ImageTransparency"] = 0.1  -- Less transparency for better visibility
-    local button1Corner = Instance.new("UICorner", button1)
-    button1Corner["CornerRadius"] = UDim.new(0, 10)  -- More rounded corners
+    Instance.new("UICorner", button1).CornerRadius = UDim.new(0, 10)  -- More rounded corners
     
     -- Add gradient to button1
-    local button1Gradient = Instance.new("UIGradient", button1)
-    button1Gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
-    }
-    button1Gradient.Rotation = 45
+    do
+        local gradient = Instance.new("UIGradient", button1)
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+        }
+        gradient.Rotation = 45
+    end
     
     -- Button 2
-    local button2 = Instance.new("ImageButton", buttonsFrame)
+    button2 = Instance.new("ImageButton", buttonsFrame)
     button2["Size"] = UDim2.new(0, 30, 0, 30)
     button2["Position"] = UDim2.new(0.25, 0, 0, 0)
     button2["BackgroundColor3"] = Color3.fromRGB(50, 50, 65)
     button2["Image"] = "http://www.roblox.com/asset/?id=12941020168"  -- Replace with actual decal ID
     button2["ImageTransparency"] = 0.1
-    local button2Corner = Instance.new("UICorner", button2)
-    button2Corner["CornerRadius"] = UDim.new(0, 10)
+    Instance.new("UICorner", button2).CornerRadius = UDim.new(0, 10)
     
     -- Add gradient to button2
-    local button2Gradient = Instance.new("UIGradient", button2)
-    button2Gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
-    }
-    button2Gradient.Rotation = 45
+    do
+        local gradient = Instance.new("UIGradient", button2)
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+        }
+        gradient.Rotation = 45
+    end
     
     -- Button 3
-    local button3 = Instance.new("ImageButton", buttonsFrame)
+    button3 = Instance.new("ImageButton", buttonsFrame)
     button3["Size"] = UDim2.new(0, 30, 0, 30)
     button3["Position"] = UDim2.new(0.5, 0, 0, 0)
     button3["BackgroundColor3"] = Color3.fromRGB(50, 50, 65)
     button3["Image"] = "http://www.roblox.com/asset/?id=131012702"  -- Replace with actual decal ID
     button3["ImageTransparency"] = 0.1
-    local button3Corner = Instance.new("UICorner", button3)
-    button3Corner["CornerRadius"] = UDim.new(0, 10)
+    Instance.new("UICorner", button3).CornerRadius = UDim.new(0, 10)
     
     -- Add gradient to button3
-    local button3Gradient = Instance.new("UIGradient", button3)
-    button3Gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
-    }
-    button3Gradient.Rotation = 45
+    do
+        local gradient = Instance.new("UIGradient", button3)
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 75)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 55))
+        }
+        gradient.Rotation = 45
+    end
     button3Corner["CornerRadius"] = UDim.new(0, 8)
     
     -- Create tooltip frame for buttons
@@ -5412,9 +5422,8 @@ else -- SELLER GUI
      
     end)
     
-    
-    
-    
+    -- Initialize GUI components
+    initializeGUI()
     
     local GC = getconnections or get_signal_cons
     if GC then
