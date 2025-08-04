@@ -312,12 +312,22 @@ if isAlt(PLAYER.UserId) == false then
     G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     G2L["7"]["BackgroundTransparency"] = 1
     G2L["7"].ZIndex = 3
+    G2L["7"].Visible = true  -- Show Players frame by default
+
+    -- Add UIListLayout for Players frame
+    G2L["8"] = Instance.new("UIListLayout", G2L["7"])
+    G2L["8"]["SortOrder"] = Enum.SortOrder.LayoutOrder
+    G2L["8"].Padding = UDim.new(0, 5)
+
+    G2L["8"]:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        G2L["7"].CanvasSize = UDim2.new(0, 0, 0, G2L["8"].AbsoluteContentSize.Y + 10)
+    end)
 
     -- Create Alts Frame
     local AltsFrame = Instance.new("ScrollingFrame", G2L["2"])
     AltsFrame["Active"] = true
     AltsFrame["BorderSizePixel"] = 0
-    AltsFrame["BackgroundColor3"] = Color3.fromRGB(255, 25, 255)
+    AltsFrame["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
     AltsFrame["ScrollBarImageTransparency"] = 1
     AltsFrame["Size"] = UDim2.new(0, 396, 0, 296)
     AltsFrame["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
@@ -326,6 +336,19 @@ if isAlt(PLAYER.UserId) == false then
     AltsFrame["BackgroundTransparency"] = 1
     AltsFrame.Visible = false
     AltsFrame.ZIndex = 3
+
+    -- Add test content to Alts Frame
+    local altsTestLabel = Instance.new("TextLabel", AltsFrame)
+    altsTestLabel.Size = UDim2.new(1, 0, 0, 50)
+    altsTestLabel.Position = UDim2.new(0, 0, 0, 10)
+    altsTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    altsTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    altsTestLabel.Text = "ALTS SECTION - Working!"
+    altsTestLabel.Font = Enum.Font.GothamBold
+    altsTestLabel.TextSize = 18
+    altsTestLabel.BorderSizePixel = 0
+    local altsCorner = Instance.new("UICorner", altsTestLabel)
+    altsCorner.CornerRadius = UDim.new(0, 8)
 
     -- Create Alt Control Frame
     local altcontrol = Instance.new("ScrollingFrame", G2L["2"])
@@ -343,6 +366,19 @@ if isAlt(PLAYER.UserId) == false then
     altcontrol.CanvasSize = UDim2.new(0, 0, 0, 1000)
     altcontrol.ScrollBarThickness = 6
 
+    -- Add test content to Alt Control Frame
+    local altControlTestLabel = Instance.new("TextLabel", altcontrol)
+    altControlTestLabel.Size = UDim2.new(1, 0, 0, 50)
+    altControlTestLabel.Position = UDim2.new(0, 0, 0, 10)
+    altControlTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    altControlTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    altControlTestLabel.Text = "ALT CONTROL SECTION - Working!"
+    altControlTestLabel.Font = Enum.Font.GothamBold
+    altControlTestLabel.TextSize = 18
+    altControlTestLabel.BorderSizePixel = 0
+    local altControlCorner = Instance.new("UICorner", altControlTestLabel)
+    altControlCorner.CornerRadius = UDim.new(0, 8)
+
     -- Create Misc Frame
     local MiscFrame = Instance.new("ScrollingFrame", G2L["2"])
     MiscFrame["Active"] = true
@@ -359,6 +395,19 @@ if isAlt(PLAYER.UserId) == false then
     MiscFrame.CanvasSize = AltsFrame.Size
     MiscFrame.ScrollBarThickness = 0
 
+    -- Add test content to Misc Frame
+    local miscTestLabel = Instance.new("TextLabel", MiscFrame)
+    miscTestLabel.Size = UDim2.new(1, 0, 0, 50)
+    miscTestLabel.Position = UDim2.new(0, 0, 0, 10)
+    miscTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    miscTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    miscTestLabel.Text = "MISC SECTION - Working!"
+    miscTestLabel.Font = Enum.Font.GothamBold
+    miscTestLabel.TextSize = 18
+    miscTestLabel.BorderSizePixel = 0
+    local miscCorner = Instance.new("UICorner", miscTestLabel)
+    miscCorner.CornerRadius = UDim.new(0, 8)
+
     -- Create Settings Frame
     local SettingsFrame = Instance.new("ScrollingFrame", G2L["2"])
     SettingsFrame["Active"] = true
@@ -374,6 +423,32 @@ if isAlt(PLAYER.UserId) == false then
     SettingsFrame.ZIndex = 3
     SettingsFrame.CanvasSize = UDim2.new(0, 0, 0, 720)
     SettingsFrame.ScrollBarThickness = 6
+
+    -- Add test content to Settings Frame
+    local settingsTestLabel = Instance.new("TextLabel", SettingsFrame)
+    settingsTestLabel.Size = UDim2.new(1, 0, 0, 50)
+    settingsTestLabel.Position = UDim2.new(0, 0, 0, 10)
+    settingsTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    settingsTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    settingsTestLabel.Text = "SETTINGS SECTION - Working!"
+    settingsTestLabel.Font = Enum.Font.GothamBold
+    settingsTestLabel.TextSize = 18
+    settingsTestLabel.BorderSizePixel = 0
+    local settingsCorner = Instance.new("UICorner", settingsTestLabel)
+    settingsCorner.CornerRadius = UDim.new(0, 8)
+
+    -- Add test content to Players Frame
+    local playersTestLabel = Instance.new("TextLabel", G2L["7"])
+    playersTestLabel.Size = UDim2.new(1, 0, 0, 50)
+    playersTestLabel.Position = UDim2.new(0, 0, 0, 0)
+    playersTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    playersTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    playersTestLabel.Text = "PLAYERS SECTION - Working!"
+    playersTestLabel.Font = Enum.Font.GothamBold
+    playersTestLabel.TextSize = 18
+    playersTestLabel.BorderSizePixel = 0
+    local playersCorner = Instance.new("UICorner", playersTestLabel)
+    playersCorner.CornerRadius = UDim.new(0, 8)
 
     -- Navigation buttons data
     local buttonsData = {
@@ -402,6 +477,20 @@ if isAlt(PLAYER.UserId) == false then
 
         -- Add functionality for button click
         button.MouseButton1Click:Connect(function()
+            print("Button clicked: " .. button.Text)  -- Debug print
+            
+            -- Reset all button colors first
+            for _, otherButtonData in ipairs(buttonsData) do
+                for _, otherButton in pairs(sideFrame:GetChildren()) do
+                    if otherButton:IsA("TextButton") then
+                        otherButton.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+                    end
+                end
+            end
+            
+            -- Highlight the clicked button
+            button.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+
             -- Hide all frames first
             G2L["7"].Visible = false
             AltsFrame.Visible = false
@@ -412,17 +501,33 @@ if isAlt(PLAYER.UserId) == false then
             -- Show the corresponding frame for the button clicked
             if button.Text == "Players" then
                 G2L["7"].Visible = true
+                print("Showing Players frame")
             elseif button.Text == "Alts" then
                 AltsFrame.Visible = true
+                print("Showing Alts frame")
             elseif button.Text == "Alt Control" then
                 altcontrol.Visible = true
+                print("Showing Alt Control frame")
             elseif button.Text == "Misc" then
                 MiscFrame.Visible = true
+                print("Showing Misc frame")
             elseif button.Text == "Settings" then
                 SettingsFrame.Visible = true
+                print("Showing Settings frame")
             end
         end)
     end
+
+    -- Set Players button as default selected
+    spawn(function()
+        wait(0.1)
+        for _, button in pairs(sideFrame:GetChildren()) do
+            if button:IsA("TextButton") and button.Text == "Players" then
+                button.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+                break
+            end
+        end
+    end)
 
     print("HOST GUI Loaded Successfully with Navigation!")
 end
