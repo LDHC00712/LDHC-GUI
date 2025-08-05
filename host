@@ -3038,18 +3038,8 @@ else -- SELLER GUI
         local gainedCash = endCash - startCash
         local gainedCashText = gainedCash >= 0 and ("+" .. tostring(gainedCash)) or tostring(gainedCash)
         
-        -- Create simple message only (without newlines and escape special chars)
-        local message = "Da Hood Order Complete! " ..
-                       "Player: " .. playerName .. " (" .. playerUsername .. ") " ..
-                       "Starting Cash: " .. tostring(startCash) .. " " ..
-                       "Final Cash: " .. tostring(endCash) .. " " ..
-                       "Cash Gained: " .. tostring(gainedCash) .. " " ..
-                       "Items Bought: " .. tostring(bought or 0) .. " " ..
-                       "Time: " .. os.date("%H:%M:%S")
-        
-        -- Escape quotes and backslashes in message
-        message = string.gsub(message, '"', '\\"')
-        message = string.gsub(message, '\\', '\\\\')
+        -- Create very simple test message
+        local message = "Test message from Da Hood script"
         
         -- Create JSON manually (avoid HttpService JSONEncode issues)
         local jsonBody = '{"content":"' .. message .. '"}'
