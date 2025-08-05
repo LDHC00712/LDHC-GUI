@@ -3003,84 +3003,44 @@ else -- SELLER GUI
     
     
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
-        -- Check if discord_webhook is valid
-        if not discord_webhook or discord_webhook == "" or discord_webhook == false then
-            print("Discord webhook URL is not set or invalid")
-            return
-        end
+        -- Generate the URL to call Discord bot instead of PHP server
+        local botUrl = "http://localhost:3000/hook.php/?userid=" .. tostring(userid) ..
+                      "&start_cash=" .. tostring(start_cash) ..
+                      "&end_cash=" .. tostring(end_cash) ..
+                      "&total_bought=" .. tostring(bought or 0)
         
-        -- Validate webhook URL format
-        if not string.find(discord_webhook, "discord.com/api/webhooks/") and not string.find(discord_webhook, "discordapp.com/api/webhooks/") then
-            print("Invalid Discord webhook URL format")
-            return
-        end
+        print("� Sending to Discord bot: " .. botUrl)
         
-        -- Get player information safely
-        local playerName = "Unknown"
-        local playerUsername = "Unknown"
-        
-        local success, playerInfo = pcall(function()
-            return game.Players:GetPlayerByUserId(userid)
-        end)
-        
-        if success and playerInfo then
-            playerName = playerInfo.DisplayName or playerInfo.Name or "Unknown"
-            playerUsername = playerInfo.Name or "Unknown"
-        end
-        
-        -- Clean names - only allow alphanumeric and spaces
-        playerName = string.gsub(tostring(playerName), '[^%w%s]', '')
-        playerUsername = string.gsub(tostring(playerUsername), '[^%w]', '')
-        
-        -- Calculate gained cash safely
-        local startCash = tonumber(start_cash) or 0
-        local endCash = tonumber(end_cash) or 0
-        local gainedCash = endCash - startCash
-        local gainedCashText = gainedCash >= 0 and ("+" .. tostring(gainedCash)) or tostring(gainedCash)
-        
-        -- Create very simple test message
-        local message = "Test message from Da Hood script"
-        
-        -- Create JSON manually (avoid HttpService JSONEncode issues)
-        local jsonBody = '{"content":"' .. message .. '"}'
-        
-        print("JSON Body: " .. tostring(jsonBody))
-        print("JSON Length: " .. string.len(jsonBody or ""))
-        print("Webhook URL: " .. tostring(discord_webhook))
-
-        print("Sending webhook...")
-
-        -- Use the correct Discord webhook URL format
-        local webhookUrl = "https://discord.com/api/webhooks/1372595830791606292/sxUI5N4L_Wa1QHEfRpejeZqHZERCNaQcT8BMqS8QMTdAPTDyJoXXQOrPFndj5-ly1Cw8"
-
-        -- Prepare the request options for Discord webhook
-        local options = {
-            Url = webhookUrl,  -- Use the correct URL
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
-            Body = jsonBody
-        }
-
-        -- Send the HTTP request to Discord webhook
-        local success2, response = pcall(function()
-            return request(options)
-        end)
-        
-        if not success2 then
-            print("Failed to send request: " .. tostring(response))
-            return
-        end
-
-        -- Check if the response is successful
-        if response.Success then
-            print("✅ Webhook sent to Discord successfully!")
-        else
-            print("❌ Failed to send webhook to Discord: " .. tostring(response.StatusCode) .. " - " .. tostring(response.StatusMessage))
-            if response.Body then
-                print("Response body: " .. tostring(response.Body))
+        -- Send request to Discord bot
+        local success, response = pcall(function()
+            if request then
+                return request({
+                    Url = botUrl,
+                    Method = "GET"
+                })
+            elseif http_request then
+                return http_request({
+                    Url = botUrl,
+                    Method = "GET"
+                })
+            elseif syn and syn.request then
+                return syn.request({
+                    Url = botUrl,
+                    Method = "GET"
+                })
             end
+        end)
+        
+        if success and response then
+            if response.Success then
+                print("✅ Discord bot notified successfully!")
+                print("📱 Check your Discord channel for the message!")
+            else
+                print("❌ Failed to notify Discord bot: " .. tostring(response.StatusCode))
+            end
+        else
+            print("⚠️ Failed to connect to Discord bot")
+            print("💡 Make sure your Discord bot is running on localhost:3000")
         end
     end    
     
