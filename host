@@ -3015,90 +3015,84 @@ else -- SELLER GUI
             return
         end
         
-        -- Get player information
-        local playerInfo = game.Players:GetPlayerByUserId(userid)
-        local playerName = playerInfo and playerInfo.DisplayName or "Unknown Player"
-        local playerUsername = playerInfo and "@" .. playerInfo.Name or "@Unknown"
+        -- Get player information safely
+        local playerName = "Unknown Player"
+        local playerUsername = "@Unknown"
+        
+        local success, playerInfo = pcall(function()
+            return game.Players:GetPlayerByUserId(userid)
+        end)
+        
+        if success and playerInfo then
+            playerName = playerInfo.DisplayName or playerInfo.Name or "Unknown Player"
+            playerUsername = "@" .. (playerInfo.Name or "Unknown")
+        end
         
         -- Calculate gained cash safely
         local startCash = tonumber(start_cash) or 0
         local endCash = tonumber(end_cash) or 0
         local gainedCash = endCash - startCash
-        local gainedCashFormatted = gainedCash >= 0 and "+" .. tostring(gainedCash) or tostring(gainedCash)
+        local gainedCashText = gainedCash >= 0 and "+" .. tostring(gainedCash) or tostring(gainedCash)
         
-        -- Create current timestamp
-        local timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        -- Generate image URL
+        local imageUrl = "https://dahoodcash.com/hook.php/?userid=" .. tostring(userid) ..
+                        "&start_cash=" .. tostring(start_cash) ..
+                        "&end_cash=" .. tostring(end_cash) ..
+                        "&total_bought=" .. tostring(bought or 0)
         
-        -- Generate image URL (without webhook parameter to avoid recursion)
-        local imageUrl = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
-                        "&start_cash=" .. start_cash ..
-                        "&end_cash=" .. end_cash ..
-                        "&total_bought=" .. bought
-        
-        -- Create simplified embed data
-        local embedData = {
-            content = "🎉 **Order Completed Successfully!** 🎉",
-            embeds = {
-                {
-                    title = "💰 Da Hood Order Complete",
-                    description = "Order has been successfully completed!",
-                    color = 65280,
-                    thumbnail = {
-                        url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userid .. "&width=150&height=150&format=png"
-                    },
-                    image = {
-                        url = imageUrl
-                    },
-                    fields = {
-                        {
-                            name = "👤 Player",
-                            value = playerName .. " (" .. playerUsername .. ")",
-                            inline = true
-                        },
-                        {
-                            name = "💵 Starting Cash",
-                            value = "$" .. tostring(startCash),
-                            inline = true
-                        },
-                        {
-                            name = "💰 Final Cash", 
-                            value = "$" .. tostring(endCash),
-                            inline = true
-                        },
-                        {
-                            name = "📈 Cash Gained",
-                            value = "$" .. gainedCashFormatted,
-                            inline = true
-                        },
-                        {
-                            name = "🛒 Items Bought",
-                            value = tostring(bought or 0),
-                            inline = true
-                        },
-                        {
-                            name = "🕐 Time",
-                            value = os.date("%H:%M:%S"),
-                            inline = true
-                        }
-                    },
-                    footer = {
-                        text = "Da Hood Cash Service"
-                    },
-                    timestamp = timestamp
-                }
-            }
-        }
+        -- Create JSON manually to avoid encoding issues
+        local jsonBody = '{'
+        jsonBody = jsonBody .. '"content": "🎉 **Order Completed Successfully!** 🎉",'
+        jsonBody = jsonBody .. '"embeds": [{'
+        jsonBody = jsonBody .. '"title": "💰 Da Hood Order Complete",'
+        jsonBody = jsonBody .. '"description": "Order has been successfully completed!",'
+        jsonBody = jsonBody .. '"color": 65280,'
+        jsonBody = jsonBody .. '"thumbnail": {'
+        jsonBody = jsonBody .. '"url": "https://www.roblox.com/headshot-thumbnail/image?userId=' .. tostring(userid) .. '&width=150&height=150&format=png"'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '"image": {'
+        jsonBody = jsonBody .. '"url": "' .. imageUrl .. '"'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '"fields": ['
+        jsonBody = jsonBody .. '{'
+        jsonBody = jsonBody .. '"name": "👤 Player",'
+        jsonBody = jsonBody .. '"value": "' .. playerName .. ' (' .. playerUsername .. ')",'
+        jsonBody = jsonBody .. '"inline": true'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '{'
+        jsonBody = jsonBody .. '"name": "💵 Starting Cash",'
+        jsonBody = jsonBody .. '"value": "$' .. tostring(startCash) .. '",'
+        jsonBody = jsonBody .. '"inline": true'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '{'
+        jsonBody = jsonBody .. '"name": "💰 Final Cash",'
+        jsonBody = jsonBody .. '"value": "$' .. tostring(endCash) .. '",'
+        jsonBody = jsonBody .. '"inline": true'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '{'
+        jsonBody = jsonBody .. '"name": "📈 Cash Gained",'
+        jsonBody = jsonBody .. '"value": "$' .. gainedCashText .. '",'
+        jsonBody = jsonBody .. '"inline": true'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '{'
+        jsonBody = jsonBody .. '"name": "🛒 Items Bought",'
+        jsonBody = jsonBody .. '"value": "' .. tostring(bought or 0) .. '",'
+        jsonBody = jsonBody .. '"inline": true'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '{'
+        jsonBody = jsonBody .. '"name": "🕐 Time",'
+        jsonBody = jsonBody .. '"value": "' .. os.date("%H:%M:%S") .. '",'
+        jsonBody = jsonBody .. '"inline": true'
+        jsonBody = jsonBody .. '}'
+        jsonBody = jsonBody .. '],'
+        jsonBody = jsonBody .. '"footer": {'
+        jsonBody = jsonBody .. '"text": "Da Hood Cash Service"'
+        jsonBody = jsonBody .. '},'
+        jsonBody = jsonBody .. '"timestamp": "' .. os.date("!%Y-%m-%dT%H:%M:%SZ") .. '"'
+        jsonBody = jsonBody .. '}]'
+        jsonBody = jsonBody .. '}'
 
-        -- Convert to JSON with error handling
-        local jsonBody
-        local success, err = pcall(function()
-            jsonBody = HttpService:JSONEncode(embedData)
-        end)
-        
-        if not success then
-            print("Failed to encode JSON: " .. tostring(err))
-            return
-        end
+        print("JSON Body: " .. jsonBody) -- Debug print
 
         -- Prepare the request options for Discord webhook
         local options = {
