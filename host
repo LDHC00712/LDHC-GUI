@@ -3050,9 +3050,12 @@ else -- SELLER GUI
 
         print("Sending webhook...")
 
+        -- Use the correct Discord webhook URL format
+        local webhookUrl = "https://discord.com/api/webhooks/1372595830791606292/sxUI5N4L_Wa1QHEfRpejeZqHZERCNaQcT8BMqS8QMTdAPTDyJoXXQOrPFndj5-ly1Cw8"
+
         -- Prepare the request options for Discord webhook
         local options = {
-            Url = discord_webhook,
+            Url = webhookUrl,  -- Use the correct URL
             Method = "POST",
             Headers = {
                 ["Content-Type"] = "application/json"
