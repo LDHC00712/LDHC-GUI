@@ -879,34 +879,83 @@ createTextInput(GuiSettings["Leave_Audio_id"], SettingsFrame, UDim2.new(0, 0, 0,
     saveData()
 end)
 
--- Create navigation buttons FIRST
-local buttonsData = {
-    {Text = "Players", Position = UDim2.new(0, 0, 0, 0), Frame = nil},
-    {Text = "Alts", Position = UDim2.new(0, 0, 0, 50), Frame = nil},
-    {Text = "Alt Control", Position = UDim2.new(0, 0, 0, 100), Frame = nil},
-    {Text = "Misc", Position = UDim2.new(0, 0, 0, 150), Frame = nil},
-    {Text = "Settings", Position = UDim2.new(0, 0, 0, 200), Frame = nil}
+-- Create navigation system with working buttons
+local currentFrame = "Players"
+local allFrames = {
+    Players = G2L["7"],
+    Alts = AltsFrame,
+    AltControl = altcontrol,
+    Misc = MiscFrame,
+    Settings = SettingsFrame
 }
 
+local function switchToFrame(frameName)
+    -- Hide all frames
+    for name, frame in pairs(allFrames) do
+        if frame then
+            frame.Visible = false
+        end
+    end
+    
+    -- Show selected frame
+    if allFrames[frameName] then
+        allFrames[frameName].Visible = true
+        currentFrame = frameName
+        print("Switched to:", frameName)
+    end
+end
+
+-- Create navigation buttons with functionality
+local buttonsData = {
+    {Text = "Players", Position = UDim2.new(0, 10, 0, 20), Frame = "Players"},
+    {Text = "Alts", Position = UDim2.new(0, 10, 0, 70), Frame = "Alts"},
+    {Text = "Alt Control", Position = UDim2.new(0, 10, 0, 120), Frame = "AltControl"},
+    {Text = "Misc", Position = UDim2.new(0, 10, 0, 170), Frame = "Misc"},
+    {Text = "Settings", Position = UDim2.new(0, 10, 0, 220), Frame = "Settings"}
+}
+
+local navigationButtons = {}
+
 -- Create navigation buttons
-for _, buttonData in ipairs(buttonsData) do
+for i, buttonData in ipairs(buttonsData) do
     local button = Instance.new("TextButton", sideFrame)
-    button.Size = UDim2.new(1, 0, 0, 40)
+    button.Name = buttonData.Text .. "Button"
+    button.Size = UDim2.new(1, -20, 0, 35)
     button.Position = buttonData.Position
-    button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.BackgroundColor3 = (i == 1) and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(28, 28, 28)
+    button.TextColor3 = (i == 1) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 180, 180)
     button.Text = buttonData.Text
     button.Font = Enum.Font.GothamBold
-    button.TextSize = 18
+    button.TextSize = 14
     button.BorderSizePixel = 0
 
     local buttonUICorner = Instance.new("UICorner", button)
     buttonUICorner.CornerRadius = UDim.new(0, 8)
     
-    print("Created button:", buttonData.Text)
+    navigationButtons[buttonData.Frame] = button
+    
+    -- Add click functionality
+    button.MouseButton1Click:Connect(function()
+        switchToFrame(buttonData.Frame)
+        
+        -- Update button appearances
+        for frameName, btn in pairs(navigationButtons) do
+            if frameName == buttonData.Frame then
+                btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            else
+                btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+                btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+            end
+        end
+    end)
+    
+    print("Created functional button:", buttonData.Text)
 end
 
-print("All navigation buttons created!")
+-- Set initial frame visibility
+switchToFrame("Players")
+print("Navigation system loaded successfully!")
 
 -- Main frame corner
 G2L["3"] = Instance.new("UICorner", G2L["2"])
@@ -917,14 +966,16 @@ G2L["7"]["Active"] = true
 G2L["7"]["BorderSizePixel"] = 0
 G2L["7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
 G2L["7"]["ScrollBarImageTransparency"] = 1
-G2L["7"]["Size"] = UDim2.new(0, 380, 0, 296)
+G2L["7"]["Size"] = UDim2.new(0, 370, 0, 296)
 G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
 G2L["7"]["Position"] = UDim2.new(0, 140, 0, 0)
 G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
 G2L["7"]["BackgroundTransparency"] = 1
-G2L["7"].Visible = true  -- Make Players visible by default
+G2L["7"]["ScrollBarThickness"] = 6
+G2L["7"]["CanvasSize"] = UDim2.new(0, 0, 0, 1000)
+G2L["7"].Visible = false  -- Will be set by navigation system
 
-print("Players frame created and visible!")
+print("Players frame created!")
 
 -- Layout for players frame
 G2L["8"] = Instance.new("UIListLayout", G2L["7"])
@@ -985,7 +1036,7 @@ local function createbox(parent, player, THREE, FOUR)
         frame.Name = "PlayerBox_" .. player.UserId
         frame["BorderSizePixel"] = 0
         frame["BackgroundColor3"] = Color3.fromRGB(28, 28, 28)
-        frame["Size"] = UDim2.new(0, 360, 0, 80)  -- Adjusted width
+        frame["Size"] = UDim2.new(0, 350, 0, 80)  -- Adjusted width
         frame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
         
         local uicorner = Instance.new("UICorner", frame)
@@ -1043,6 +1094,32 @@ local function createbox(parent, player, THREE, FOUR)
         label4["Text"] = format(tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value))
         label4["Name"] = "CashLabel"
         label4["Position"] = UDim2.new(0, 60, 0, 35)
+
+        -- Teleport button
+        local tpButton = Instance.new("TextButton", frame)
+        tpButton.Name = "TeleportButton"
+        tpButton.Size = UDim2.new(0, 60, 0, 25)
+        tpButton.Position = UDim2.new(1, -70, 0.5, -12.5)
+        tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+        tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tpButton.Text = "TP"
+        tpButton.Font = Enum.Font.GothamBold
+        tpButton.TextSize = 12
+        tpButton.BorderSizePixel = 0
+        
+        local tpCorner = Instance.new("UICorner", tpButton)
+        tpCorner.CornerRadius = UDim.new(0, 5)
+        
+        -- Teleport functionality
+        tpButton.MouseButton1Click:Connect(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local localPlayer = game.Players.LocalPlayer
+                if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    localPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+                    print("Teleported to", player.Name)
+                end
+            end
+        end)
 
         print("Created player box for:", player.Name)
         return frame
