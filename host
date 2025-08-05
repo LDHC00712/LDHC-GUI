@@ -257,9 +257,224 @@ if isAlt(PLAYER.UserId) == false then
     end
     
     -- Function to show all GUIs
-    local function showGUIs()
+    -- Function to create a dropdown list
+    local function createDropdown(TEXTBOX, parent, position, text, options, callback)
+        local dropdownFrame = Instance.new("Frame", parent)
+        dropdownFrame.Size = UDim2.new(0, 379, 0, 40)
+        dropdownFrame.Position = position
+        dropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        dropdownFrame.BorderSizePixel = 0
+        local uiCorner = Instance.new("UICorner", dropdownFrame)
+        uiCorner.CornerRadius = UDim.new(0, 8)
+
+        local label = Instance.new("TextLabel", dropdownFrame)
+        label.Size = UDim2.new(0.7, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 13
+
+        local dropdownButton = Instance.new("TextButton", dropdownFrame)
+        dropdownButton.Size = UDim2.new(0, 100, 0, 40)
+        dropdownButton.Position = UDim2.new(0.7, 0, 0, 0)
+        dropdownButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        dropdownButton.Text = TEXTBOX
+        dropdownButton.Font = Enum.Font.GothamBold
+        dropdownButton.TextSize = 16
+        dropdownButton.BorderSizePixel = 0
+        local uiCornerDropdown = Instance.new("UICorner", dropdownButton)
+        uiCornerDropdown.CornerRadius = UDim.new(0, 8)
+        
+        dropdownButton.MouseButton1Click:Connect(function()
+            local selection = Instance.new("Frame")
+            selection.Size = UDim2.new(0, 100, 0, 160)
+            selection.Position = UDim2.new(0, 0, 0, dropdownFrame.Position.Y.Offset + 40)
+            selection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            selection.Parent = parent
+            selection.ZIndex = 2
+
+            local corner = Instance.new("UICorner", selection)
+            corner.CornerRadius = UDim.new(0, 10)
+
+            local scrollFrame = Instance.new("ScrollingFrame", selection)
+            scrollFrame.Size = UDim2.new(0, 100, 0, 160)
+            scrollFrame.Position = UDim2.new(0, 0, 0, 0)
+            scrollFrame.BackgroundTransparency = 1
+            scrollFrame.ScrollBarThickness = 6
+            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, math.min(#options, 4) * 80)
+            scrollFrame.ScrollBarImageTransparency = 0.7
+            scrollFrame.ZIndex = 3
+
+            for i, option in ipairs(options) do
+                local optionButton = Instance.new("TextButton", scrollFrame)
+                optionButton.Size = UDim2.new(0, 95, 0, 40)
+                optionButton.Position = UDim2.new(0, 0, 0, (i - 1) * 45)
+                optionButton.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+                optionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                optionButton.Text = option
+                optionButton.Font = Enum.Font.GothamBold
+                optionButton.TextSize = 10
+                optionButton.BorderSizePixel = 0
+
+                local optionCorner = Instance.new("UICorner", optionButton)
+                optionCorner.CornerRadius = UDim.new(0, 8)
+
+                optionButton.MouseButton1Click:Connect(function()
+                    dropdownButton.Text = option
+                    selection:Destroy()
+                    if callback then
+                        callback(option)
+                    end
+                end)
+            end
+        end)
+
+        return dropdownFrame
+    end
+
+    -- Function to create text input boxes
+    local function createTextInput(TEXTBOX, parent, position, text, placeholder, callback)
+        local textInputFrame = Instance.new("Frame", parent)
+        textInputFrame.Size = UDim2.new(0, 379, 0, 40)
+        textInputFrame.Position = position
+        textInputFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        textInputFrame.BorderSizePixel = 0
+
+        local uiCorner = Instance.new("UICorner", textInputFrame)
+        uiCorner.CornerRadius = UDim.new(0, 8)
+
+        local label = Instance.new("TextLabel", textInputFrame)
+        label.Size = UDim2.new(0.7, 0, 1, 0)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 13
+
+        local inputBox = Instance.new("TextBox", textInputFrame)
+        inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        inputBox.BorderSizePixel = 0
+        inputBox.TextSize = 14
+        inputBox.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+        inputBox.FontFace = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        inputBox.Size = UDim2.new(0, 104, 0, 23)
+        inputBox.Position = UDim2.new(0.7, 0, 0.2, 0)
+        inputBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        inputBox.Text = TEXTBOX
+        inputBox.ClearTextOnFocus = false
+        inputBox.TextWrapped = true
+
+        local inputBoxCorner = Instance.new("UICorner", inputBox)
+        inputBoxCorner.CornerRadius = UDim.new(0, 5)
+
+        local inputBoxStroke = Instance.new("UIStroke", inputBox)
+        inputBoxStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        inputBoxStroke.Color = Color3.fromRGB(50, 50, 50)
+
+        textInputFrame.ZIndex = 1
+
+        inputBox.FocusLost:Connect(function()
+            if callback then
+                callback(inputBox.Text)
+            end
+        end)
+
+        return textInputFrame
+    end
+
+    -- Function to create toggle switches
+    local function createToggle(parent, position, text, initialState, callback)
+        local toggleFrame = Instance.new("Frame", parent)
+        toggleFrame.Size = UDim2.new(0, 379, 0, 40)
+        toggleFrame.Position = position
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        toggleFrame.BorderSizePixel = 0
+        local uiCorner = Instance.new("UICorner", toggleFrame)
+        uiCorner.CornerRadius = UDim.new(0, 8)
+
+        local toggleLabel = Instance.new("TextLabel", toggleFrame)
+        toggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
+        toggleLabel.BackgroundTransparency = 1
+        toggleLabel.Text = text
+        toggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        toggleLabel.Font = Enum.Font.GothamBold
+        toggleLabel.TextSize = 13
+
+        local toggleButton = Instance.new("TextButton", toggleFrame)
+        toggleButton.Size = UDim2.new(0.3, 0, 1, 0)
+        toggleButton.Position = UDim2.new(0.7, 0, 0, 0)
+        toggleButton.BackgroundColor3 = initialState and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        toggleButton.Text = initialState and "ON" or "OFF"
+        toggleButton.Font = Enum.Font.GothamBold
+        toggleButton.TextSize = 18
+        toggleButton.BorderSizePixel = 0
+        local uiCornerToggle = Instance.new("UICorner", toggleButton)
+        uiCornerToggle.CornerRadius = UDim.new(0, 8)
+
+        toggleFrame.ZIndex = 2
+        toggleButton.ZIndex = 3
+
+        toggleButton.MouseButton1Click:Connect(function()
+            initialState = not initialState
+            toggleButton.BackgroundColor3 = initialState and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+            toggleButton.Text = initialState and "ON" or "OFF"
+            if callback then
+                callback(initialState)
+            end
+        end)
+
+        return toggleFrame
+    end
+
+    -- GUI Settings
+    local GuiSettings = {
+        ["Teleport_Location"] = "Bank",
+        ["Teleport_Location_Keybind"] = "c",
+        ["Auto_Bring_to_Vault"] = false,
+        ["Auto_Kick_on_Finished"] = false, 
+        ["Auto_Kick_on_Extra_Pickup"] = false,
+        ["Bring_on_Join"] = false,
+        ["Join_Audio_id"] = "2927319759",
+        ["Goal_Audio_id"] = "7116606826",
+        ["Leave_Audio_id"] = "5606947971",
+        ["Gui_Image_Background_id"] = "5430597512",
+        ["Roblox_Cookie"] = false,
+        ["Use_Cookie_block_method"] = false,
+        ["Discord_Webhook"] = false,
+        ["Send_Webhook_on_complete_order"] = false,
+        ["Gui_Open_and_Close"] = "v",
+    }
+
+    -- Function to save settings
+    local function saveData()
+        -- This function would save settings to a data store
+        -- For now it's just a placeholder
+    end
+
+    -- Function to teleport to locations
+    local function teleportToLocation(location)
+        local locations = {
+            Bank = Vector3.new(-384, 23, -286),
+            Bankroof = Vector3.new(-384, 40, -286),
+            Basketball = Vector3.new(-930, 22, -481),
+            Club = Vector3.new(-287, 49, -800),
+            Swamp = Vector3.new(921, 50, -838),
+            Train = Vector3.new(-1142, 18, -225),
+            Vault = Vector3.new(-503, 40, -790)
+        }
+        
+        local targetPosition = locations[location]
+        if targetPosition and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+        end
+    end
+
+    -- Function to hide GUIs
+    local function hideGUIs()
         if G2L["1"] then
-            G2L["1"].Enabled = true  -- Enables the GUI by setting the "Enabled" property to true
+            G2L["1"].Enabled = false
         end
     end
     
@@ -719,8 +934,232 @@ if isAlt(PLAYER.UserId) == false then
     SettingsFrame["BackgroundTransparency"] = 1
     SettingsFrame.Visible = false
     SettingsFrame.ZIndex = 3
-    SettingsFrame.CanvasSize = UDim2.new(0, 0, 0, 720)
-    SettingsFrame.ScrollBarThickness = 6
+    -- Add keybind functionality
+    local UserInputService = game:GetService("UserInputService")
+    
+    UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+        if gameProcessedEvent then
+            return
+        end
+
+        local guiKeybind = GuiSettings["Gui_Open_and_Close"]:sub(1, 1):upper()
+        local guiKeyEnum = Enum.KeyCode[guiKeybind]
+        
+        if input.KeyCode == guiKeyEnum then
+            if G2L["1"].Enabled then
+                hideGUIs()
+            else
+                showGUIs()
+            end
+        end
+
+        local teleportKeybind = GuiSettings["Teleport_Location_Keybind"]:sub(1, 1):upper()
+        local teleportKeyEnum = Enum.KeyCode[teleportKeybind]
+        
+        if input.KeyCode == teleportKeyEnum then
+            teleportToLocation(GuiSettings["Teleport_Location"])
+        end
+    end)
+
+    -- Alt Control section content
+    createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 10), "Setup", {
+        "Bank", 
+        "Bankroof", 
+        "Basketball", 
+        "Club", 
+        "Swamp", 
+        "Train", 
+        "Vault"
+    }, function(location)
+        game.Players:Chat("/setup " .. string.lower(location))
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 60), "Drop", false, function(state)
+        if state == true then
+            game.Players:Chat("/drop")
+        else
+            game.Players:Chat("/stop")
+        end
+    end)
+    
+    createTextInput("", altcontrol, UDim2.new(0, 0, 0, 110), "Cdrop", "Press a key", function(input)
+        if input == "" then
+            game.Players:Chat("/stop")
+        else
+            game.Players:Chat("/cdrop " .. string.lower(input))
+        end
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 160), "Airlock", false, function(state)
+        if state == true then
+            game.Players:Chat("/airlock")
+        else
+            game.Players:Chat("/hide")
+        end
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 210), "Hide", false, function(state)
+        if state == true then
+            game.Players:Chat("/hide")
+        else
+            game.Players:Chat("/airlock")
+        end
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 260), "Line", false, function(state)
+        game.Players:Chat("/line")
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 310), "Aura", false, function(state)
+        if state == true then
+            game.Players:Chat("/aura")
+        else
+            game.Players:Chat("/stop")
+        end
+    end)
+    
+    createTextInput("", altcontrol, UDim2.new(0, 0, 0, 360), "Redeem", "Press a key", function(input)
+        game.Players:Chat("/redeem " .. input)
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 410), "Freeze", false, function(state)
+        if state == true then
+            game.Players:Chat("/freeze")
+        else
+            game.Players:Chat("/unfreeze")
+        end
+    end)
+    
+    createTextInput("", altcontrol, UDim2.new(0, 0, 0, 460), "Advert", "Press a key", function(input)
+        if input == "" then
+            game.Players:Chat("/advert off")
+        else
+            game.Players:Chat("/advert " .. input)
+        end
+    end)
+    
+    createTextInput("", altcontrol, UDim2.new(0, 0, 0, 510), "Say", "Press a key", function(input)
+        game.Players:Chat("/say " .. input)
+    end)
+    
+    createTextInput("", altcontrol, UDim2.new(0, 0, 0, 560), "Join Crew", "Press a key", function(input)
+        game.Players:Chat("/joincrew " .. input)
+    end)
+    
+    createDropdown("Animations", altcontrol, UDim2.new(0, 0, 0, 610), "Animation", {
+        "fly", 
+        "sturdy", 
+        "griddy", 
+        "tpose", 
+        "speed"
+    }, function(animation)
+        game.Players:Chat("/animation " .. animation)
+    end)
+    
+    createDropdown("Circle", altcontrol, UDim2.new(0, 0, 0, 660), "Size", {
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+    }, function(size)
+        game.Players:Chat("/circle " .. size)
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 710), "Tower", false, function(state)
+        game.Players:Chat("/tower")
+    end)
+    
+    createToggle(altcontrol, UDim2.new(0, 0, 0, 760), "Dupe", false, function(state)
+        game.Players:Chat("/dupefor")
+    end)
+    
+    createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 810), "Setup OG", {
+        "Bank", 
+        "Bankroof", 
+        "Basketball", 
+        "Club", 
+        "Swamp", 
+        "Train", 
+        "Vault"
+    }, function(location)
+        game.Players:Chat("/setup " .. string.lower(location) .. " og")
+    end)
+
+    -- Settings section content
+    createDropdown(GuiSettings["Teleport_Location"], SettingsFrame, UDim2.new(0, 0, 0, 10), "Teleport Location", {
+        "Bank", 
+        "Bankroof", 
+        "Basketball", 
+        "Club", 
+        "Swamp", 
+        "Train", 
+        "Vault"
+    }, function(location)
+        GuiSettings["Teleport_Location"] = location
+        saveData()
+    end)
+    
+    createTextInput(GuiSettings["Teleport_Location_Keybind"], SettingsFrame, UDim2.new(0, 0, 0, 60), "Teleport Location Keybind", "Press a key", function(input)
+        GuiSettings["Teleport_Location_Keybind"] = input
+        saveData()
+    end)
+    
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 110), "Auto Bring to Vault on Finished [👑]", GuiSettings["Auto_Bring_to_Vault"], function(state)
+        GuiSettings["Auto_Bring_to_Vault"] = state
+        saveData()
+    end)
+    
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 160), "Auto Kick on Finished [👑]", GuiSettings["Auto_Kick_on_Finished"], function(state)
+        GuiSettings["Auto_Kick_on_Finished"] = state
+        saveData()
+    end)
+    
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 210), "Auto Kick on Extra Pickup [👑]", GuiSettings["Auto_Kick_on_Extra_Pickup"], function(state)
+        GuiSettings["Auto_Kick_on_Extra_Pickup"] = state
+        saveData()
+    end)
+    
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 260), "Bring on Join [👑]", GuiSettings["Bring_on_Join"], function(state)
+        GuiSettings["Bring_on_Join"] = state
+        saveData()
+    end)
+    
+    createTextInput(GuiSettings["Roblox_Cookie"], SettingsFrame, UDim2.new(0, 0, 0, 310), "Roblox Cookie", "Enter cookie", function(input)
+        GuiSettings["Roblox_Cookie"] = input
+        saveData()
+    end)
+    
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 360), "Use Cookie block method [👑]", GuiSettings["Use_Cookie_block_method"], function(state)
+        GuiSettings["Use_Cookie_block_method"] = state
+        saveData()
+    end)
+    
+    createTextInput(GuiSettings["Discord_Webhook"], SettingsFrame, UDim2.new(0, 0, 0, 410), "Discord Webhook", "Enter webhook URL", function(input)
+        GuiSettings["Discord_Webhook"] = input
+        saveData()
+    end)
+    
+    createToggle(SettingsFrame, UDim2.new(0, 0, 0, 460), "Send Webhook on complete order", GuiSettings["Send_Webhook_on_complete_order"], function(state)
+        GuiSettings["Send_Webhook_on_complete_order"] = state
+        saveData()
+    end)
+    
+    createTextInput(GuiSettings["Gui_Open_and_Close"], SettingsFrame, UDim2.new(0, 0, 0, 510), "Gui Open and Close", "Press a key", function(input)
+        GuiSettings["Gui_Open_and_Close"] = input
+        saveData()
+    end)
+    
+    createTextInput(GuiSettings["Join_Audio_id"], SettingsFrame, UDim2.new(0, 0, 0, 560), "Join Audio id", "Enter audio ID", function(input)
+        GuiSettings["Join_Audio_id"] = input
+        saveData()
+    end)
+    
+    createTextInput(GuiSettings["Goal_Audio_id"], SettingsFrame, UDim2.new(0, 0, 0, 610), "Goal Audio id", "Enter audio ID", function(input)
+        GuiSettings["Goal_Audio_id"] = input
+        saveData()
+    end)
+    
+    createTextInput(GuiSettings["Leave_Audio_id"], SettingsFrame, UDim2.new(0, 0, 0, 660), "Leave Audio id", "Enter audio ID", function(input)
+        GuiSettings["Leave_Audio_id"] = input
+        saveData()
+    end)
 
     -- Create altcontrol Frame
     local altcontrol = Instance.new("ScrollingFrame", G2L["2"])
@@ -813,6 +1252,222 @@ if isAlt(PLAYER.UserId) == false then
     G2L["8"]:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         -- Add extra space for padding and any offsets that might be required
         G2L["7"].CanvasSize = UDim2.new(0, 0, 0, G2L["8"].AbsoluteContentSize.Y + 10)
+    end)
+
+    -- Player Data System
+    local playerData = {}
+    
+    -- Initialize data for a player
+    function initializePlayerData(player)
+        if not playerData[player.Name] then
+            playerData[player.Name] = {
+                credit = tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value),
+                need = 0,
+                missing = 0,
+                shouldhave = 0,
+                last_cash_amount = 0,
+                CASH_SPENT = 0,
+                notificationPlayed = false,
+                istracking = false,
+                starter = 0,
+                need2 = 0
+            }
+        end
+    end
+    
+    -- Access player data
+    function getPlayerData(player)
+        return playerData[player.Name] or {}
+    end
+
+    -- Function to parse amount with suffixes
+    local function parseAmount(input)
+        input = input:match("^%s*(.-)%s*$")
+        local num, suffix = input:match("^(%d+%.?%d*)([kmb]?)$")
+        num = tonumber(num)
+        
+        if num then
+            if suffix == "k" then
+                return num * 1000
+            elseif suffix == "m" then
+                return num * 1000000
+            elseif suffix == "b" then
+                return num * 1000000000
+            else
+                return num
+            end
+        else
+            return 0
+        end
+    end
+
+    -- Function to create player boxes
+    local function createbox(player, THREE, LABEL1)
+        local frame = Instance.new("Frame", G2L["7"])
+        frame["BorderSizePixel"] = 0
+        frame["BackgroundColor3"] = Color3.fromRGB(28, 28, 28)
+        frame["Size"] = UDim2.new(0, 379, 0, 76)
+        frame["Position"] = UDim2.new(-0.02488, 0, -0.01718, 0)
+        frame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        frame.Name = player.Name .. "_Box"
+        
+        local uicorner1 = Instance.new("UICorner", frame)
+        
+        local PLACEHOLDER_IMAGE = "rbxassetid://0"
+        
+        local image1 = Instance.new("ImageLabel")
+        image1.Parent = frame
+        image1["BorderSizePixel"] = 0
+        image1["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)
+        image1["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        image1["Size"] = UDim2.new(0, 40, 0, 40)
+        image1["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        image1["Position"] = UDim2.new(0.01583, 0, 0.05117, 0)
+        
+        local userId = player.UserId
+        local thumbType = Enum.ThumbnailType.HeadShot
+        local thumbSize = Enum.ThumbnailSize.Size420x420
+        local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
+        
+        image1.Image = (isReady and content) or PLACEHOLDER_IMAGE
+        
+        local uicorner2 = Instance.new("UICorner", image1)
+        uicorner2["CornerRadius"] = UDim.new(1, 0)
+        
+        local stroke2 = Instance.new("UIStroke", image1)
+        stroke2["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+        stroke2["Color"] = Color3.fromRGB(49, 49, 49)
+        
+        -- Should Have label
+        local textlabel1 = Instance.new("TextLabel", frame)
+        textlabel1["BorderSizePixel"] = 0
+        textlabel1["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+        textlabel1["TextSize"] = 14
+        textlabel1["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        textlabel1["TextColor3"] = Color3.fromRGB(255, 255, 255)
+        textlabel1["BackgroundTransparency"] = 1
+        textlabel1["Size"] = UDim2.new(0, 200, 0, 26)
+        textlabel1["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        textlabel1["Text"] = LABEL1 or ""
+        textlabel1["Name"] = "ShouldHave"
+        textlabel1["Position"] = UDim2.new(0.67018, 0, -0.00049, 0)
+        
+        -- Username label
+        local label2 = Instance.new("TextLabel", frame)
+        label2["BorderSizePixel"] = 0
+        label2["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+        label2["TextSize"] = 14
+        label2["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        label2["TextColor3"] = Color3.fromRGB(255, 255, 255)
+        label2["BackgroundTransparency"] = 1
+        label2["Size"] = UDim2.new(0, 145, 0, 26)
+        label2["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        label2["Text"] = player.Name
+        label2["Name"] = "NAYM"
+        label2["Position"] = UDim2.new(0.15, 0, -0.00049, 0)
+        
+        -- Missing label
+        local label3 = Instance.new("TextLabel", frame)
+        label3["BorderSizePixel"] = 0
+        label3["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+        label3["TextSize"] = 14
+        label3["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        label3["TextColor3"] = Color3.fromRGB(64, 64, 64)
+        label3["BackgroundTransparency"] = 1
+        label3["Size"] = UDim2.new(0, 200, 0, 26)
+        label3["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        label3["Text"] = THREE or ""
+        label3["Name"] = "Missing"
+        label3["Position"] = UDim2.new(0.67018, 0, 0.21991, 0)
+        
+        -- Credit label
+        local label4 = Instance.new("TextLabel", frame)
+        label4["BorderSizePixel"] = 0
+        label4["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+        label4["TextSize"] = 14
+        label4["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        label4["TextColor3"] = Color3.fromRGB(0, 131, 0)
+        label4["BackgroundTransparency"] = 1
+        label4["Size"] = UDim2.new(0, 200, 0, 26)
+        label4["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        label4["Text"] = format(tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value))
+        label4["Name"] = "Credit"
+        label4["Position"] = UDim2.new(0.15, 0, 0.238, 0)
+        
+        -- Input textbox
+        local textbox = Instance.new("TextBox", frame)
+        textbox["TextColor3"] = Color3.fromRGB(255, 255, 255)
+        textbox["BorderSizePixel"] = 0
+        textbox["TextSize"] = 14
+        textbox["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)
+        textbox["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        textbox["Size"] = UDim2.new(0, 104, 0, 23)
+        textbox["Position"] = UDim2.new(0.67018, 0, 0.61136, 0)
+        textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        textbox["Text"] = ""
+        
+        local corner4 = Instance.new("UICorner", textbox)
+        corner4["CornerRadius"] = UDim.new(0, 5)
+        
+        local uistroke4 = Instance.new("UIStroke", textbox)
+        uistroke4["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+        uistroke4["Color"] = Color3.fromRGB(50, 50, 50)
+
+        -- Handle textbox input
+        textbox.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                local inputValue = parseAmount(textbox.Text)
+                if inputValue > 0 then
+                    local data = getPlayerData(player)
+                    data.need = inputValue
+                    data.shouldhave = data.credit + inputValue
+                    data.missing = data.shouldhave - tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
+                    
+                    textlabel1.Text = "Should have: " .. format(data.shouldhave)
+                    label3.Text = "Missing: " .. format(data.missing)
+                    
+                    textbox.Text = ""
+                end
+            end
+        end)
+
+        -- Update cash in real time
+        player:WaitForChild("DataFolder"):WaitForChild("Currency").Changed:Connect(function(newValue)
+            label4.Text = format(newValue)
+            local data = getPlayerData(player)
+            if data.need > 0 then
+                data.missing = data.shouldhave - newValue
+                label3.Text = "Missing: " .. format(data.missing)
+            end
+        end)
+
+        return frame
+    end
+
+    -- Create boxes for all players
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            initializePlayerData(player)
+            createbox(player, "", "")
+        end
+    end
+
+    -- Handle new players joining
+    game.Players.PlayerAdded:Connect(function(player)
+        wait(2) -- Wait for player to load
+        if player ~= game.Players.LocalPlayer then
+            initializePlayerData(player)
+            createbox(player, "", "")
+        end
+    end)
+
+    -- Handle players leaving
+    game.Players.PlayerRemoving:Connect(function(player)
+        local box = G2L["7"]:FindFirstChild(player.Name .. "_Box")
+        if box then
+            box:Destroy()
+        end
+        playerData[player.Name] = nil
     end)
 
     print("HOST GUI Loaded Successfully!")
