@@ -3044,26 +3044,34 @@ else -- SELLER GUI
                         "&end_cash=" .. tostring(end_cash) ..
                         "&total_bought=" .. tostring(bought or 0)
         
-        -- Build JSON manually to ensure validity
-        local json = '{'
-        json = json .. '"embeds":[{'
-        json = json .. '"title":"💰 Da Hood Order Complete",'
-        json = json .. '"description":"Order has been successfully completed!",'
-        json = json .. '"color":65280,'
-        json = json .. '"fields":['
-        json = json .. '{"name":"👤 Player","value":"' .. playerName .. ' (@' .. playerUsername .. ')","inline":true},'
-        json = json .. '{"name":"💵 Starting Cash","value":"$' .. tostring(startCash) .. '","inline":true},'
-        json = json .. '{"name":"💰 Final Cash","value":"$' .. tostring(endCash) .. '","inline":true},'
-        json = json .. '{"name":"📈 Cash Gained","value":"$' .. gainedCashText .. '","inline":true},'
-        json = json .. '{"name":"🛒 Items Bought","value":"' .. tostring(bought or 0) .. '","inline":true},'
-        json = json .. '{"name":"🕐 Time","value":"' .. os.date("%H:%M:%S") .. '","inline":true}'
-        json = json .. '],'
-        json = json .. '"image":{"url":"' .. imageUrl .. '"},'
-        json = json .. '"thumbnail":{"url":"https://www.roblox.com/headshot-thumbnail/image?userId=' .. tostring(userid) .. '&width=150&height=150&format=png"},'
-        json = json .. '"footer":{"text":"Da Hood Cash Service"},'
-        json = json .. '"timestamp":"' .. os.date("!%Y-%m-%dT%H:%M:%SZ") .. '"'
-        json = json .. '}]'
-        json = json .. '}'
+        -- Create simple message with image using HttpService JSONEncode
+        local webhookData = {
+            content = "**Da Hood Order Complete!**\n" ..
+                     "Player: " .. playerName .. " (@" .. playerUsername .. ")\n" ..
+                     "Starting Cash: $" .. tostring(startCash) .. "\n" ..
+                     "Final Cash: $" .. tostring(endCash) .. "\n" ..
+                     "Cash Gained: $" .. gainedCashText .. "\n" ..
+                     "Items Bought: " .. tostring(bought or 0) .. "\n" ..
+                     "Time: " .. os.date("%H:%M:%S"),
+            embeds = {
+                {
+                    image = {
+                        url = imageUrl
+                    }
+                }
+            }
+        }
+        
+        -- Convert to JSON safely
+        local jsonBody
+        local success, err = pcall(function()
+            jsonBody = HttpService:JSONEncode(webhookData)
+        end)
+        
+        if not success then
+            print("Failed to encode JSON: " .. tostring(err))
+            return
+        end
 
         print("Sending webhook...")
 
@@ -3074,7 +3082,7 @@ else -- SELLER GUI
             Headers = {
                 ["Content-Type"] = "application/json"
             },
-            Body = json
+            Body = jsonBody
         }
 
         -- Send the HTTP request to Discord webhook
