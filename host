@@ -3013,7 +3013,7 @@ else -- SELLER GUI
         print("🚀 Sending to Discord bot: " .. botUrl)
         
         -- Send request to Discord bot
-        local success, response = pcall(function()
+        local success, response = pcall(function())
     
         -- Check if the response is successful
         if response.Success then
