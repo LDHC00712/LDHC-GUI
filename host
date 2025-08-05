@@ -596,6 +596,7 @@ local function createNavButton(parent, position, text, targetFrame)
 
     -- Add functionality for button click
     button.MouseButton1Click:Connect(function()
+        print("Button clicked:", text)  -- Debug print
         -- Hide all frames first
         G2L["7"].Visible = false
         MiscFrame.Visible = false
@@ -604,6 +605,10 @@ local function createNavButton(parent, position, text, targetFrame)
         -- Show the corresponding frame for the button clicked
         if targetFrame then
             targetFrame.Visible = true
+            print("Showing frame for:", text)  -- Debug print
+            print("Frame visibility set to:", targetFrame.Visible)
+            print("Frame size:", targetFrame.Size)
+            print("Frame position:", targetFrame.Position)
         end
     end)
 
@@ -611,9 +616,17 @@ local function createNavButton(parent, position, text, targetFrame)
 end
 
 -- Create navigation buttons
-createNavButton(sideFrame, UDim2.new(0, 10, 0, 20), "Players", G2L["7"])
-createNavButton(sideFrame, UDim2.new(0, 10, 0, 70), "Host", MiscFrame)
-createNavButton(sideFrame, UDim2.new(0, 10, 0, 120), "Settings", SettingsFrame)
+local playersButton = createNavButton(sideFrame, UDim2.new(0, 10, 0, 20), "Players", G2L["7"])
+local hostButton = createNavButton(sideFrame, UDim2.new(0, 10, 0, 70), "Host", MiscFrame)
+local settingsButton = createNavButton(sideFrame, UDim2.new(0, 10, 0, 120), "Settings", SettingsFrame)
+
+print("Navigation buttons created!")
+print("Players button exists:", playersButton ~= nil)
+print("Host button exists:", hostButton ~= nil)
+print("Settings button exists:", settingsButton ~= nil)
+print("Players frame exists:", G2L["7"] ~= nil)
+print("MiscFrame exists:", MiscFrame ~= nil)
+print("SettingsFrame exists:", SettingsFrame ~= nil)
 
 -- StarterGui.ScreenGui.Frame.UICorner
 G2L["3"] = Instance.new("UICorner", G2L["2"])
@@ -629,8 +642,12 @@ G2L["7"]["Size"] = UDim2.new(0, 410, 0, 296)
 G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
 G2L["7"]["Position"] = UDim2.new(0.24, 0, 0, 0)
 G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-G2L["7"]["BackgroundTransparency"] = 1
+G2L["7"]["BackgroundTransparency"] = 0.95  -- Make slightly visible for debugging
+G2L["7"]["BackgroundColor3"] = Color3.fromRGB(100, 100, 100)  -- Light gray background
 G2L["7"].Visible = false  -- Initially hidden
+
+print("Players frame (G2L[7]) created with size:", G2L["7"].Size)
+print("Players frame position:", G2L["7"].Position)
 
 -- StarterGui.ScreenGui.Frame.ScrollingFrame.UIListLayout
 G2L["8"] = Instance.new("UIListLayout", G2L["7"])
@@ -787,6 +804,8 @@ end
 
 -- Function to create player box (simplified for HOST)
 local function createbox(player, THREE, LABEL1)
+    print("Creating player box for:", player.Name)
+    
     local frame = Instance.new("Frame", G2L["7"])
     frame["BorderSizePixel"] = 0
     frame["BackgroundColor3"] = Color3.fromRGB(28, 28, 28)
@@ -794,6 +813,8 @@ local function createbox(player, THREE, LABEL1)
     frame["Position"] = UDim2.new(-0.02488, 0, -0.01718, 0)
     frame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     frame.Name = player.Name .. "_Box"  -- Naming the box with player name
+    
+    print("Player box frame created for:", player.Name, "- Frame exists:", frame ~= nil)
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.UICorner
     local uicorner1 = Instance.new("UICorner", frame)
@@ -992,6 +1013,9 @@ local function createbox(player, THREE, LABEL1)
             label3.Text = "Missing: " .. format(data.missing)
         end
     end)
+    
+    print("Player box completed for:", player.Name)
+    return frame
 end
 
 -- Function to delete player box
@@ -1005,10 +1029,30 @@ end
 -- Initialize for existing players
 for _, player in pairs(game.Players:GetPlayers()) do
     if player ~= game.Players.LocalPlayer then
+        print("Creating box for existing player:", player.Name)
         initializePlayerData(player)
         createbox(player, "", "")
     end
 end
+
+print("Finished creating boxes for existing players")
+
+-- Add a test frame to make sure Players tab shows something
+local testFrame = Instance.new("Frame", G2L["7"])
+testFrame.Size = UDim2.new(0, 379, 0, 50)
+testFrame.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+testFrame.Name = "TestFrame"
+
+local testLabel = Instance.new("TextLabel", testFrame)
+testLabel.Size = UDim2.new(1, 0, 1, 0)
+testLabel.BackgroundTransparency = 1
+testLabel.Text = "Players Tab is Working! Players will appear here."
+testLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+testLabel.Font = Enum.Font.GothamBold
+testLabel.TextSize = 16
+
+print("Test frame added to Players tab")
+print("G2L[7] children count:", #G2L["7"]:GetChildren())
 
 -- Connect events for new players
 game.Players.PlayerAdded:Connect(function(player)
@@ -1078,6 +1122,10 @@ end)
 -- Set initial visibility
 G2L["7"].Visible = true  -- Show Players section by default
 G2L["1"].Enabled = true
+
+print("Initial setup complete!")
+print("Players frame visible:", G2L["7"].Visible)
+print("Number of existing players:", #game.Players:GetPlayers() - 1)  -- Exclude LocalPlayer
 
 -- Update player cash values in real time
 spawn(function()
