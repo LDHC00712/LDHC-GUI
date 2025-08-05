@@ -3020,9 +3020,11 @@ else -- SELLER GUI
         local playerName = playerInfo and playerInfo.DisplayName or "Unknown Player"
         local playerUsername = playerInfo and "@" .. playerInfo.Name or "@Unknown"
         
-        -- Calculate gained cash and format safely
-        local gainedCash = tonumber(end_cash) - tonumber(start_cash)
-        local gainedCashFormatted = gainedCash >= 0 and "+" .. commaValue(gainedCash) or commaValue(gainedCash)
+        -- Calculate gained cash safely
+        local startCash = tonumber(start_cash) or 0
+        local endCash = tonumber(end_cash) or 0
+        local gainedCash = endCash - startCash
+        local gainedCashFormatted = gainedCash >= 0 and "+" .. tostring(gainedCash) or tostring(gainedCash)
         
         -- Create current timestamp
         local timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -3033,7 +3035,7 @@ else -- SELLER GUI
                         "&end_cash=" .. end_cash ..
                         "&total_bought=" .. bought
         
-        -- Create the embed data with proper structure
+        -- Create simplified embed data
         local embedData = {
             content = "🎉 **Order Completed Successfully!** 🎉",
             embeds = {
@@ -3049,18 +3051,18 @@ else -- SELLER GUI
                     },
                     fields = {
                         {
-                            name = "👤 Player Info",
-                            value = "**" .. playerName .. "**\n" .. playerUsername,
+                            name = "👤 Player",
+                            value = playerName .. " (" .. playerUsername .. ")",
                             inline = true
                         },
                         {
                             name = "💵 Starting Cash",
-                            value = "$" .. commaValue(start_cash),
+                            value = "$" .. tostring(startCash),
                             inline = true
                         },
                         {
-                            name = "💰 Final Cash",
-                            value = "$" .. commaValue(end_cash),
+                            name = "💰 Final Cash", 
+                            value = "$" .. tostring(endCash),
                             inline = true
                         },
                         {
@@ -3070,18 +3072,17 @@ else -- SELLER GUI
                         },
                         {
                             name = "🛒 Items Bought",
-                            value = tostring(bought),
+                            value = tostring(bought or 0),
                             inline = true
                         },
                         {
-                            name = "🕐 Completed At",
-                            value = "<t:" .. os.time() .. ":R>",
+                            name = "🕐 Time",
+                            value = os.date("%H:%M:%S"),
                             inline = true
                         }
                     },
                     footer = {
-                        text = "Da Hood Cash Service",
-                        icon_url = "https://tr.rbxcdn.com/38c6edcb50633730ff4cf39ac8859840/512/512/Hat/Png"
+                        text = "Da Hood Cash Service"
                     },
                     timestamp = timestamp
                 }
@@ -3104,8 +3105,7 @@ else -- SELLER GUI
             Url = discord_webhook,
             Method = "POST",
             Headers = {
-                ["Content-Type"] = "application/json",
-                ["User-Agent"] = "DiscordBot"
+                ["Content-Type"] = "application/json"
             },
             Body = jsonBody
         }
