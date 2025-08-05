@@ -3047,23 +3047,9 @@ else -- SELLER GUI
                        "Items Bought: " .. tostring(bought or 0) .. " " ..
                        "Time: " .. os.date("%H:%M:%S")
         
-        -- Create the simplest possible webhook data
-        local webhookData = {
-            content = message
-        }
+        -- Create JSON manually (avoid HttpService JSONEncode issues)
+        local jsonBody = '{"content":"' .. message .. '"}'
         
-        -- Convert to JSON safely
-        local jsonBody
-        local success, err = pcall(function()
-            jsonBody = HttpService:JSONEncode(webhookData)
-        end)
-        
-        if not success then
-            print("Failed to encode JSON: " .. tostring(err))
-            return
-        end
-
-        -- Debug: print the JSON to see what's wrong
         print("JSON Body: " .. tostring(jsonBody))
         print("JSON Length: " .. string.len(jsonBody or ""))
         print("Webhook URL: " .. tostring(discord_webhook))
