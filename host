@@ -3063,6 +3063,10 @@ else -- SELLER GUI
             return
         end
 
+        -- Debug: print the JSON to see what's wrong
+        print("JSON Body: " .. tostring(jsonBody))
+        print("JSON Length: " .. string.len(jsonBody or ""))
+
         print("Sending webhook...")
 
         -- Prepare the request options for Discord webhook
