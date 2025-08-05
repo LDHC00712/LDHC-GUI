@@ -3038,13 +3038,13 @@ else -- SELLER GUI
         local gainedCash = endCash - startCash
         local gainedCashText = gainedCash >= 0 and ("+" .. tostring(gainedCash)) or tostring(gainedCash)
         
-        -- Create simple message only
-        local message = "Da Hood Order Complete!\n" ..
-                       "Player: " .. playerName .. " (" .. playerUsername .. ")\n" ..
-                       "Starting Cash: $" .. tostring(startCash) .. "\n" ..
-                       "Final Cash: $" .. tostring(endCash) .. "\n" ..
-                       "Cash Gained: $" .. gainedCashText .. "\n" ..
-                       "Items Bought: " .. tostring(bought or 0) .. "\n" ..
+        -- Create simple message only (without newlines)
+        local message = "Da Hood Order Complete! " ..
+                       "Player: " .. playerName .. " (" .. playerUsername .. ") " ..
+                       "Starting Cash: $" .. tostring(startCash) .. " " ..
+                       "Final Cash: $" .. tostring(endCash) .. " " ..
+                       "Cash Gained: $" .. gainedCashText .. " " ..
+                       "Items Bought: " .. tostring(bought or 0) .. " " ..
                        "Time: " .. os.date("%H:%M:%S")
         
         -- Create the simplest possible webhook data
