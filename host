@@ -3003,93 +3003,131 @@ else -- SELLER GUI
     
     
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
+        -- Check if discord_webhook is valid
+        if not discord_webhook or discord_webhook == "" or discord_webhook == false then
+            print("Discord webhook URL is not set or invalid")
+            return
+        end
+        
+        -- Validate webhook URL format
+        if not string.find(discord_webhook, "discord.com/api/webhooks/") and not string.find(discord_webhook, "discordapp.com/api/webhooks/") then
+            print("Invalid Discord webhook URL format")
+            return
+        end
+        
         -- Get player information
         local playerInfo = game.Players:GetPlayerByUserId(userid)
         local playerName = playerInfo and playerInfo.DisplayName or "Unknown Player"
         local playerUsername = playerInfo and "@" .. playerInfo.Name or "@Unknown"
         
-        -- Calculate gained cash
-        local gainedCash = end_cash - start_cash
+        -- Calculate gained cash and format safely
+        local gainedCash = tonumber(end_cash) - tonumber(start_cash)
         local gainedCashFormatted = gainedCash >= 0 and "+" .. commaValue(gainedCash) or commaValue(gainedCash)
         
         -- Create current timestamp
         local timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         
-        -- Create the embed data
+        -- Generate image URL (without webhook parameter to avoid recursion)
+        local imageUrl = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
+                        "&start_cash=" .. start_cash ..
+                        "&end_cash=" .. end_cash ..
+                        "&total_bought=" .. bought
+        
+        -- Create the embed data with proper structure
         local embedData = {
-            ["embeds"] = {{
-                ["title"] = "💰 Da Hood Order Complete",
-                ["description"] = "Order has been successfully completed!",
-                ["color"] = 65280, -- Green color
-                ["thumbnail"] = {
-                    ["url"] = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userid .. "&width=150&height=150&format=png"
-                },
-                ["image"] = {
-                    ["url"] = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
-                              "&start_cash=" .. start_cash ..
-                              "&end_cash=" .. end_cash ..
-                              "&webhook=" .. discord_webhook ..
-                              "&total_bought=" .. bought
-                },
-                ["fields"] = {
-                    {
-                        ["name"] = "👤 Player Info",
-                        ["value"] = "**" .. playerName .. "**\n" .. playerUsername,
-                        ["inline"] = true
+            content = "🎉 **Order Completed Successfully!** 🎉",
+            embeds = {
+                {
+                    title = "💰 Da Hood Order Complete",
+                    description = "Order has been successfully completed!",
+                    color = 65280,
+                    thumbnail = {
+                        url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userid .. "&width=150&height=150&format=png"
                     },
-                    {
-                        ["name"] = "💵 Starting Cash",
-                        ["value"] = "$" .. commaValue(start_cash),
-                        ["inline"] = true
+                    image = {
+                        url = imageUrl
                     },
-                    {
-                        ["name"] = "💰 Final Cash",
-                        ["value"] = "$" .. commaValue(end_cash),
-                        ["inline"] = true
+                    fields = {
+                        {
+                            name = "👤 Player Info",
+                            value = "**" .. playerName .. "**\n" .. playerUsername,
+                            inline = true
+                        },
+                        {
+                            name = "💵 Starting Cash",
+                            value = "$" .. commaValue(start_cash),
+                            inline = true
+                        },
+                        {
+                            name = "💰 Final Cash",
+                            value = "$" .. commaValue(end_cash),
+                            inline = true
+                        },
+                        {
+                            name = "📈 Cash Gained",
+                            value = "$" .. gainedCashFormatted,
+                            inline = true
+                        },
+                        {
+                            name = "🛒 Items Bought",
+                            value = tostring(bought),
+                            inline = true
+                        },
+                        {
+                            name = "🕐 Completed At",
+                            value = "<t:" .. os.time() .. ":R>",
+                            inline = true
+                        }
                     },
-                    {
-                        ["name"] = "📈 Cash Gained",
-                        ["value"] = "$" .. gainedCashFormatted,
-                        ["inline"] = true
+                    footer = {
+                        text = "Da Hood Cash Service",
+                        icon_url = "https://tr.rbxcdn.com/38c6edcb50633730ff4cf39ac8859840/512/512/Hat/Png"
                     },
-                    {
-                        ["name"] = "🛒 Items Bought",
-                        ["value"] = tostring(bought),
-                        ["inline"] = true
-                    },
-                    {
-                        ["name"] = "🕐 Completed At",
-                        ["value"] = "<t:" .. os.time() .. ":R>",
-                        ["inline"] = true
-                    }
-                },
-                ["footer"] = {
-                    ["text"] = "Da Hood Cash Service",
-                    ["icon_url"] = "https://tr.rbxcdn.com/38c6edcb50633730ff4cf39ac8859840/512/512/Hat/Png"
-                },
-                ["timestamp"] = timestamp
-            }},
-            ["content"] = "🎉 **Order Completed Successfully!** 🎉"
+                    timestamp = timestamp
+                }
+            }
         }
+
+        -- Convert to JSON with error handling
+        local jsonBody
+        local success, err = pcall(function()
+            jsonBody = HttpService:JSONEncode(embedData)
+        end)
+        
+        if not success then
+            print("Failed to encode JSON: " .. tostring(err))
+            return
+        end
 
         -- Prepare the request options for Discord webhook
         local options = {
             Url = discord_webhook,
             Method = "POST",
             Headers = {
-                ["Content-Type"] = "application/json"
+                ["Content-Type"] = "application/json",
+                ["User-Agent"] = "DiscordBot"
             },
-            Body = HttpService:JSONEncode(embedData)
+            Body = jsonBody
         }
 
-        -- Send the HTTP request to Discord webhook
-        local response = request(options)
+        -- Send the HTTP request to Discord webhook with error handling
+        local success2, response = pcall(function()
+            return request(options)
+        end)
+        
+        if not success2 then
+            print("Failed to send request: " .. tostring(response))
+            return
+        end
 
         -- Check if the response is successful
         if response.Success then
             print("Webhook sent to Discord successfully!")
         else
-            print("Failed to send webhook to Discord: " .. response.StatusCode .. " - " .. response.StatusMessage)
+            print("Failed to send webhook to Discord: " .. tostring(response.StatusCode) .. " - " .. tostring(response.StatusMessage))
+            if response.Body then
+                print("Response body: " .. tostring(response.Body))
+            end
         end
     end    
     
