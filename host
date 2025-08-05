@@ -3040,57 +3040,27 @@ else -- SELLER GUI
                         "&end_cash=" .. tostring(end_cash) ..
                         "&total_bought=" .. tostring(bought or 0)
         
-        -- Create JSON manually to avoid encoding issues
-        local jsonBody = '{'
-        jsonBody = jsonBody .. '"content": "🎉 **Order Completed Successfully!** 🎉",'
-        jsonBody = jsonBody .. '"embeds": [{'
-        jsonBody = jsonBody .. '"title": "💰 Da Hood Order Complete",'
-        jsonBody = jsonBody .. '"description": "Order has been successfully completed!",'
-        jsonBody = jsonBody .. '"color": 65280,'
-        jsonBody = jsonBody .. '"thumbnail": {'
-        jsonBody = jsonBody .. '"url": "https://www.roblox.com/headshot-thumbnail/image?userId=' .. tostring(userid) .. '&width=150&height=150&format=png"'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '"image": {'
-        jsonBody = jsonBody .. '"url": "' .. imageUrl .. '"'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '"fields": ['
-        jsonBody = jsonBody .. '{'
-        jsonBody = jsonBody .. '"name": "👤 Player",'
-        jsonBody = jsonBody .. '"value": "' .. playerName .. ' (' .. playerUsername .. ')",'
-        jsonBody = jsonBody .. '"inline": true'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '{'
-        jsonBody = jsonBody .. '"name": "💵 Starting Cash",'
-        jsonBody = jsonBody .. '"value": "$' .. tostring(startCash) .. '",'
-        jsonBody = jsonBody .. '"inline": true'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '{'
-        jsonBody = jsonBody .. '"name": "💰 Final Cash",'
-        jsonBody = jsonBody .. '"value": "$' .. tostring(endCash) .. '",'
-        jsonBody = jsonBody .. '"inline": true'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '{'
-        jsonBody = jsonBody .. '"name": "📈 Cash Gained",'
-        jsonBody = jsonBody .. '"value": "$' .. gainedCashText .. '",'
-        jsonBody = jsonBody .. '"inline": true'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '{'
-        jsonBody = jsonBody .. '"name": "🛒 Items Bought",'
-        jsonBody = jsonBody .. '"value": "' .. tostring(bought or 0) .. '",'
-        jsonBody = jsonBody .. '"inline": true'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '{'
-        jsonBody = jsonBody .. '"name": "🕐 Time",'
-        jsonBody = jsonBody .. '"value": "' .. os.date("%H:%M:%S") .. '",'
-        jsonBody = jsonBody .. '"inline": true'
-        jsonBody = jsonBody .. '}'
-        jsonBody = jsonBody .. '],'
-        jsonBody = jsonBody .. '"footer": {'
-        jsonBody = jsonBody .. '"text": "Da Hood Cash Service"'
-        jsonBody = jsonBody .. '},'
-        jsonBody = jsonBody .. '"timestamp": "' .. os.date("!%Y-%m-%dT%H:%M:%SZ") .. '"'
-        jsonBody = jsonBody .. '}]'
-        jsonBody = jsonBody .. '}'
+        -- Create a simple message first (test basic webhook)
+        local simpleMessage = {
+            content = "🎉 **Order Completed Successfully!** 🎉\n" ..
+                     "👤 Player: " .. playerName .. " (" .. playerUsername .. ")\n" ..
+                     "💵 Starting Cash: $" .. tostring(startCash) .. "\n" ..
+                     "💰 Final Cash: $" .. tostring(endCash) .. "\n" ..
+                     "📈 Cash Gained: $" .. gainedCashText .. "\n" ..
+                     "🛒 Items Bought: " .. tostring(bought or 0) .. "\n" ..
+                     "🖼️ Screenshot: " .. imageUrl
+        }
+        
+        -- Convert to JSON with Roblox's HttpService
+        local jsonBody
+        local success, err = pcall(function()
+            jsonBody = HttpService:JSONEncode(simpleMessage)
+        end)
+        
+        if not success then
+            print("Failed to encode JSON: " .. tostring(err))
+            return
+        end
 
         print("JSON Body: " .. jsonBody) -- Debug print
 
