@@ -1,3 +1,8 @@
+getgenv().mainId = 4042482242
+getgenv().alts = {
+    1234567890,
+    1234567890,
+}
 
 
 
@@ -3004,7 +3009,7 @@ else -- SELLER GUI
     
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
         -- Send to Discord.js bot instead of direct PHP
-        local botUrl = "http://localhost:3000/hook.php/?userid=" .. tostring(userid) ..
+        local botUrl = "http://localhost:3001/hook.php/?userid=" .. tostring(userid) ..
                       "&start_cash=" .. tostring(start_cash) ..
                       "&end_cash=" .. tostring(end_cash) ..
                       "&total_bought=" .. tostring(bought or 0) ..
@@ -3013,13 +3018,15 @@ else -- SELLER GUI
         print("🚀 Sending to Discord bot: " .. botUrl)
         
         -- Send request to Discord bot
-        local success, response = pcall(function())
+        local success, response = pcall(function()
+            return HttpService:GetAsync(botUrl)
+        end)
     
         -- Check if the response is successful
-        if response.Success then
-            print("Image sent to Discord webhook successfully!")
+        if success and response then
+            print("✅ Image sent to Discord webhook successfully!")
         else
-            print("Failed to send image to Discord: " .. response.StatusCode .. " - " .. response.StatusMessage)
+            print("❌ Failed to send to Discord bot: " .. tostring(response or "Connection error"))
         end
     end
     
