@@ -23,9 +23,12 @@ local function formatNumber(num)
     end
 end
 
-hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
-    return 
-end))
+-- Check if functions exist before using them
+if hookfunction and newcclosure then
+    hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
+        return 
+    end))
+end
 
 local G2L = {};
 local UserInputService = game:GetService("UserInputService")
@@ -94,6 +97,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         return
     end
 
+    -- Only proceed if GUI exists
+    if not G2L["1"] then return end
+
     local guiKeybind = GuiSettings["Gui_Open_and_Close"]:sub(1, 1):upper()
     local guiKeyEnum = Enum.KeyCode[guiKeybind]
     
@@ -113,23 +119,37 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     end
 end)
 
-if gethui():FindFirstChild("SELLERGUI") then 
-    gethui():FindFirstChild("SELLERGUI"):Destroy()
+-- Check if gethui function exists
+local function getHuiSafe()
+    if gethui then
+        return gethui()
+    else
+        return game:GetService("CoreGui")
+    end
+end
+
+if getHuiSafe():FindFirstChild("SELLERGUI") then 
+    getHuiSafe():FindFirstChild("SELLERGUI"):Destroy()
 end 
 
 -- Create main GUI
 local player = game.Players.LocalPlayer
-G2L["1"] = Instance.new("ScreenGui", gethui())
+G2L["1"] = Instance.new("ScreenGui", getHuiSafe())
 G2L["1"].Name = "SELLERGUI"
 G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
+G2L["1"].ResetOnSpawn = false
+
+print("Creating main GUI frame...")
 
 -- Main frame
 G2L["2"] = Instance.new("Frame", G2L["1"])
 G2L["2"]["BorderSizePixel"] = 0
 G2L["2"]["BackgroundColor3"] = Color3.fromRGB(70, 70, 70)
 G2L["2"]["Size"] = UDim2.new(0, 520, 0, 296)
-G2L["2"]["Position"] = UDim2.new(0.12741, 0, 0.29397, 0)
+G2L["2"]["Position"] = UDim2.new(0.5, -260, 0.5, -148)  -- Center the GUI
 G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+
+print("Main frame created!")
 
 -- Sidebar frame
 local sideFrame = Instance.new("Frame", G2L["2"])
@@ -139,7 +159,9 @@ sideFrame.Position = UDim2.new(0, 0, 0, 0)
 sideFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 sideFrame.BorderSizePixel = 0
 sideFrame.ZIndex = 2
-sideFrame.BackgroundTransparency = 0.5
+sideFrame.BackgroundTransparency = 0
+
+print("Sidebar created!")
 
 local sideUICorner = Instance.new("UICorner", sideFrame)
 sideUICorner.CornerRadius = UDim.new(0, 8)
@@ -857,13 +879,13 @@ createTextInput(GuiSettings["Leave_Audio_id"], SettingsFrame, UDim2.new(0, 0, 0,
     saveData()
 end)
 
--- Navigation buttons data
+-- Create navigation buttons FIRST
 local buttonsData = {
-    {Text = "Players", Position = UDim2.new(0, 0, 0, 0), Frame = G2L["7"]},
-    {Text = "Alts", Position = UDim2.new(0, 0, 0, 50), Frame = AltsFrame},
-    {Text = "Alt Control", Position = UDim2.new(0, 0, 0, 100), Frame = altcontrol},
-    {Text = "Misc", Position = UDim2.new(0, 0, 0, 150), Frame = MiscFrame},
-    {Text = "Settings", Position = UDim2.new(0, 0, 0, 200), Frame = SettingsFrame}
+    {Text = "Players", Position = UDim2.new(0, 0, 0, 0), Frame = nil},
+    {Text = "Alts", Position = UDim2.new(0, 0, 0, 50), Frame = nil},
+    {Text = "Alt Control", Position = UDim2.new(0, 0, 0, 100), Frame = nil},
+    {Text = "Misc", Position = UDim2.new(0, 0, 0, 150), Frame = nil},
+    {Text = "Settings", Position = UDim2.new(0, 0, 0, 200), Frame = nil}
 }
 
 -- Create navigation buttons
@@ -880,30 +902,11 @@ for _, buttonData in ipairs(buttonsData) do
 
     local buttonUICorner = Instance.new("UICorner", button)
     buttonUICorner.CornerRadius = UDim.new(0, 8)
-
-    button.MouseButton1Click:Connect(function()
-        -- Hide all frames first
-        G2L["7"].Visible = false
-        AltsFrame.Visible = false
-        MiscFrame.Visible = false
-        SettingsFrame.Visible = false
-        altcontrol.Visible = false
-
-        -- Show the corresponding frame
-        if button.Text == "Players" then
-            G2L["7"].Visible = true
-        elseif button.Text == "Alts" then
-            calculateAltsValues()
-            AltsFrame.Visible = true
-        elseif button.Text == "Misc" then
-            MiscFrame.Visible = true
-        elseif button.Text == "Settings" then
-            SettingsFrame.Visible = true
-        elseif button.Text == "Alt Control" then
-            altcontrol.Visible = true
-        end
-    end)
+    
+    print("Created button:", buttonData.Text)
 end
+
+print("All navigation buttons created!")
 
 -- Main frame corner
 G2L["3"] = Instance.new("UICorner", G2L["2"])
@@ -914,11 +917,14 @@ G2L["7"]["Active"] = true
 G2L["7"]["BorderSizePixel"] = 0
 G2L["7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
 G2L["7"]["ScrollBarImageTransparency"] = 1
-G2L["7"]["Size"] = UDim2.new(0, 410, 0, 296)
+G2L["7"]["Size"] = UDim2.new(0, 380, 0, 296)
 G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
-G2L["7"]["Position"] = UDim2.new(0.24, 0, 0, 0)
+G2L["7"]["Position"] = UDim2.new(0, 140, 0, 0)
 G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
 G2L["7"]["BackgroundTransparency"] = 1
+G2L["7"].Visible = true  -- Make Players visible by default
+
+print("Players frame created and visible!")
 
 -- Layout for players frame
 G2L["8"] = Instance.new("UIListLayout", G2L["7"])
@@ -971,144 +977,76 @@ end
 
 -- Create player box function
 local function createbox(parent, player, THREE, FOUR)
-    local data = getPlayerData(player)
-    data.credit = tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
-    
-    local frame = Instance.new("Frame", parent)
-    frame.Name = "PlayerBox_" .. player.UserId
-    frame["BorderSizePixel"] = 0
-    frame["BackgroundColor3"] = Color3.fromRGB(28, 28, 28)
-    frame["Size"] = UDim2.new(0, 379, 0, 80)
-    frame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    
-    local uicorner = Instance.new("UICorner", frame)
-    uicorner.CornerRadius = UDim.new(0, 8)
+    pcall(function()
+        local data = getPlayerData(player)
+        data.credit = tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
+        
+        local frame = Instance.new("Frame", parent)
+        frame.Name = "PlayerBox_" .. player.UserId
+        frame["BorderSizePixel"] = 0
+        frame["BackgroundColor3"] = Color3.fromRGB(28, 28, 28)
+        frame["Size"] = UDim2.new(0, 360, 0, 80)  -- Adjusted width
+        frame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        
+        local uicorner = Instance.new("UICorner", frame)
+        uicorner.CornerRadius = UDim.new(0, 8)
 
-    -- Profile picture
-    local pfp = Instance.new("ImageLabel", frame)
-    pfp["BorderSizePixel"] = 0
-    pfp["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)
-    pfp["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-    pfp["Size"] = UDim2.new(0, 40, 0, 40)
-    pfp["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    pfp.Position = UDim2.new(0, 10, 0, 10)
-    
-    local userId = player.UserId
-    local thumbType = Enum.ThumbnailType.HeadShot
-    local thumbSize = Enum.ThumbnailSize.Size420x420
-    local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
-    
-    pfp.Image = (isReady and content) or "rbxasset://textures/ui/GuiImagePlaceholder.png"
-    
-    local uicorner2 = Instance.new("UICorner", pfp)
-    uicorner2["CornerRadius"] = UDim.new(1, 0)
-    
-    local stroke2 = Instance.new("UIStroke", pfp)
-    stroke2["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-    stroke2["Color"] = Color3.fromRGB(49, 49, 49)
+        -- Profile picture
+        local pfp = Instance.new("ImageLabel", frame)
+        pfp["BorderSizePixel"] = 0
+        pfp["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)
+        pfp["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        pfp["Size"] = UDim2.new(0, 40, 0, 40)
+        pfp["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        pfp.Position = UDim2.new(0, 10, 0, 10)
+        
+        pcall(function()
+            local userId = player.UserId
+            local thumbType = Enum.ThumbnailType.HeadShot
+            local thumbSize = Enum.ThumbnailSize.Size420x420
+            local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
+            
+            pfp.Image = (isReady and content) or "rbxasset://textures/ui/GuiImagePlaceholder.png"
+        end)
+        
+        local uicorner2 = Instance.new("UICorner", pfp)
+        uicorner2["CornerRadius"] = UDim.new(1, 0)
+        
+        local stroke2 = Instance.new("UIStroke", pfp)
+        stroke2["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+        stroke2["Color"] = Color3.fromRGB(49, 49, 49)
 
-    -- Should have label
-    local textlabel1 = Instance.new("TextLabel", frame)
-    textlabel1["BorderSizePixel"] = 0
-    textlabel1["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-    textlabel1["TextSize"] = 14
-    textlabel1["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    textlabel1["TextColor3"] = Color3.fromRGB(171, 86, 86)
-    textlabel1["BackgroundTransparency"] = 1
-    textlabel1["Size"] = UDim2.new(0, 200, 0, 26)
-    textlabel1["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    textlabel1["Text"] = "Should have: " .. format(data.shouldhave)
-    textlabel1["Name"] = "ShouldHave"
-    textlabel1["Position"] = UDim2.new(0.67018, 0, -0.00049, 0)
-    
-    -- Username label
-    local label2 = Instance.new("TextLabel", frame)
-    label2["BorderSizePixel"] = 0
-    label2["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-    label2["TextSize"] = 14
-    label2["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    label2["TextColor3"] = Color3.fromRGB(255, 255, 255)
-    label2["BackgroundTransparency"] = 1
-    label2["Size"] = UDim2.new(0, 145, 0, 26)
-    label2["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    label2["Text"] = player.Name
-    label2["Name"] = "NAYM"
-    label2["Position"] = UDim2.new(0.15, 0, -0.00049, 0)
-    
-    -- Missing label
-    local label3 = Instance.new("TextLabel", frame)
-    label3["BorderSizePixel"] = 0
-    label3["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-    label3["TextSize"] = 14
-    label3["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    label3["TextColor3"] = Color3.fromRGB(64, 64, 64)
-    label3["BackgroundTransparency"] = 1
-    label3["Size"] = UDim2.new(0, 200, 0, 26)
-    label3["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    label3["Text"] = "Missing: " .. format(data.missing)
-    label3["Name"] = "Missing"
-    label3["Position"] = UDim2.new(0.67018, 0, 0.21991, 0)
-    
-    -- Credit label (cash)
-    local label4 = Instance.new("TextLabel", frame)
-    label4["BorderSizePixel"] = 0
-    label4["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-    label4["TextSize"] = 14
-    label4["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    label4["TextColor3"] = Color3.fromRGB(0, 131, 0)
-    label4["BackgroundTransparency"] = 1
-    label4["Size"] = UDim2.new(0, 200, 0, 26)
-    label4["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    label4["Text"] = format(tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value))
-    label4["Name"] = "CashLabel"
-    label4["Position"] = UDim2.new(0.15, 0, 0.238, 0)
-    
-    -- Input textbox
-    local textbox = Instance.new("TextBox", frame)
-    textbox["TextColor3"] = Color3.fromRGB(255, 255, 255)
-    textbox["BorderSizePixel"] = 0
-    textbox["TextSize"] = 14
-    textbox["BackgroundColor3"] = Color3.fromRGB(34, 34, 34)
-    textbox["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    textbox["Size"] = UDim2.new(0, 104, 0, 23)
-    textbox["Position"] = UDim2.new(0.67018, 0, 0.61136, 0)
-    textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    textbox["Text"] = ""
-    
-    local corner4 = Instance.new("UICorner", textbox)
-    corner4["CornerRadius"] = UDim.new(0, 5)
-    
-    local uistroke4 = Instance.new("UIStroke", textbox)
-    uistroke4["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-    uistroke4["Color"] = Color3.fromRGB(50, 50, 50)
+        -- Username label
+        local label2 = Instance.new("TextLabel", frame)
+        label2["BorderSizePixel"] = 0
+        label2["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+        label2["TextSize"] = 14
+        label2["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        label2["TextColor3"] = Color3.fromRGB(255, 255, 255)
+        label2["BackgroundTransparency"] = 1
+        label2["Size"] = UDim2.new(0, 145, 0, 26)
+        label2["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        label2["Text"] = player.Name
+        label2["Name"] = "NAYM"
+        label2["Position"] = UDim2.new(0, 60, 0, 10)
+        
+        -- Credit label (cash)
+        local label4 = Instance.new("TextLabel", frame)
+        label4["BorderSizePixel"] = 0
+        label4["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+        label4["TextSize"] = 14
+        label4["FontFace"] = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        label4["TextColor3"] = Color3.fromRGB(0, 255, 0)
+        label4["BackgroundTransparency"] = 1
+        label4["Size"] = UDim2.new(0, 200, 0, 26)
+        label4["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+        label4["Text"] = format(tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value))
+        label4["Name"] = "CashLabel"
+        label4["Position"] = UDim2.new(0, 60, 0, 35)
 
-    -- Handle textbox input
-    textbox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local inputValue = parseAmount(textbox.Text)
-            if inputValue > 0 then
-                data.need = inputValue
-                data.shouldhave = data.credit + inputValue
-                data.missing = data.shouldhave - tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
-                
-                textlabel1.Text = "Should have: " .. format(data.shouldhave)
-                label3.Text = "Missing: " .. format(data.missing)
-                
-                textbox.Text = ""
-            end
-        end
+        print("Created player box for:", player.Name)
+        return frame
     end)
-
-    -- Update cash in real time
-    player:WaitForChild("DataFolder"):WaitForChild("Currency").Changed:Connect(function(newValue)
-        label4.Text = format(newValue)
-        if data.need > 0 then
-            data.missing = data.shouldhave - newValue
-            label3.Text = "Missing: " .. format(data.missing)
-        end
-    end)
-
-    return frame
 end
 
 -- Initialize players
@@ -1135,7 +1073,9 @@ for _, player in pairs(game.Players:GetPlayers()) do
     if player ~= game.Players.LocalPlayer then
         initializePlayerData(player)
         createbox(G2L["7"], player)
-        addProfileBoxes(player)
+        if AltsFrame then
+            addProfileBoxes(player)
+        end
     end
 end
 
@@ -1145,22 +1085,33 @@ spawn(function()
         for _, player in pairs(game.Players:GetPlayers()) do
             if player ~= game.Players.LocalPlayer then
                 if playerData[player.UserId] then
-                    local currentCash = player:WaitForChild("DataFolder"):WaitForChild("Currency").Value
-                    if playerData[player.UserId].lastCash ~= currentCash then
-                        playerData[player.UserId].lastCash = currentCash
-                        local box = G2L["7"]:FindFirstChild("PlayerBox_" .. player.UserId)
-                        if box then
-                            local cashLabel = box:FindFirstChild("CashLabel")
-                            if cashLabel then
-                                cashLabel.Text = format(currentCash)
+                    pcall(function()
+                        local currentCash = player:WaitForChild("DataFolder"):WaitForChild("Currency").Value
+                        if playerData[player.UserId].lastCash ~= currentCash then
+                            playerData[player.UserId].lastCash = currentCash
+                            local box = G2L["7"]:FindFirstChild("PlayerBox_" .. player.UserId)
+                            if box then
+                                local cashLabel = box:FindFirstChild("CashLabel")
+                                if cashLabel then
+                                    cashLabel.Text = format(currentCash)
+                                end
                             end
                         end
-                    end
+                    end)
                 end
             end
         end
-        calculateAltsValues()
+        if calculateAltsValues then
+            pcall(calculateAltsValues)
+        end
     end
 end)
 
 print("HOST GUI Loaded Successfully!")
+print("Press V to toggle GUI, C to teleport!")
+
+-- Show the GUI immediately
+if G2L["1"] then
+    G2L["1"].Enabled = true
+    print("GUI is now visible!")
+end
