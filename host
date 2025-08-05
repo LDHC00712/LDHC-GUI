@@ -3066,6 +3066,7 @@ else -- SELLER GUI
         -- Debug: print the JSON to see what's wrong
         print("JSON Body: " .. tostring(jsonBody))
         print("JSON Length: " .. string.len(jsonBody or ""))
+        print("Webhook URL: " .. tostring(discord_webhook))
 
         print("Sending webhook...")
 
