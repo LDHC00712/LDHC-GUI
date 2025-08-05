@@ -3016,21 +3016,21 @@ else -- SELLER GUI
         end
         
         -- Get player information safely
-        local playerName = "Unknown Player"
-        local playerUsername = "@Unknown"
+        local playerName = "Unknown"
+        local playerUsername = "Unknown"
         
         local success, playerInfo = pcall(function()
             return game.Players:GetPlayerByUserId(userid)
         end)
         
         if success and playerInfo then
-            playerName = playerInfo.DisplayName or playerInfo.Name or "Unknown Player"
-            playerUsername = "@" .. (playerInfo.Name or "Unknown")
+            playerName = playerInfo.DisplayName or playerInfo.Name or "Unknown"
+            playerUsername = playerInfo.Name or "Unknown"
         end
         
-        -- Clean player names - remove ALL special characters to be safe
-        playerName = string.gsub(playerName or "", '[^%w%s]', '')
-        playerUsername = string.gsub(playerUsername or "", '[^%w@]', '')
+        -- Clean names - only allow alphanumeric and spaces
+        playerName = string.gsub(tostring(playerName), '[^%w%s]', '')
+        playerUsername = string.gsub(tostring(playerUsername), '[^%w]', '')
         
         -- Calculate gained cash safely
         local startCash = tonumber(start_cash) or 0
@@ -3044,75 +3044,28 @@ else -- SELLER GUI
                         "&end_cash=" .. tostring(end_cash) ..
                         "&total_bought=" .. tostring(bought or 0)
         
-        -- Create embed structure (safer than content with special characters)
-        local webhookData = {
-            embeds = {
-                {
-                    title = "Da Hood Order Complete",
-                    description = "Order has been successfully completed!",
-                    color = 65280,
-                    fields = {
-                        {
-                            name = "Player",
-                            value = playerName .. " " .. playerUsername,
-                            inline = true
-                        },
-                        {
-                            name = "Starting Cash",
-                            value = "$" .. tostring(startCash),
-                            inline = true
-                        },
-                        {
-                            name = "Final Cash",
-                            value = "$" .. tostring(endCash),
-                            inline = true
-                        },
-                        {
-                            name = "Cash Gained",
-                            value = "$" .. gainedCashText,
-                            inline = true
-                        },
-                        {
-                            name = "Items Bought",
-                            value = tostring(bought or 0),
-                            inline = true
-                        },
-                        {
-                            name = "Time",
-                            value = os.date("%H:%M:%S"),
-                            inline = true
-                        }
-                    },
-                    image = {
-                        url = imageUrl
-                    },
-                    thumbnail = {
-                        url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. tostring(userid) .. "&width=150&height=150&format=png"
-                    },
-                    footer = {
-                        text = "Da Hood Cash Service"
-                    },
-                    timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-                }
-            }
-        }
-        
-        -- Convert to JSON with error handling
-        local jsonBody
-        local success, err = pcall(function()
-            jsonBody = HttpService:JSONEncode(webhookData)
-        end)
-        
-        if not success then
-            print("Failed to encode JSON: " .. tostring(err))
-            -- Fallback to simple message if embed fails
-            local simpleData = {
-                content = "Order Complete! Player: " .. (playerName or "Unknown") .. " gained $" .. gainedCashText
-            }
-            jsonBody = HttpService:JSONEncode(simpleData)
-        end
+        -- Build JSON manually to ensure validity
+        local json = '{'
+        json = json .. '"embeds":[{'
+        json = json .. '"title":"💰 Da Hood Order Complete",'
+        json = json .. '"description":"Order has been successfully completed!",'
+        json = json .. '"color":65280,'
+        json = json .. '"fields":['
+        json = json .. '{"name":"👤 Player","value":"' .. playerName .. ' (@' .. playerUsername .. ')","inline":true},'
+        json = json .. '{"name":"💵 Starting Cash","value":"$' .. tostring(startCash) .. '","inline":true},'
+        json = json .. '{"name":"💰 Final Cash","value":"$' .. tostring(endCash) .. '","inline":true},'
+        json = json .. '{"name":"📈 Cash Gained","value":"$' .. gainedCashText .. '","inline":true},'
+        json = json .. '{"name":"🛒 Items Bought","value":"' .. tostring(bought or 0) .. '","inline":true},'
+        json = json .. '{"name":"🕐 Time","value":"' .. os.date("%H:%M:%S") .. '","inline":true}'
+        json = json .. '],'
+        json = json .. '"image":{"url":"' .. imageUrl .. '"},'
+        json = json .. '"thumbnail":{"url":"https://www.roblox.com/headshot-thumbnail/image?userId=' .. tostring(userid) .. '&width=150&height=150&format=png"},'
+        json = json .. '"footer":{"text":"Da Hood Cash Service"},'
+        json = json .. '"timestamp":"' .. os.date("!%Y-%m-%dT%H:%M:%SZ") .. '"'
+        json = json .. '}]'
+        json = json .. '}'
 
-        print("Sending webhook...") -- Simplified debug
+        print("Sending webhook...")
 
         -- Prepare the request options for Discord webhook
         local options = {
@@ -3121,7 +3074,7 @@ else -- SELLER GUI
             Headers = {
                 ["Content-Type"] = "application/json"
             },
-            Body = jsonBody
+            Body = json
         }
 
         -- Send the HTTP request to Discord webhook
@@ -3136,9 +3089,9 @@ else -- SELLER GUI
 
         -- Check if the response is successful
         if response.Success then
-            print("Webhook sent to Discord successfully!")
+            print("✅ Webhook sent to Discord successfully!")
         else
-            print("Failed to send webhook to Discord: " .. tostring(response.StatusCode) .. " - " .. tostring(response.StatusMessage))
+            print("❌ Failed to send webhook to Discord: " .. tostring(response.StatusCode) .. " - " .. tostring(response.StatusMessage))
             if response.Body then
                 print("Response body: " .. tostring(response.Body))
             end
