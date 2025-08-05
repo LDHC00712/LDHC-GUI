@@ -268,8 +268,6 @@ if isAlt(PLAYER.UserId) == false then
         gethui():FindFirstChild("SELLERGUI"):Destroy()
     end 
     
-    -- Assuming G2L is already defined somewhere in the script
-    
     -- Create the ScreenGui and place it in the G2L area
     local player = game.Players.LocalPlayer
     G2L["1"] = Instance.new("ScreenGui", gethui())
@@ -299,87 +297,263 @@ if isAlt(PLAYER.UserId) == false then
     -- Add rounded corners to sideFrame using UICorner
     local uiCorner = Instance.new("UICorner", sideFrame)
     uiCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the radius value to make the corners more or less rounded
-
-    -- Create Players Frame (G2L["7"])
-    G2L["7"] = Instance.new("ScrollingFrame", G2L["2"])
-    G2L["7"]["Active"] = true
-    G2L["7"]["BorderSizePixel"] = 0
-    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-    G2L["7"]["ScrollBarImageTransparency"] = 1
-    G2L["7"]["Size"] = UDim2.new(0, 410, 0, 296)
-    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
-    G2L["7"]["Position"] = UDim2.new(0.24, 0, 0, 0)
-    G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    G2L["7"]["BackgroundTransparency"] = 1
-    G2L["7"].ZIndex = 3
-    G2L["7"].Visible = true  -- Show Players frame by default
-
-    -- Add UIListLayout for Players frame
-    G2L["8"] = Instance.new("UIListLayout", G2L["7"])
-    G2L["8"]["SortOrder"] = Enum.SortOrder.LayoutOrder
-    G2L["8"].Padding = UDim.new(0, 5)
-
-    G2L["8"]:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        G2L["7"].CanvasSize = UDim2.new(0, 0, 0, G2L["8"].AbsoluteContentSize.Y + 10)
-    end)
-
-    -- Create Alts Frame
+    
+    
+    
+    
+    -- Function to create buttons
+    local function createmobile(parent, position, text, callback)
+        local button = Instance.new("TextButton", parent)
+        button.Size = UDim2.new(0, 100, 0, 40)
+        button.Position = position
+        button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Text = text
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 18
+        button.BorderSizePixel = 0
+        local uiCorner = Instance.new("UICorner", button)
+        uiCorner.CornerRadius = UDim.new(0, 8)
+    
+        -- Button click event
+        button.MouseButton1Click:Connect(callback)
+        
+        return button
+    end
+    
+    
+    
+    
+    -- mobile
+    ---------
+    local tpframe = Instance.new("Frame", G2L["2"])
+    tpframe.Name = "sideFrame"
+    tpframe.Size = UDim2.new(0, 70, 0, 10)
+    tpframe.Position = UDim2.new(0, 420, 0, -55)
+    tpframe.BackgroundColor3 = Color3.fromRGB(50, 25, 50)
+    tpframe.BorderSizePixel = 0
+    tpframe.ZIndex = 2
+    tpframe.BackgroundTransparency = 1
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    -- Create the frames for Alts
     local AltsFrame = Instance.new("ScrollingFrame", G2L["2"])
     AltsFrame["Active"] = true
     AltsFrame["BorderSizePixel"] = 0
-    AltsFrame["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    AltsFrame["BackgroundColor3"] = Color3.fromRGB(255, 25, 255)
     AltsFrame["ScrollBarImageTransparency"] = 1
     AltsFrame["Size"] = UDim2.new(0, 396, 0, 296)
     AltsFrame["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
     AltsFrame["Position"] = UDim2.new(0.24, 10, 0, 0)
     AltsFrame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     AltsFrame["BackgroundTransparency"] = 1
-    AltsFrame.Visible = false
+    
+    AltsFrame.Visible = false  -- Initially hidden
     AltsFrame.ZIndex = 3
-
-    -- Add test content to Alts Frame
-    local altsTestLabel = Instance.new("TextLabel", AltsFrame)
-    altsTestLabel.Size = UDim2.new(1, 0, 0, 50)
-    altsTestLabel.Position = UDim2.new(0, 0, 0, 10)
-    altsTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    altsTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    altsTestLabel.Text = "ALTS SECTION - Working!"
-    altsTestLabel.Font = Enum.Font.GothamBold
-    altsTestLabel.TextSize = 18
-    altsTestLabel.BorderSizePixel = 0
-    local altsCorner = Instance.new("UICorner", altsTestLabel)
-    altsCorner.CornerRadius = UDim.new(0, 8)
-
-    -- Create Alt Control Frame
-    local altcontrol = Instance.new("ScrollingFrame", G2L["2"])
-    altcontrol["Active"] = true
-    altcontrol["BorderSizePixel"] = 0
-    altcontrol["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
-    altcontrol["ScrollBarImageTransparency"] = 1
-    altcontrol["Size"] = UDim2.new(0, 396, 0, 296)
-    altcontrol["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
-    altcontrol["Position"] = UDim2.new(0.24, 10, 0, 0)
-    altcontrol["BorderColor3"] = Color3.fromRGB(0, 0, 0)
-    altcontrol["BackgroundTransparency"] = 1
-    altcontrol.Visible = false
-    altcontrol.ZIndex = 3
-    altcontrol.CanvasSize = UDim2.new(0, 0, 0, 1000)
-    altcontrol.ScrollBarThickness = 6
-
-    -- Add test content to Alt Control Frame
-    local altControlTestLabel = Instance.new("TextLabel", altcontrol)
-    altControlTestLabel.Size = UDim2.new(1, 0, 0, 50)
-    altControlTestLabel.Position = UDim2.new(0, 0, 0, 10)
-    altControlTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    altControlTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    altControlTestLabel.Text = "ALT CONTROL SECTION - Working!"
-    altControlTestLabel.Font = Enum.Font.GothamBold
-    altControlTestLabel.TextSize = 18
-    altControlTestLabel.BorderSizePixel = 0
-    local altControlCorner = Instance.new("UICorner", altControlTestLabel)
-    altControlCorner.CornerRadius = UDim.new(0, 8)
-
-    -- Create Misc Frame
+    
+    
+    -- Store the references to the labels to update later
+    local altsStockLabel, altsBountyLabel, totalAltsLabel
+    
+    -- Helper function to create the boxes
+    local function createBox2(parent, position, title, number)
+        local box = Instance.new("Frame", parent)
+        box.Size = UDim2.new(0, 379, 0, 60)
+        box.Position = position
+        box.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        box.BorderSizePixel = 0
+        
+        uicorner13 = Instance.new("UICorner", box);
+    
+        
+        -- Title Label
+        local titleLabel = Instance.new("TextLabel", box)
+        titleLabel.Size = UDim2.new(1, 0, 0.5, 0)
+        titleLabel.Position = UDim2.new(0, 0, 0, 0)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.Text = title
+        titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        titleLabel.Font = Enum.Font.GothamBold
+        titleLabel.TextSize = 16
+        
+        -- Number Label
+        local numberLabel = Instance.new("TextLabel", box)
+        numberLabel.Size = UDim2.new(1, 0, 0.5, 0)
+        numberLabel.Position = UDim2.new(0, 0, 0.5, 0)
+        numberLabel.BackgroundTransparency = 1
+        numberLabel.Text = tostring(number)  -- Set the number dynamically
+        numberLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        numberLabel.Font = Enum.Font.GothamBold
+        numberLabel.TextSize = 14
+        
+        -- Return the number label to be stored for future updates
+        return numberLabel
+    end
+    
+    -- Create the boxes and store references to the number labels
+    altsStockLabel = createBox2(AltsFrame, UDim2.new(0, 0, 0, 10), "Alts Stock", 0)
+    altsBountyLabel = createBox2(AltsFrame, UDim2.new(0, 0, 0, 80), "Alts Bounty", 0)
+    totalAltsLabel = createBox2(AltsFrame, UDim2.new(0, 0, 0, 150), "Total Alts", 0)
+    
+    
+    
+    -- Function to create a dynamic box to display PFP, username, and cash balance
+    local function createProfileBox(parent, player, position)
+        local box = Instance.new("Frame", parent)
+        box.Size = UDim2.new(0, 379, 0, 80)  -- Fixed height for each profile box
+        box.Position = position  -- Position passed in as argument
+        box.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        box.BorderSizePixel = 0
+        box.Name = "ProfileBox_" .. player.UserId  -- Unique name for the box
+    
+        local uicorner13 = Instance.new("UICorner", box)
+    
+        local PLACEHOLDER_IMAGE = "rbxassetid://0"
+    
+        local pfp = Instance.new("ImageLabel", box)
+        pfp.Parent = box
+        pfp["BorderSizePixel"] = 0;
+        pfp["BackgroundColor3"] = Color3.fromRGB(34, 34, 34);
+        pfp["Image"] = "rbxasset://textures/ui/GuiImagePlaceholder.png";
+        pfp["Size"] = UDim2.new(0, 40, 0, 40);
+        pfp["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+        pfp.Position = UDim2.new(0, 10, 0, 10)
+        
+        local userId = player.UserId
+        local thumbType = Enum.ThumbnailType.HeadShot
+        local thumbSize = Enum.ThumbnailSize.Size420x420
+        local content, isReady = game:GetService("Players"):GetUserThumbnailAsync(userId, thumbType, thumbSize)
+        
+        pfp.Image =  (isReady and content) or PLACEHOLDER_IMAGE
+        
+        
+        uicorner2 = Instance.new("UICorner", pfp);
+        uicorner2["CornerRadius"] = UDim.new(1, 0);
+        
+        
+        -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.ImageLabel.UIStroke
+        stroke2 = Instance.new("UIStroke", pfp);
+        stroke2["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+        stroke2["Color"] = Color3.fromRGB(49, 49, 49);
+    
+        -- Username Label
+        local usernameLabel = Instance.new("TextLabel", box)
+        usernameLabel.Size = UDim2.new(0, 200, 0, 25)
+        usernameLabel.Position = UDim2.new(0, 70, 0, 10)  -- Adjusted position
+        usernameLabel.BackgroundTransparency = 1
+        usernameLabel.Text = player.Name  -- Player's Username
+        usernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        usernameLabel.Font = Enum.Font.GothamBold
+        usernameLabel.TextSize = 16
+    
+        -- Cash Balance Label
+        local cashBalanceLabel = Instance.new("TextLabel", box)
+        cashBalanceLabel.Size = UDim2.new(0, 200, 0, 25)
+        cashBalanceLabel.Position = UDim2.new(0, 70, 0, 40)  -- Adjusted position
+        cashBalanceLabel.BackgroundTransparency = 1
+        cashBalanceLabel.Text = format(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
+        cashBalanceLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        cashBalanceLabel.Font = Enum.Font.GothamBold
+        cashBalanceLabel.TextSize = 14
+    
+        return box
+    end
+    
+    -- Function to add the profile boxes dynamically under the existing ones
+    local function addProfileBoxes(player)
+        -- Calculate the Y position for the new box (below the existing ones)
+        local positionY = 220 + (#AltsFrame:GetChildren() - 3) * 90  -- Start from 220, increment by 90 for each box
+        local newBox = createProfileBox(AltsFrame, player, UDim2.new(0, 0, 0, positionY))
+    end
+    
+    -- Function to remove a profile box when the player leaves
+    local function removeProfileBox(player)
+        local boxToRemove = AltsFrame:FindFirstChild("ProfileBox_" .. player.UserId)
+        if boxToRemove then
+            boxToRemove:Destroy()
+            updateProfileBoxes()  -- Update the positions of the remaining boxes
+        end
+    end
+    
+    -- Function to update the positioning of the remaining boxes after a player leaves
+    local function updateProfileBoxes()
+        local positionY = 220  -- Start position for profile boxes
+        for _, child in pairs(AltsFrame:GetChildren()) do
+            if child.Name:find("ProfileBox_") then
+                child.Position = UDim2.new(0, 0, 0, positionY)
+                positionY = positionY + 90  -- Increment for the next box
+            end
+        end
+    end
+    
+    
+    
+    
+    
+    
+    -- Function to format the numbers with suffixes (b for billion, m for million, etc.)
+    local function formatNumber(value)
+        if value >= 1000000000 then
+            return string.format("%.1fb", value / 1000000000)
+        elseif value >= 1000000 then
+            return string.format("%.1fm", value / 1000000)
+        elseif value >= 1000 then
+            return string.format("%.1fk", value / 1000)
+        else
+            return tostring(value)
+        end
+    end
+    
+    -- Function to update the box values with formatted numbers
+    local function updateAltsValues(altsStock, altsBounty, totalAlts)
+        altsStockLabel.Text = formatNumber(altsStock)  -- Update Alts Stock value
+        altsBountyLabel.Text = formatNumber(altsBounty)  -- Update Alts Bounty value
+        totalAltsLabel.Text = formatNumber(totalAlts)  -- Update Total Alts value
+    end
+    
+    local function calculateAltsValues()
+        local totalMoney = 0
+        local totalBounties = 0
+        local altsInGame = 0
+    
+        -- Iterate through all players in the game
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and isAlt(player.UserId) then  -- Exclude the local player, only alts
+                altsInGame = altsInGame + 1
+                
+                -- Get the player's cash
+                local cash = player:WaitForChild("DataFolder"):WaitForChild("Currency").Value
+                totalMoney = totalMoney + cash
+                
+                -- Get the player's bounty (assuming it's stored in leaderstats)
+                local leaderstats = player:FindFirstChild("leaderstats")
+                if leaderstats then
+                    local bounty = leaderstats:FindFirstChild("Bounty")
+                    if bounty then
+                        totalBounties = totalBounties + bounty.Value
+                    end
+                end
+            end
+        end
+    
+        updateAltsValues(totalMoney, totalBounties, altsInGame)
+    end
+    
+    
+    
+    -- Create MiscFrame (already provided)
     local MiscFrame = Instance.new("ScrollingFrame", G2L["2"])
     MiscFrame["Active"] = true
     MiscFrame["BorderSizePixel"] = 0
@@ -390,25 +564,149 @@ if isAlt(PLAYER.UserId) == false then
     MiscFrame["Position"] = UDim2.new(0.24, 10, 0, 0)
     MiscFrame["BorderColor3"] = Color3.fromRGB(0, 0, 0)
     MiscFrame["BackgroundTransparency"] = 1
-    MiscFrame.Visible = false
+    MiscFrame.Visible = false  -- Initially hidden
     MiscFrame.ZIndex = 3
+    -- Disable scroll functionality by setting CanvasSize to Size and removing the scrollbar
     MiscFrame.CanvasSize = AltsFrame.Size
-    MiscFrame.ScrollBarThickness = 0
-
-    -- Add test content to Misc Frame
-    local miscTestLabel = Instance.new("TextLabel", MiscFrame)
-    miscTestLabel.Size = UDim2.new(1, 0, 0, 50)
-    miscTestLabel.Position = UDim2.new(0, 0, 0, 10)
-    miscTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    miscTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    miscTestLabel.Text = "MISC SECTION - Working!"
-    miscTestLabel.Font = Enum.Font.GothamBold
-    miscTestLabel.TextSize = 18
-    miscTestLabel.BorderSizePixel = 0
-    local miscCorner = Instance.new("UICorner", miscTestLabel)
-    miscCorner.CornerRadius = UDim.new(0, 8)
-
-    -- Create Settings Frame
+    MiscFrame.ScrollBarThickness = 0  -- This hides the scrollbar
+    
+    
+    
+    -- Function to create buttons
+    local function createButton(parent, position, text, callback)
+        local button = Instance.new("TextButton", parent)
+        button.Size = UDim2.new(0, 379, 0, 40)
+        button.Position = position
+        button.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Text = text
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 18
+        button.BorderSizePixel = 0
+        local uiCorner = Instance.new("UICorner", button)
+        uiCorner.CornerRadius = UDim.new(0, 8)
+    
+        -- Button click event
+        button.MouseButton1Click:Connect(callback)
+        
+        return button
+    end
+    
+    -- Function to create toggle switches
+    local function createToggle1(parent, position, text, initialState, callback)
+        local toggleFrame = Instance.new("Frame", parent)
+        toggleFrame.Size = UDim2.new(0, 379, 0, 40)
+        toggleFrame.Position = position
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        toggleFrame.BorderSizePixel = 0
+        local uiCorner = Instance.new("UICorner", toggleFrame)
+        uiCorner.CornerRadius = UDim.new(0, 8)
+    
+    
+        -- Create the label
+        local label = Instance.new("TextLabel", toggleFrame)
+        label.Size = UDim2.new(0.7, 0, 1, 0)
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 16
+        label.TextXAlignment = Enum.TextXAlignment.Left
+    
+        -- Create the toggle button
+        local toggleButton = Instance.new("TextButton", toggleFrame)
+        toggleButton.Size = UDim2.new(0, 60, 0, 25)
+        toggleButton.Position = UDim2.new(1, -70, 0.5, -12.5)
+        toggleButton.BackgroundColor3 = initialState and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        toggleButton.Text = initialState and "ON" or "OFF"
+        toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        toggleButton.Font = Enum.Font.GothamBold
+        toggleButton.TextSize = 14
+        toggleButton.BorderSizePixel = 0
+        local toggleCorner = Instance.new("UICorner", toggleButton)
+        toggleCorner.CornerRadius = UDim.new(0, 5)
+    
+        local isToggled = initialState
+    
+        toggleButton.MouseButton1Click:Connect(function()
+            isToggled = not isToggled
+            toggleButton.BackgroundColor3 = isToggled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+            toggleButton.Text = isToggled and "ON" or "OFF"
+            callback(isToggled)
+        end)
+    
+        return toggleFrame
+    end
+    
+    local LocalPlayer = game.Players.LocalPlayer
+    local function bringallplayers()
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= LocalPlayer and isAlt(player.UserId) then
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    -- Teleport the alt to the local player's position
+                    game.Players:Chat("/bring " .. player.Name)
+                end
+            end
+        end
+    end
+    
+    local function babyAlts()
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= LocalPlayer and isAlt(player.UserId) then
+                game.Players:Chat("/baby " .. player.Name)
+            end
+        end
+    end
+    
+    
+    
+    
+    -- Create the buttons inside MiscFrame
+    createButton(MiscFrame, UDim2.new(0, 0, 0, 10), "Bring all buyers [👑]", function()
+        bringallplayers()
+    end)
+    
+    createButton(MiscFrame, UDim2.new(0, 0, 0, 60), "Baby alts [👑]", function()
+        babyAlts()
+    end)
+    -- Define a variable to control the loop state
+    local cashAuraActive = false
+    
+    -- Assuming you have a createToggle function and a MiscFrame for the UI elements
+    createToggle1(MiscFrame, UDim2.new(0, 0, 0, 110), "Cash Aura", false, function(state)
+        cashAuraActive = state
+        if cashAuraActive then
+            spawn(function()
+                while cashAuraActive do
+                    game.Players:Chat("/aura " .. LocalPlayer.Name)
+                    wait(5)  -- Adjust the wait time as needed
+                end
+            end)
+        end
+    end)
+    
+    
+    
+    
+    -- Declare a variable to control the Auto Drop state
+    local autoDropActive = false
+    
+    -- Assuming you have a createToggle function and a MiscFrame for the UI elements
+    createToggle1(MiscFrame, UDim2.new(0, 0, 0, 160), "Auto Drop", false, function(state)
+        autoDropActive = state
+        if autoDropActive then
+            spawn(function()
+                while autoDropActive do
+                    game.Players:Chat("/drop")
+                    wait(10)  -- Adjust the wait time as needed (10 seconds in this example)
+                end
+            end)
+        end
+    end)
+    local IGNORED = workspace:WaitForChild("Ignored")
+    
+    -- Create SettingsFrame
     local SettingsFrame = Instance.new("ScrollingFrame", G2L["2"])
     SettingsFrame["Active"] = true
     SettingsFrame["BorderSizePixel"] = 0
@@ -424,31 +722,21 @@ if isAlt(PLAYER.UserId) == false then
     SettingsFrame.CanvasSize = UDim2.new(0, 0, 0, 720)
     SettingsFrame.ScrollBarThickness = 6
 
-    -- Add test content to Settings Frame
-    local settingsTestLabel = Instance.new("TextLabel", SettingsFrame)
-    settingsTestLabel.Size = UDim2.new(1, 0, 0, 50)
-    settingsTestLabel.Position = UDim2.new(0, 0, 0, 10)
-    settingsTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    settingsTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    settingsTestLabel.Text = "SETTINGS SECTION - Working!"
-    settingsTestLabel.Font = Enum.Font.GothamBold
-    settingsTestLabel.TextSize = 18
-    settingsTestLabel.BorderSizePixel = 0
-    local settingsCorner = Instance.new("UICorner", settingsTestLabel)
-    settingsCorner.CornerRadius = UDim.new(0, 8)
-
-    -- Add test content to Players Frame
-    local playersTestLabel = Instance.new("TextLabel", G2L["7"])
-    playersTestLabel.Size = UDim2.new(1, 0, 0, 50)
-    playersTestLabel.Position = UDim2.new(0, 0, 0, 0)
-    playersTestLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    playersTestLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    playersTestLabel.Text = "PLAYERS SECTION - Working!"
-    playersTestLabel.Font = Enum.Font.GothamBold
-    playersTestLabel.TextSize = 18
-    playersTestLabel.BorderSizePixel = 0
-    local playersCorner = Instance.new("UICorner", playersTestLabel)
-    playersCorner.CornerRadius = UDim.new(0, 8)
+    -- Create altcontrol Frame
+    local altcontrol = Instance.new("ScrollingFrame", G2L["2"])
+    altcontrol["Active"] = true
+    altcontrol["BorderSizePixel"] = 0
+    altcontrol["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    altcontrol["ScrollBarImageTransparency"] = 1
+    altcontrol["Size"] = UDim2.new(0, 396, 0, 296)
+    altcontrol["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    altcontrol["Position"] = UDim2.new(0.24, 10, 0, 0)
+    altcontrol["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    altcontrol["BackgroundTransparency"] = 1
+    altcontrol.Visible = false
+    altcontrol.ZIndex = 3
+    altcontrol.CanvasSize = UDim2.new(0, 0, 0, 1000)
+    altcontrol.ScrollBarThickness = 6
 
     -- Navigation buttons data
     local buttonsData = {
@@ -459,7 +747,7 @@ if isAlt(PLAYER.UserId) == false then
         {Text = "Settings", Position = UDim2.new(0, 0, 0, 200), Frame = SettingsFrame}
     }
 
-    -- Create navigation buttons inside the sideFrame
+    -- Create buttons inside the sideFrame
     for _, buttonData in ipairs(buttonsData) do
         local button = Instance.new("TextButton", sideFrame)
         button.Size = UDim2.new(1, 0, 0, 40)
@@ -477,19 +765,6 @@ if isAlt(PLAYER.UserId) == false then
 
         -- Add functionality for button click
         button.MouseButton1Click:Connect(function()
-            print("Button clicked: " .. button.Text)  -- Debug print
-            
-            -- Reset all button colors first
-            for _, otherButtonData in ipairs(buttonsData) do
-                for _, otherButton in pairs(sideFrame:GetChildren()) do
-                    if otherButton:IsA("TextButton") then
-                        otherButton.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-                    end
-                end
-            end
-            
-            -- Highlight the clicked button
-            button.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
 
             -- Hide all frames first
             G2L["7"].Visible = false
@@ -501,35 +776,47 @@ if isAlt(PLAYER.UserId) == false then
             -- Show the corresponding frame for the button clicked
             if button.Text == "Players" then
                 G2L["7"].Visible = true
-                print("Showing Players frame")
             elseif button.Text == "Alts" then
+                calculateAltsValues()
                 AltsFrame.Visible = true
-                print("Showing Alts frame")
-            elseif button.Text == "Alt Control" then
-                altcontrol.Visible = true
-                print("Showing Alt Control frame")
             elseif button.Text == "Misc" then
                 MiscFrame.Visible = true
-                print("Showing Misc frame")
             elseif button.Text == "Settings" then
                 SettingsFrame.Visible = true
-                print("Showing Settings frame")
+            elseif button.Text == "Alt Control" then
+                altcontrol.Visible = true
             end
         end)
     end
 
-    -- Set Players button as default selected
-    spawn(function()
-        wait(0.1)
-        for _, button in pairs(sideFrame:GetChildren()) do
-            if button:IsA("TextButton") and button.Text == "Players" then
-                button.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-                break
-            end
-        end
+    -- StarterGui.ScreenGui.Frame.UICorner
+    G2L["3"] = Instance.new("UICorner", G2L["2"])
+
+    -- StarterGui.ScreenGui.Frame.ScrollingFrame
+    -- player cards FRAME
+    G2L["7"] = Instance.new("ScrollingFrame", G2L["2"])
+    G2L["7"]["Active"] = true
+    G2L["7"]["BorderSizePixel"] = 0
+    G2L["7"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["7"]["ScrollBarImageTransparency"] = 1
+    G2L["7"]["Size"] = UDim2.new(0, 410, 0, 296)
+    G2L["7"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["7"]["Position"] = UDim2.new(0.24, 0, 0, 0)
+    G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["7"]["BackgroundTransparency"] = 1
+
+    -- StarterGui.ScreenGui.Frame.ScrollingFrame.UIListLayout
+    G2L["8"] = Instance.new("UIListLayout", G2L["7"])
+    G2L["8"]["SortOrder"] = Enum.SortOrder.LayoutOrder
+    G2L["8"].Padding = UDim.new(0, 5)
+
+    G2L["8"]:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        -- Add extra space for padding and any offsets that might be required
+        G2L["7"].CanvasSize = UDim2.new(0, 0, 0, G2L["8"].AbsoluteContentSize.Y + 10)
     end)
 
-    print("HOST GUI Loaded Successfully with Navigation!")
+    print("HOST GUI Loaded Successfully!")
+    print("Ran")
 end
 
 local GC = getconnections or get_signal_cons
