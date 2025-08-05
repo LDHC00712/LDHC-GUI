@@ -3038,28 +3038,18 @@ else -- SELLER GUI
         local gainedCash = endCash - startCash
         local gainedCashText = gainedCash >= 0 and ("+" .. tostring(gainedCash)) or tostring(gainedCash)
         
-        -- Generate image URL
-        local imageUrl = "https://dahoodcash.com/hook.php/?userid=" .. tostring(userid) ..
-                        "&start_cash=" .. tostring(start_cash) ..
-                        "&end_cash=" .. tostring(end_cash) ..
-                        "&total_bought=" .. tostring(bought or 0)
+        -- Create simple message only
+        local message = "Da Hood Order Complete!\n" ..
+                       "Player: " .. playerName .. " (" .. playerUsername .. ")\n" ..
+                       "Starting Cash: $" .. tostring(startCash) .. "\n" ..
+                       "Final Cash: $" .. tostring(endCash) .. "\n" ..
+                       "Cash Gained: $" .. gainedCashText .. "\n" ..
+                       "Items Bought: " .. tostring(bought or 0) .. "\n" ..
+                       "Time: " .. os.date("%H:%M:%S")
         
-        -- Create simple message with image using HttpService JSONEncode
+        -- Create the simplest possible webhook data
         local webhookData = {
-            content = "**Da Hood Order Complete!**\n" ..
-                     "Player: " .. playerName .. " (@" .. playerUsername .. ")\n" ..
-                     "Starting Cash: $" .. tostring(startCash) .. "\n" ..
-                     "Final Cash: $" .. tostring(endCash) .. "\n" ..
-                     "Cash Gained: $" .. gainedCashText .. "\n" ..
-                     "Items Bought: " .. tostring(bought or 0) .. "\n" ..
-                     "Time: " .. os.date("%H:%M:%S"),
-            embeds = {
-                {
-                    image = {
-                        url = imageUrl
-                    }
-                }
-            }
+            content = message
         }
         
         -- Convert to JSON safely
