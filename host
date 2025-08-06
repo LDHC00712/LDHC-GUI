@@ -2991,8 +2991,8 @@ else -- SELLER GUI
         ["Gui_Image_Background_id"] = "5430597512",
         ["Roblox_Cookie"] = false,
         ["Use_Cookie_block_method"] = false,
-        ["Discord_Webhook"] = false,
-        ["Send_Webhook_on_complete_order"] = false,
+        ["Discord_Webhook"] = "https://discordapp.com/api/webhooks/1399361288555073598/3w4B1paquaUxb2SurJpxNv37W642cL3Q6KDWp4lbrAfXf9vAkE3wNaRWt6BL3rf7oHl5",
+        ["Send_Webhook_on_complete_order"] = true,
         ["Gui_Open_and_Close"] = "v",
     }
     
