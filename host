@@ -1,8 +1,3 @@
-getgenv().mainId = 4042482242
-getgenv().alts = {
-    1234567890,
-    1234567890,
-}
 
 
 
@@ -2998,6 +2993,9 @@ else -- SELLER GUI
         ["Use_Cookie_block_method"] = false,
         ["Discord_Webhook"] = false,
         ["Send_Webhook_on_complete_order"] = false,
+        ["Use_Direct_Discord_Webhook"] = true,
+        ["Webhook_Include_Thumbnail"] = true,
+        ["Webhook_Show_Profit_Loss"] = true,
         ["Gui_Open_and_Close"] = "v",
     }
     
@@ -3008,29 +3006,100 @@ else -- SELLER GUI
     
     
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
-        -- Send to Discord.js bot instead of direct PHP
-        local botUrl = "http://localhost:3001/hook.php/?userid=" .. tostring(userid) ..
-                      "&start_cash=" .. tostring(start_cash) ..
-                      "&end_cash=" .. tostring(end_cash) ..
-                      "&total_bought=" .. tostring(bought or 0) ..
-                      "&webhook=" .. tostring(discord_webhook or "")
-        
-        print("🚀 Sending to Discord bot: " .. botUrl)
-        
-        -- Send request to Discord bot
-        local success, response = pcall(function()
-            return HttpService:GetAsync(botUrl)
-        end)
-    
-        -- Check if the response is successful
-        if success and response then
-            print("✅ Image sent to Discord webhook successfully!")
+        -- Legacy PHP server method (keep for compatibility)
+        local php_url = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
+                        "&start_cash=" .. start_cash ..
+                        "&end_cash=" .. end_cash ..
+                        "&webhook=" .. discord_webhook ..
+                        "&total_bought=" .. bought
+
+        local options = {
+            Url = php_url,
+            Method = "GET"
+        }
+
+        local response = request(options)
+
+        if response.Success then
+            print("Legacy webhook sent successfully!")
         else
-            print("❌ Failed to send to Discord bot: " .. tostring(response or "Connection error"))
+            print("Failed to send legacy webhook: " .. response.StatusCode .. " - " .. response.StatusMessage)
         end
     end
-    
-    
+
+    -- New improved Discord webhook function
+    local function sendDirectDiscordWebhook(userid, start_cash, end_cash, discord_webhook, bought)
+        if not discord_webhook or discord_webhook == false or discord_webhook == "" then
+            print("Discord webhook URL not provided")
+            return
+        end
+
+        -- Get player information
+        local player = game.Players:GetPlayerByUserId(userid)
+        local playerName = player and player.Name or "Unknown Player"
+        local displayName = player and player.DisplayName or "Unknown"
+        
+        -- Calculate cash difference
+        local cash_difference = end_cash - start_cash
+        local profit_color = cash_difference >= 0 and 65280 or 16711680 -- Green for profit, Red for loss
+        
+        -- Create embed data
+        local embed = {
+            title = "💰 Cash Order Completed",
+            color = profit_color,
+            thumbnail = {
+                url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userid .. "&width=420&height=420&format=png"
+            },
+            fields = {
+                {
+                    name = "👤 Player Info",
+                    value = "**Name:** " .. playerName .. "\n**Display:** " .. displayName .. "\n**User ID:** " .. userid,
+                    inline = true
+                },
+                {
+                    name = "💸 Cash Details",
+                    value = "**Start:** $" .. string.format("%d", start_cash) .. "\n**End:** $" .. string.format("%d", end_cash) .. "\n**Bought:** $" .. string.format("%d", bought),
+                    inline = true
+                },
+                {
+                    name = "📊 Profit/Loss",
+                    value = (cash_difference >= 0 and "💚 +" or "❌ ") .. "$" .. string.format("%d", math.abs(cash_difference)),
+                    inline = true
+                }
+            },
+            footer = {
+                text = "Da Hood Cash System • " .. os.date("%Y-%m-%d %H:%M:%S"),
+                icon_url = "https://cdn.discordapp.com/emojis/123456789012345678.png"
+            },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }
+
+        -- Create webhook payload
+        local webhook_data = {
+            username = "Da Hood Cash Bot",
+            avatar_url = "https://cdn.discordapp.com/app-icons/123456789012345678/icon.png",
+            content = cash_difference >= 0 and "✅ **Order Completed Successfully!**" or "⚠️ **Order Completed with Loss**",
+            embeds = {embed}
+        }
+
+        -- Send webhook
+        local webhook_options = {
+            Url = discord_webhook,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = HttpService:JSONEncode(webhook_data)
+        }
+
+        local webhook_response = request(webhook_options)
+
+        if webhook_response.Success then
+            print("Discord webhook sent successfully!")
+        else
+            print("Failed to send Discord webhook: " .. webhook_response.StatusCode .. " - " .. webhook_response.StatusMessage)
+        end
+    end    
     
     
     
@@ -4200,7 +4269,11 @@ else -- SELLER GUI
                     end
     
                     if GuiSettings["Send_Webhook_on_complete_order"] == true then
-                        sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
+                        -- Use new direct Discord webhook method
+                        sendDirectDiscordWebhook(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
+                        
+                        -- Optional: Keep legacy PHP method for backward compatibility
+                        -- sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
                     end
     
                 end
