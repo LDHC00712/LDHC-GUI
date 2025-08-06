@@ -3064,7 +3064,7 @@ else -- SELLER GUI
         }
         
         -- Use a simpler approach with emoji or no image if URLs fail
-        local use_completion_image = GuiSettings["Webhook_Show_Completion_Image"] ~= false
+        local use_completion_image = GuiSettings["Webhook_Show_Completion_Image"] ~= true
         local completion_image = nil
         
         if use_completion_image then
