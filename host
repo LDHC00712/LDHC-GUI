@@ -3003,58 +3003,104 @@ else -- SELLER GUI
     
     
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
-        -- ใช้ URL ที่สร้างได้จริงแล้ว
-        local php_url = "https://ldhccash.infinityfreeapp.com/hook.php/?userid=" .. userid ..
-                        "&start_cash=" .. start_cash ..
-                        "&end_cash=" .. end_cash ..
-                        "&webhook=" .. tostring(discord_webhook) ..
-                        "&total_bought=" .. bought
+        -- URL encode the webhook parameter properly
+        local function urlEncode(str)
+            str = string.gsub(str, "([^%w _~%.%-])", function(c)
+                return string.format("%%%02X", string.byte(c))
+            end)
+            str = string.gsub(str, " ", "%%20")
+            return str
+        end
 
-        print("Sending to PHP server: " .. php_url)
-        print("Discord webhook: " .. tostring(discord_webhook))
+        -- Encode webhook URL properly for PHP
+        local encoded_webhook = urlEncode(tostring(discord_webhook))
+        
+        -- สร้าง URL สำหรับ PHP server
+        local php_url = "https://ldhccash.infinityfreeapp.com/hook.php" ..
+                        "?userid=" .. tostring(userid) ..
+                        "&start_cash=" .. tostring(start_cash) ..
+                        "&end_cash=" .. tostring(end_cash) ..
+                        "&webhook=" .. encoded_webhook ..
+                        "&total_bought=" .. tostring(bought)
 
-        -- Prepare the request options for a GET request
+        print("=== WEBHOOK DEBUG INFO ===")
+        print("User ID: " .. tostring(userid))
+        print("Start Cash: " .. tostring(start_cash))
+        print("End Cash: " .. tostring(end_cash))
+        print("Total Bought: " .. tostring(bought))
+        print("Original Webhook: " .. tostring(discord_webhook))
+        print("Encoded Webhook: " .. encoded_webhook)
+        print("Full PHP URL: " .. php_url)
+        print("========================")
+
+        -- ส่ง request ไปยัง PHP server
         local options = {
-            Url = php_url,  -- The full URL with query parameters
-            Method = "GET"  -- Using GET method
+            Url = php_url,
+            Method = "GET",
+            Headers = {
+                ["User-Agent"] = "Roblox-DaHood-Script/1.0"
+            }
         }
 
-        -- Send the HTTP request using the request function
         local success, response = pcall(function()
             return request(options)
         end)
 
-        -- Check if the response is successful
-        if success and response.Success then
-            print("Image sent to Discord webhook successfully!")
-            print("Response body: " .. tostring(response.Body))
-            -- แสดงใน game chat ด้วย
+        if success and response and response.Success then
+            print("HTTP Status Code: " .. tostring(response.StatusCode))
+            print("Response Body: " .. tostring(response.Body))
+            
+            -- ตรวจสอบว่า response เป็น JSON หรือไม่
+            local responseBody = tostring(response.Body)
+            
+            if string.find(responseBody, '"status"') and string.find(responseBody, '"success"') then
+                -- PHP ตอบกลับ JSON ถูกต้อง
+                local jsonSuccess, jsonData = pcall(function()
+                    return game:GetService("HttpService"):JSONDecode(responseBody)
+                end)
+                
+                if jsonSuccess and jsonData.status == "success" then
+                    print("✅ Image sent to Discord webhook successfully!")
+                    game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                        Text = "[WEBHOOK] ✅ รูปภาพส่งไปยัง Discord สำเร็จ!";
+                        Color = Color3.fromRGB(0, 255, 0);
+                        Font = Enum.Font.Gotham;
+                        FontSize = Enum.FontSize.Size18;
+                    })
+                    return true
+                else
+                    print("❌ PHP returned error: " .. (jsonData and jsonData.message or "Unknown error"))
+                    game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                        Text = "[WEBHOOK] ❌ PHP Error: " .. (jsonData and jsonData.message or "Unknown");
+                        Color = Color3.fromRGB(255, 0, 0);
+                        Font = Enum.Font.Gotham;
+                        FontSize = Enum.FontSize.Size18;
+                    })
+                    return false
+                end
+            else
+                -- PHP ตอบกลับ HTML หรือ error page
+                print("⚠️ PHP server returned HTML/Error page instead of JSON")
+                print("This might indicate server issues or missing GD extension")
+                game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                    Text = "[WEBHOOK] ⚠️ PHP Server Error - กำลังลองวิธีอื่น...";
+                    Color = Color3.fromRGB(255, 165, 0);
+                    Font = Enum.Font.Gotham;
+                    FontSize = Enum.FontSize.Size18;
+                })
+                return false
+            end
+        else
+            -- Network error หรือ request failed
+            local errorMsg = response and (tostring(response.StatusCode) .. " - " .. tostring(response.StatusMessage)) or tostring(response)
+            print("❌ Network error: " .. errorMsg)
             game.StarterGui:SetCore("ChatMakeSystemMessage", {
-                Text = "[WEBHOOK] Successfully sent to Discord!";
-                Color = Color3.fromRGB(0, 255, 0);
+                Text = "[WEBHOOK] ❌ Network Error: " .. errorMsg;
+                Color = Color3.fromRGB(255, 0, 0);
                 Font = Enum.Font.Gotham;
                 FontSize = Enum.FontSize.Size18;
             })
-        else
-            if success then
-                print("Failed to send image to Discord: " .. response.StatusCode .. " - " .. response.StatusMessage)
-                print("Response body: " .. tostring(response.Body))
-                -- แสดง error ใน game chat
-                game.StarterGui:SetCore("ChatMakeSystemMessage", {
-                    Text = "[WEBHOOK] Failed: " .. response.StatusCode .. " - " .. response.StatusMessage;
-                    Color = Color3.fromRGB(255, 0, 0);
-                    Font = Enum.Font.Gotham;
-                    FontSize = Enum.FontSize.Size18;
-                })
-            else
-                print("Error sending request: " .. tostring(response))
-                game.StarterGui:SetCore("ChatMakeSystemMessage", {
-                    Text = "[WEBHOOK] Error: " .. tostring(response);
-                    Color = Color3.fromRGB(255, 0, 0);
-                    Font = Enum.Font.Gotham;
-                    FontSize = Enum.FontSize.Size18;
-                })
-            end
+            return false
         end
     end
 
@@ -3072,6 +3118,87 @@ else -- SELLER GUI
 
     -- เรียกใช้เพื่อทดสอบ (uncomment บรรทัดด้านล่างเพื่อทดสอบ)
     -- testWebhook()
+
+    -- ฟังก์ชันส่งตรงไปยัง Discord (backup method)
+    local function sendDirectToDiscord(userid, start_cash, end_cash, discord_webhook, bought)
+        local player_info = game.Players:GetPlayerByUserId(userid)
+        local player_name = player_info and player_info.Name or "Unknown"
+        local display_name = player_info and player_info.DisplayName or "Unknown"
+        
+        local profit = end_cash - start_cash
+        local profit_color = profit >= 0 and 3066993 or 15158332 -- เขียวหรือแดง
+        
+        local embed = {
+            ["title"] = "💰 Da Hood Cash Order Completed!",
+            ["description"] = "A cash order has been completed successfully",
+            ["color"] = profit_color,
+            ["fields"] = {
+                {
+                    ["name"] = "👤 Player Information",
+                    ["value"] = string.format("**Name:** %s\n**Display:** %s\n**User ID:** %s", player_name, display_name, userid),
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "💵 Starting Cash",
+                    ["value"] = "$" .. tostring(start_cash),
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "💰 Ending Cash", 
+                    ["value"] = "$" .. tostring(end_cash),
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "🛒 Total Bought",
+                    ["value"] = "$" .. tostring(bought),
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "📈 Profit/Loss",
+                    ["value"] = (profit >= 0 and "+" or "") .. "$" .. tostring(profit),
+                    ["inline"] = true
+                }
+            },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S.000Z"),
+            ["footer"] = {
+                ["text"] = "Da Hood Cash Service",
+                ["icon_url"] = "https://cdn.discordapp.com/emojis/741395247028248688.png"
+            }
+        }
+
+        local webhook_data = {
+            ["username"] = "Da Hood Cash Bot",
+            ["avatar_url"] = "https://cdn.discordapp.com/emojis/741395247028248688.png",
+            ["embeds"] = {embed}
+        }
+
+        local options = {
+            Url = discord_webhook,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = game:GetService("HttpService"):JSONEncode(webhook_data)
+        }
+
+        local success, response = pcall(function()
+            return request(options)
+        end)
+
+        if success and response.Success then
+            print("Direct Discord webhook sent successfully!")
+            game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                Text = "[WEBHOOK] Direct Discord message sent!";
+                Color = Color3.fromRGB(0, 255, 0);
+                Font = Enum.Font.Gotham;
+                FontSize = Enum.FontSize.Size18;
+            })
+            return true
+        else
+            print("Failed to send direct Discord webhook")
+            return false
+        end
+    end
     
     
     
@@ -4241,7 +4368,42 @@ else -- SELLER GUI
                     end
     
                     if GuiSettings["Send_Webhook_on_complete_order"] == true then
-                        sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
+                        -- ลอง PHP server ก่อน เพื่อส่งรูปภาพ
+                        print("🚀 Attempting to send webhook via PHP server...")
+                        
+                        local php_success = sendToPHPServer(
+                            player.userId, 
+                            data.starter, 
+                            tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), 
+                            GuiSettings["Discord_Webhook"], 
+                            data.need
+                        )
+                        
+                        -- หาก PHP server ล้มเหลว ให้ส่งผ่าน Discord embed เป็น backup
+                        if not php_success then
+                            print("🔄 PHP failed, trying direct Discord embed...")
+                            task.wait(1) -- รอสักครู่
+                            
+                            local direct_success = sendDirectToDiscord(
+                                player.userId, 
+                                data.starter, 
+                                tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), 
+                                GuiSettings["Discord_Webhook"], 
+                                data.need
+                            )
+                            
+                            if direct_success then
+                                print("✅ Direct Discord embed sent successfully!")
+                            else
+                                print("❌ Both PHP and Direct Discord methods failed!")
+                                game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                                    Text = "[WEBHOOK] ❌ ทั้ง PHP และ Discord ล้มเหลว!";
+                                    Color = Color3.fromRGB(255, 0, 0);
+                                    Font = Enum.Font.Gotham;
+                                    FontSize = Enum.FontSize.Size18;
+                                })
+                            end
+                        end
                     end
     
                 end
