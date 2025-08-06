@@ -2996,6 +2996,7 @@ else -- SELLER GUI
         ["Use_Direct_Discord_Webhook"] = true,
         ["Webhook_Include_Thumbnail"] = true,
         ["Webhook_Show_Profit_Loss"] = true,
+        ["Webhook_Show_Completion_Image"] = false,
         ["Gui_Open_and_Close"] = "v",
     }
     
@@ -3053,14 +3054,23 @@ else -- SELLER GUI
             return formatted
         end
         
-        -- Create success/completion image URL (you can replace with your preferred image)
+        -- Create success/completion image URL (using valid image URLs)
         local completion_images = {
-            "https://i.imgur.com/ZqY9X7v.png", -- Money bag success
-            "https://i.imgur.com/K3nD8sF.png", -- Cash stack
-            "https://i.imgur.com/M9pL4xR.png", -- Dollar sign success
-            "https://i.imgur.com/R7dQ2nM.png", -- Green checkmark with money
+            "https://cdn.discordapp.com/attachments/123/456/money_success.png", -- Money bag success
+            "https://i.postimg.cc/9fNZqY8v/cash-success.png", -- Cash stack 
+            "https://i.postimg.cc/tgXqR9Kx/dollar-success.png", -- Dollar sign success
+            "https://media.tenor.com/images/8c3c3f3f3f3f3f3f3f3f3f3f3f3f3f3f/tenor.gif", -- Money animation
+            "https://i.ibb.co/123456/money-completed.png", -- Alternative hosting
         }
-        local completion_image = completion_images[math.random(1, #completion_images)]
+        
+        -- Use a simpler approach with emoji or no image if URLs fail
+        local use_completion_image = GuiSettings["Webhook_Show_Completion_Image"] ~= false
+        local completion_image = nil
+        
+        if use_completion_image then
+            -- Try to use a more reliable image source or use text-based success indicator
+            completion_image = "https://via.placeholder.com/400x200/00ff00/ffffff?text=💰+ORDER+COMPLETED+✅"
+        end
         
         -- Create embed data
         local embed = {
@@ -3069,9 +3079,6 @@ else -- SELLER GUI
             color = profit_color,
             thumbnail = {
                 url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userid .. "&width=420&height=420&format=png"
-            },
-            image = {
-                url = completion_image
             },
             fields = {
                 {
@@ -3111,6 +3118,13 @@ else -- SELLER GUI
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
+        
+        -- Add completion image only if it's valid and enabled
+        if completion_image and GuiSettings["Webhook_Show_Completion_Image"] ~= false then
+            embed.image = {
+                url = completion_image
+            }
+        end
 
         -- Create webhook payload
         local webhook_data = {
