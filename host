@@ -3043,42 +3043,80 @@ else -- SELLER GUI
         local cash_difference = end_cash - start_cash
         local profit_color = cash_difference >= 0 and 65280 or 16711680 -- Green for profit, Red for loss
         
+        -- Format cash with commas
+        local function formatCash(amount)
+            local formatted = tostring(amount)
+            formatted = formatted:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+            if formatted:sub(1, 1) == "," then
+                formatted = formatted:sub(2)
+            end
+            return formatted
+        end
+        
+        -- Create success/completion image URL (you can replace with your preferred image)
+        local completion_images = {
+            "https://i.imgur.com/ZqY9X7v.png", -- Money bag success
+            "https://i.imgur.com/K3nD8sF.png", -- Cash stack
+            "https://i.imgur.com/M9pL4xR.png", -- Dollar sign success
+            "https://i.imgur.com/R7dQ2nM.png", -- Green checkmark with money
+        }
+        local completion_image = completion_images[math.random(1, #completion_images)]
+        
         -- Create embed data
         local embed = {
-            title = "💰 Cash Order Completed",
+            title = "💰 เก็บเงินเสร็จแล้ว | Cash Order Completed",
+            description = "**" .. displayName .. "** (" .. playerName .. ") ได้ทำการเก็บเงินเสร็จสิ้นแล้ว!",
             color = profit_color,
             thumbnail = {
                 url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userid .. "&width=420&height=420&format=png"
             },
+            image = {
+                url = completion_image
+            },
             fields = {
                 {
-                    name = "👤 Player Info",
-                    value = "**Name:** " .. playerName .. "\n**Display:** " .. displayName .. "\n**User ID:** " .. userid,
+                    name = "👤 ข้อมูลผู้เล่น | Player Info",
+                    value = "**ชื่อ Name:** " .. playerName .. "\n**ชื่อแสดง Display:** " .. displayName .. "\n**รหัสผู้ใช้ User ID:** " .. userid,
                     inline = true
                 },
                 {
-                    name = "💸 Cash Details",
-                    value = "**Start:** $" .. string.format("%d", start_cash) .. "\n**End:** $" .. string.format("%d", end_cash) .. "\n**Bought:** $" .. string.format("%d", bought),
+                    name = "💸 รายละเอียดเงิน | Cash Details",
+                    value = "**เริ่มต้น Start:** $" .. formatCash(start_cash) .. "\n**สิ้นสุด End:** $" .. formatCash(end_cash) .. "\n**ซื้อ Bought:** $" .. formatCash(bought),
                     inline = true
                 },
                 {
-                    name = "📊 Profit/Loss",
-                    value = (cash_difference >= 0 and "💚 +" or "❌ ") .. "$" .. string.format("%d", math.abs(cash_difference)),
+                    name = "📊 กำไร/ขาดทุน | Profit/Loss",
+                    value = (cash_difference >= 0 and "💚 กำไร +" or "❌ ขาดทุน -") .. "$" .. formatCash(math.abs(cash_difference)),
+                    inline = true
+                },
+                {
+                    name = "⏰ เวลาที่เสร็จสิ้น | Completion Time",
+                    value = os.date("📅 %d/%m/%Y\n🕐 %H:%M:%S"),
+                    inline = true
+                },
+                {
+                    name = "🎮 เซิร์ฟเวอร์ | Server Info",
+                    value = "**Job ID:** " .. game.JobId:sub(1, 8) .. "...\n**Players:** " .. #game.Players:GetPlayers() .. "/12",
+                    inline = true
+                },
+                {
+                    name = "💎 สถานะ | Status",
+                    value = cash_difference >= 0 and "✅ **สำเร็จ SUCCESS**" or "⚠️ **มีปัญหา ISSUE**",
                     inline = true
                 }
             },
             footer = {
-                text = "Da Hood Cash System • " .. os.date("%Y-%m-%d %H:%M:%S"),
-                icon_url = "https://cdn.discordapp.com/emojis/123456789012345678.png"
+                text = "🏠 Da Hood Cash System | Made with ❤️",
+                icon_url = "https://cdn.discordapp.com/emojis/1234567890123456789.png"
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
 
         -- Create webhook payload
         local webhook_data = {
-            username = "Da Hood Cash Bot",
-            avatar_url = "https://cdn.discordapp.com/app-icons/123456789012345678/icon.png",
-            content = cash_difference >= 0 and "✅ **Order Completed Successfully!**" or "⚠️ **Order Completed with Loss**",
+            username = "💰 Da Hood Cash Bot",
+            avatar_url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userid .. "&width=150&height=150&format=png",
+            content = cash_difference >= 0 and "🎉 **เก็บเงินสำเร็จแล้ว! Order Completed Successfully!**" or "⚠️ **เก็บเงินเสร็จแต่มีปัญหา Order Completed with Issues**",
             embeds = {embed}
         }
 
