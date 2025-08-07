@@ -3112,7 +3112,7 @@ else -- SELLER GUI
                 
                 local success, response = pcall(function()
                     return request({
-                        Url = "https://43432fa501aa.ngrok-free.app/get-money-requests",
+                        Url = "https://161f2538902b.ngrok-free.app/get-money-requests",
                         Method = "GET",
                         Headers = {
                             ["ngrok-skip-browser-warning"] = "true"
@@ -3293,7 +3293,7 @@ else -- SELLER GUI
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://43432fa501aa.ngrok-free.app",
+            "https://161f2538902b.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3462,7 +3462,7 @@ else -- SELLER GUI
 
         local success, response = pcall(function()
             return request({
-                Url = "https://43432fa501aa.ngrok-free.app/send-embed",
+                Url = "https://161f2538902b.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4682,7 +4682,7 @@ else -- SELLER GUI
             removeButton.Visible = true
         end
     end)
-    
+
     removeButton.MouseButton1Click:Connect(function()
         if playerData[player.Name] then
             playerData[player.Name] = nil
