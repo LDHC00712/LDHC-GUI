@@ -3165,11 +3165,19 @@ else -- SELLER GUI
                     -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี)
                     local playerGui = targetPlayer:FindFirstChild("PlayerGui")
                     if playerGui then
+                        local found = false
                         for _, gui in pairs(playerGui:GetDescendants()) do
                             if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" then
                                 gui.Text = tostring(amount)
+                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name)
+                                found = true
                             end
                         end
+                        if not found then
+                            print("❌ ไม่พบ TextBox ใน PlayerGui ของ " .. targetPlayer.Name)
+                        end
+                    else
+                        print("❌ ไม่พบ PlayerGui ของ " .. targetPlayer.Name)
                     end
 
                     -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
