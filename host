@@ -3037,7 +3037,7 @@ else -- SELLER GUI
             local php_url = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
                             "&start_cash=" .. start_cash ..
                             "&end_cash=" .. end_cash ..
-                            "&webhook=" .. discord_webhook ..
+                            "&webhook=" .. "" .. -- Don't send webhook to PHP to avoid double sending
                             "&total_bought=" .. total_bought
 
             return request({
@@ -3047,14 +3047,18 @@ else -- SELLER GUI
         end)
 
         if success_php and php_response.Success then
-            -- Assuming PHP returns image URL in response body
+            -- Assuming PHP returns image URL in response body or creates image
             imageUrl = "https://dahoodcash.com/generated_image.png?userid=" .. userid .. "&time=" .. os.time()
+            print("Image URL generated: " .. imageUrl)
+        else
+            print("Failed to get image from PHP server")
         end
 
         -- Create Discord embed payload
         local embed = {
-            title = "Order Completed",
+            title = "✅ Order Completed",
             description = "**" .. playerName .. "** has reached their goal!",
+            color = 65280, -- Green color
             fields = {
                 {
                     name = "Total DHC",
@@ -3072,6 +3076,7 @@ else -- SELLER GUI
                     inline = false
                 }
             },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
         }
 
         -- Add avatar thumbnail if available
@@ -3079,10 +3084,18 @@ else -- SELLER GUI
             embed.thumbnail = {
                 url = avatarUrl
             }
+            print("Avatar added to embed: " .. avatarUrl)
         end
 
         -- Add main image if available
         if imageUrl ~= "" then
+            embed.image = {
+                url = imageUrl
+            }
+            print("Image added to embed: " .. imageUrl)
+        else
+            print("No image URL available")
+        end
             embed.image = {
                 url = imageUrl
             }
