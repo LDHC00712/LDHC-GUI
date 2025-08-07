@@ -3080,9 +3080,12 @@ else -- SELLER GUI
             discord_webhook = discord_webhook
         }
 
+        print("Sending payload to webhook server...")
+        print("Payload:", HttpService:JSONEncode(payload))
+
         local success, response = pcall(function()
             return request({
-                Url = "http://localhost:3000/send-embed", -- เปลี่ยนเป็น URL ของเซิร์ฟเวอร์คุณ
+                Url = "http://127.0.0.1:3000/send-embed", -- เปลี่ยนเป็น 127.0.0.1
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
