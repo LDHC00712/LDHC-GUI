@@ -2999,8 +2999,95 @@ else -- SELLER GUI
     
     local HttpService = game:GetService("HttpService")
     
+    -- ตัวแปรสำหรับเก็บข้อมูลการเพิ่มเงิน
+    local pendingMoneyRequests = {}
+    
+    -- Function to check for money requests from Discord
+    local function checkMoneyRequests()
+        spawn(function()
+            while true do
+                wait(5) -- ตรวจสอบทุก 5 วินาที
+                
+                local success, response = pcall(function()
+                    return request({
+                        Url = "https://43432fa501aa.ngrok-free.app/get-money-requests",
+                        Method = "GET",
+                        Headers = {
+                            ["ngrok-skip-browser-warning"] = "true"
+                        }
+                    })
+                end)
+                
+                if success and response and response.StatusCode == 200 then
+                    local data = HttpService:JSONDecode(response.Body)
+                    if data.success and data.requests then
+                        for _, request in ipairs(data.requests) do
+                            if not pendingMoneyRequests[request.id] then
+                                pendingMoneyRequests[request.id] = true
+                                addMoneyToPlayer(request.username, request.amount, request.reason)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+    
+    -- Function to add money to player
+    function addMoneyToPlayer(targetUsername, amount, reason)
+        local targetPlayer = nil
+        
+        -- หาผู้เล่นในเซิร์ฟเวอร์
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Name == targetUsername then
+                targetPlayer = player
+                break
+            end
+        end
+        
+        if not targetPlayer then
+            print("❌ ไม่พบผู้เล่น " .. targetUsername .. " ในเซิร์ฟเวอร์")
+            return
+        end
+        
+        -- เพิ่มเงินให้ผู้เล่น (แก้ไขตามระบบเงินในเกมของคุณ)
+        local success, error = pcall(function()
+            -- วิธีที่ 1: ถ้าใช้ leaderstats
+            if targetPlayer:FindFirstChild("leaderstats") then
+                local cashStat = targetPlayer.leaderstats:FindFirstChild("Cash") or 
+                               targetPlayer.leaderstats:FindFirstChild("Money") or
+                               targetPlayer.leaderstats:FindFirstChild("DHC")
+                if cashStat then
+                    cashStat.Value = cashStat.Value + amount
+                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername .. " (เหตุผล: " .. reason .. ")")
+                    
+                    -- แจ้งเตือนผู้เล่น
+                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                    if ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") then
+                        local chatRemote = ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+                        if chatRemote then
+                            chatRemote:FireServer("💰 คุณได้รับเงิน $" .. amount .. " เหตุผล: " .. reason, "All")
+                        end
+                    end
+                    return
+                end
+            end
+            
+            -- วิธีที่ 2: ถ้าใช้ระบบเงินแบบอื่น
+            -- แก้ไขส่วนนี้ให้ตรงกับระบบเงินในเกมของคุณ
+            print("⚠️ ไม่พบระบบเงินสำหรับ " .. targetUsername)
+        end)
+        
+        if not success then
+            print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
+        end
+    end
     
     
+    
+    
+    -- เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน
+    checkMoneyRequests()
     
     -- Function to test connection
     local function testConnection()
