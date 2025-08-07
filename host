@@ -193,6 +193,7 @@ local GroupService = game:GetService("GroupService")
 local Lighting = game:GetService("Lighting")
 local ChatService = game:GetService("Chat")
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
 
 --Module scripts
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
@@ -3135,6 +3136,61 @@ else -- SELLER GUI
         end)
     end
     
+    -- Function to show Discord money notification in player box
+    local function showDiscordMoneyNotification(targetPlayer, amount)
+        -- หาช่องของผู้เล่น
+        local container = G2L["7"] -- Player list container
+        if not container then return end
+        
+        local playerBox = container:FindFirstChild(targetPlayer.Name .. "_Box")
+        if not playerBox then return end
+        
+        -- สร้างข้อความแจ้งเตือน
+        local notification = Instance.new("TextLabel")
+        notification.Name = "DiscordMoneyNotification"
+        notification.Size = UDim2.new(0, 60, 0, 25)
+        notification.Position = UDim2.new(1, -70, 0, 10) -- มุมขวาบน
+        notification.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        notification.BorderSizePixel = 0
+        notification.Text = formatNumber(amount)
+        notification.TextColor3 = Color3.fromRGB(0, 255, 0) -- สีเขียว
+        notification.TextScaled = true
+        notification.Font = Enum.Font.GothamBold
+        notification.Parent = playerBox
+        
+        -- เพิ่ม corner rounded
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 6)
+        corner.Parent = notification
+        
+        -- Animation: แสดงผลแล้วหายไป
+        notification.BackgroundTransparency = 1
+        notification.TextTransparency = 1
+        
+        -- Fade in
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local fadeIn = TweenService:Create(notification, tweenInfo, {
+            BackgroundTransparency = 0.2,
+            TextTransparency = 0
+        })
+        
+        fadeIn:Play()
+        
+        -- Fade out หลังจาก 3 วินาที (ใช้ spawn เพื่อไม่ให้บล็อก)
+        spawn(function()
+            wait(3)
+            local fadeOut = TweenService:Create(notification, tweenInfo, {
+                BackgroundTransparency = 1,
+                TextTransparency = 1
+            })
+            
+            fadeOut:Play()
+            fadeOut.Completed:Connect(function()
+                notification:Destroy()
+            end)
+        end)
+    end
+
     -- Function to add money to player
     function addMoneyToPlayer(targetUsername, amount, reason)
         local targetPlayer = nil
@@ -3170,6 +3226,9 @@ else -- SELLER GUI
                         -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
                         updateRightSideGUI(amount, totalAddedMoney)
                     end
+                    
+                    -- แสดงข้อความแจ้งเตือนในช่องของผู้เล่น
+                    showDiscordMoneyNotification(targetPlayer, amount)
                     
                     print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
                     print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
