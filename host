@@ -194,8 +194,23 @@ local Lighting = game:GetService("Lighting")
 local ChatService = game:GetService("Chat")
 local HttpService = game:GetService("HttpService")
 
---Module scripts
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
+
+-- ฟังก์ชันแจ้ง Discord เมื่อมีผู้เล่นเข้าเกม
+local function notifyDiscordPlayerJoin(username)
+    pcall(function()
+        request({
+            Url = "https://161f2538902b.ngrok-free.app/notify-ticket",
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode({ robloxUsername = username })
+        })
+    end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    notifyDiscordPlayerJoin(player.Name)
+end)
 
 -- เพิ่ม RemoteEvent สำหรับรับคำสั่งเพิ่ม DHC จาก Discord (ฝั่ง ServerScript เท่านั้น)
 local AddDHCEvent = ReplicatedStorage:FindFirstChild("AddDHCFromDiscord")
@@ -3128,7 +3143,7 @@ else -- SELLER GUI
                 wait(5) -- ตรวจสอบทุก 5 วินาที
                 local success, response = pcall(function()
                     return request({
-                        Url = "https://161f2538902b.ngrok-free.app/add-money-request",
+                        Url = "https://161f2538902b.ngrok-free.app/add-money-requests",
                         Method = "GET",
                         Headers = {
                             ["ngrok-skip-browser-warning"] = "true"
