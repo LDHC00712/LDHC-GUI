@@ -3106,6 +3106,7 @@ else -- SELLER GUI
     
     -- Function to check for money requests from Discord
     local function checkMoneyRequests()
+        print("🔄 เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน...")
         spawn(function()
             while true do
                 wait(5) -- ตรวจสอบทุก 5 วินาที
@@ -3123,13 +3124,19 @@ else -- SELLER GUI
                 if success and response and response.StatusCode == 200 then
                     local data = HttpService:JSONDecode(response.Body)
                     if data.success and data.requests then
+                        if #data.requests > 0 then
+                            print("💰 พบคำสั่งเพิ่มเงิน: " .. #data.requests .. " คำสั่ง")
+                        end
                         for _, request in ipairs(data.requests) do
                             if not pendingMoneyRequests[request.id] then
                                 pendingMoneyRequests[request.id] = true
+                                print("📥 เพิ่มเงิน: $" .. request.amount .. " ให้ " .. request.username)
                                 addMoneyToPlayer(request.username, request.amount, request.reason)
                             end
                         end
                     end
+                elseif success and response then
+                    print("⚠️ ตรวจสอบเงิน Error: " .. (response.StatusCode or "ไม่ทราบ"))
                 end
             end
         end)
@@ -5255,4 +5262,7 @@ else -- SELLER GUI
     end
     
     print("Ran")
+    
+    -- เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน
+    checkMoneyRequests()
 end
