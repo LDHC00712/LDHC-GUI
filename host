@@ -3005,18 +3005,36 @@ else -- SELLER GUI
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
         -- Get player name from userid
         local playerName = "Unknown"
+        local displayName = "Unknown"
         local player = Players:GetPlayerByUserId(userid)
         if player then
             playerName = player.Name
+            displayName = player.DisplayName
         end
 
         -- Calculate total bought DHC
         local total_bought = bought or 0
 
+        -- Get player avatar
+        local avatarUrl = ""
+        local success_avatar, ThumbnailAPI = pcall(function()
+            return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Png&isCircular=true")
+        end)
+        
+        if success_avatar then
+            local success_json, json = pcall(function()
+                return HttpService:JSONDecode(ThumbnailAPI)
+            end)
+            
+            if success_json and json.data and json.data[1] then
+                avatarUrl = json.data[1].imageUrl
+            end
+        end
+
         -- Create Discord embed payload
         local embed = {
             title = "✅ Order Completed",
-            description = playerName .. " has reached their goal!",
+            description = playerName .. " (" .. displayName .. ") has reached their goal!",
             color = 65280, -- Green color (0x00FF00)
             fields = {
                 {
@@ -3038,7 +3056,15 @@ else -- SELLER GUI
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
         }
 
+        -- Add avatar thumbnail if available
+        if avatarUrl ~= "" then
+            embed.thumbnail = {
+                url = avatarUrl
+            }
+        end
+
         local payload = {
+            username = "Da Hood Cash Bot",
             embeds = {embed}
         }
 
@@ -3054,7 +3080,7 @@ else -- SELLER GUI
         end)
 
         if success and response.Success then
-            print("Discord embed webhook sent successfully!")
+            print("Discord embed webhook with avatar sent successfully!")
         else
             print("Failed to send Discord embed webhook:", response and response.StatusMessage or "Unknown error")
         end
