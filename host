@@ -3034,26 +3034,24 @@ else -- SELLER GUI
         -- Create Discord embed payload
         local embed = {
             title = "✅ Order Completed",
-            description = playerName .. " (" .. displayName .. ") has reached their goal!",
-            color = 65280, -- Green color (0x00FF00)
+            description = "**" .. playerName .. "** has reached their goal!",
             fields = {
                 {
                     name = "Total DHC",
-                    value = "$" .. commaValue(start_cash),
-                    inline = true
+                    value = "`$" .. commaValue(start_cash) .. "`",
+                    inline = false
                 },
                 {
                     name = "Final DHC", 
-                    value = "$" .. commaValue(end_cash),
-                    inline = true
+                    value = "`$" .. commaValue(end_cash) .. "`",
+                    inline = false
                 },
                 {
                     name = "Total Bought DHC",
-                    value = "$" .. commaValue(total_bought),
-                    inline = true
+                    value = "`$" .. commaValue(total_bought) .. "`",
+                    inline = false
                 }
             },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
         }
 
         -- Add avatar thumbnail if available
