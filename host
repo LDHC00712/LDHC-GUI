@@ -3417,7 +3417,7 @@ else -- SELLER GUI
     
     -- Function to update money input fields
     function updateMoneyInputFields(amount)
-        print("💰 กำลังอัปเดตช่องใส่เงิน...")
+        print("💰 กำลังอัปเดตช่องใส่เงินให้ลูกค้า...")
         
         local function formatMoney(amt)
             local formatted = tostring(amt):reverse():gsub("(%d%d%d)", "%1,"):reverse()
@@ -3432,50 +3432,64 @@ else -- SELLER GUI
         
         local updatedCount = 0
         
-        -- หาช่อง TextBox ที่น่าจะเป็นช่องใส่เงิน
-        for _, element in pairs(playerGui:GetDescendants()) do
-            if element:IsA("TextBox") and element.Visible then
-                local shouldUpdate = false
-                local reason = ""
-                
-                -- เงื่อนไขการอัปเดต
-                if element.Name:lower():find("money") or 
-                   element.Name:lower():find("cash") or
-                   element.Name:lower():find("amount") or
-                   element.Name:lower():find("input") or
-                   element.Name:lower():find("value") then
-                    shouldUpdate = true
-                    reason = "ชื่อ: " .. element.Name
+        -- ลำดับความสำคัญของ field ที่จะอัปเดต
+        local targetFields = {
+            -- Field หลักที่น่าจะใช้เพิ่มเงินให้ลูกค้า
+            "MainScreenGui.WeaponSkinsGUI.PurchaseFrame.Frame.Amount",
+            "InvestCasino.Frame.TextBox"
+        }
+        
+        -- ลองหา field หลักก่อน
+        for _, fieldPath in ipairs(targetFields) do
+            local field = playerGui:FindFirstChild(fieldPath:split(".")[1])
+            if field then
+                -- Navigate through the path
+                local current = field
+                local pathParts = fieldPath:split(".")
+                for i = 2, #pathParts do
+                    current = current:FindFirstChild(pathParts[i])
+                    if not current then break end
                 end
                 
-                if element.PlaceholderText and 
-                   (element.PlaceholderText:lower():find("money") or
-                    element.PlaceholderText:lower():find("amount") or
-                    element.PlaceholderText:match("%$")) then
-                    shouldUpdate = true
-                    reason = reason .. " | PlaceholderText: " .. element.PlaceholderText
-                end
-                
-                -- ถ้า TextBox ปัจจุบันมีเลขอยู่
-                if element.Text:match("^[%d,]*$") and element.Text ~= "" then
-                    shouldUpdate = true
-                    reason = reason .. " | มีเลข: " .. element.Text
-                end
-                
-                -- ถ้า Parent มีคำว่า money/cash
-                if element.Parent and 
-                   (element.Parent.Name:lower():find("money") or
-                    element.Parent.Name:lower():find("cash") or
-                    element.Parent.Name:lower():find("input")) then
-                    shouldUpdate = true
-                    reason = reason .. " | Parent: " .. element.Parent.Name
-                end
-                
-                if shouldUpdate then
-                    element.Text = formatMoney(amount)
-                    print("✅ อัปเดต TextBox: " .. element:GetFullName() .. " → " .. formatMoney(amount))
-                    print("   เหตุผล: " .. reason)
+                if current and current:IsA("TextBox") and current.Visible then
+                    current.Text = tostring(amount)
+                    print("✅ อัปเดตช่องเงินหลัก: " .. fieldPath .. " → " .. amount)
                     updatedCount = updatedCount + 1
+                    break
+                end
+            end
+        end
+        
+        -- ถ้าไม่เจอ field หลัก ใช้วิธีเดิม
+        if updatedCount == 0 then
+            print("🔍 ไม่เจอช่องหลัก ใช้การค้นหาทั่วไป...")
+            
+            for _, element in pairs(playerGui:GetDescendants()) do
+                if element:IsA("TextBox") and element.Visible then
+                    local shouldUpdate = false
+                    local reason = ""
+                    
+                    -- เงื่อนไขการอัปเดต - เน้น Amount field
+                    if element.Name:lower() == "amount" and 
+                       element:GetFullName():find("PurchaseFrame") then
+                        shouldUpdate = true
+                        reason = "PurchaseFrame Amount field"
+                    elseif element.PlaceholderText and 
+                           element.PlaceholderText:lower():find("amount") then
+                        shouldUpdate = true
+                        reason = "PlaceholderText: " .. element.PlaceholderText
+                    elseif element.Name:lower():find("money") or 
+                           element.Name:lower():find("cash") then
+                        shouldUpdate = true
+                        reason = "Money/Cash field: " .. element.Name
+                    end
+                    
+                    if shouldUpdate then
+                        element.Text = tostring(amount)
+                        print("✅ อัปเดต TextBox: " .. element:GetFullName() .. " → " .. amount)
+                        print("   เหตุผล: " .. reason)
+                        updatedCount = updatedCount + 1
+                    end
                 end
             end
         end
