@@ -3002,6 +3002,47 @@ else -- SELLER GUI
     
     
     
+    -- Function to notify Discord ticket when player joins
+    local function notifyDiscordTicket(playerName, userId)
+        -- ตรวจสอบว่าไม่ใช่ alt account
+        if getgenv().alts and getgenv().alts[playerName] then
+            print("🚫 " .. playerName .. " เป็น alt account, ไม่ส่งการแจ้งเตือน")
+            return
+        end
+        
+        print("🔔 กำลังส่งการแจ้งเตือนสำหรับ: " .. playerName)
+
+        -- ส่งข้อมูลที่จำเป็นเท่านั้น
+        local payload = {
+            robloxUsername = playerName
+        }
+
+        local success, response = pcall(function()
+            return request({
+                Url = "http://localhost:3000/notify-ticket",
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+
+        if success and response.Success then
+            print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
+            print("📄 Response: " .. (response.Body or "ไม่มี response body"))
+        else
+            print("❌ เกิดข้อผิดพลาดในการส่งการแจ้งเตือน")
+            if response then
+                print("   StatusCode:", response.StatusCode)
+                print("   StatusMessage:", response.StatusMessage)
+                print("   Body:", response.Body)
+            else
+                print("   ไม่ได้รับ response")
+            end
+        end
+    end
+
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
         -- Get player name from userid
         local playerName = "Unknown"
@@ -4414,14 +4455,17 @@ else -- SELLER GUI
             -- Play the sound as soon as the player joins
             local Join_Audio = tonumber(GuiSettings["Join_Audio_id"])
             playSound(Join_Audio)
-    
+
             -- Fetch the player's profile picture and username
             local username = player.Name
             local userId = player.UserId
             
             -- Get the player's profile picture URL
             local pfpUrl = game:GetService("Players"):GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-    
+
+            -- Send notification to Discord ticket (New feature) - Only for non-alt players
+            notifyDiscordTicket(username, userId)
+
             -- Show a notification to all players about the player joining
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Player Joined",
@@ -4429,20 +4473,20 @@ else -- SELLER GUI
                 Icon = pfpUrl,  -- The profile picture URL
                 Duration = 10  -- Notification duration in seconds
             })
-    
+
             -- Start the character loading and ForceField removal check as before
             local startTime = tick()  -- Get the current time
             local timeout = 30  -- Timeout limit in seconds
-    
+
             repeat
                 task.wait()
             until player.Character and player.Character:FindFirstChild("FULLY_LOADED_CHAR") ~= nil or (tick() - startTime > timeout)
-    
+
             -- Check if we exited the loop due to timeout
             if tick() - startTime > timeout then
                 warn("Player character took too long to load.")
             else
-    
+
                 local container = G2L["7"]
                 if container then
                     -- Look for the player's box in the container
@@ -4458,7 +4502,7 @@ else -- SELLER GUI
                         box:Destroy()
                         createbox(player,THREE,LABEL1)
                     end
-    
+
                     if GuiSettings["Bring_on_Join"] == true then
                         task.wait(0.5)
                         game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
@@ -4469,9 +4513,7 @@ else -- SELLER GUI
             addProfileBoxes(player)
             updateProfileBoxes()
         end
-    end)
-    
-    -- PlayerRemoving event: Delete box when a player leaves
+    end)    -- PlayerRemoving event: Delete box when a player leaves
     Players.PlayerRemoving:Connect(function(player)
         if playerData[player.Name] == nil then
             deletebox(player)
