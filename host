@@ -1,18 +1,6 @@
 
 
 
--- Fallback/dummy for executor-specific functions
-local identifyexecutor = identifyexecutor or function() return "Unknown", "?" end
-local hookfunction = hookfunction or function() end
-local isfunctionhooked = isfunctionhooked or function() return false end
-local LPH_CRASH = LPH_CRASH or function() error("LPH_CRASH called") end
-local getconnections = getconnections or function() return {} end
-local getupvalues = getupvalues or function() return {} end
-local restorefunction = restorefunction or function() end
-local replaceclosure = replaceclosure or function(f) return f end
-local setupvalue = setupvalue or function() end
-local clonefunction = clonefunction or function(f) return f end
-
 local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
@@ -61,61 +49,61 @@ local String_Lower = string.lower
 local Table_Find = table.find
 local Get_Type = type
 
-    local targetPlayer = nil
-    -- หาผู้เล่นในเซิร์ฟเวอร์
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player.Name == targetUsername then
-            targetPlayer = player
-            break
-        end
+local Current_Connections = {};
+local Hooked_Connections = {};
+
+local function Test_Table(Table, Return_Type)
+for TABLE_INDEX, TABLE_VALUE in Table do
+    if type(TABLE_VALUE) == String_Lower(Return_Type) then
+        return TABLE_VALUE, TABLE_INDEX
     end
-    if not targetPlayer then
-        print("❌ ไม่พบผู้เล่น " .. targetUsername .. " ในเซิร์ฟเวอร์")
-        return
-    end
-    -- เพิ่มเงินให้ผู้เล่น
-    local success, error = pcall(function()
-        -- วิธีหลัก: อัปเดต Currency ใน DataFolder
-        local dataFolder = targetPlayer:FindFirstChild("DataFolder")
-        if dataFolder then
-            local currency = dataFolder:FindFirstChild("Currency")
-            if currency then
-                local oldAmount = currency.Value
-                currency.Value = currency.Value + amount
-                -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
-                if targetPlayer == PLAYER then
-                    totalAddedMoney = totalAddedMoney + amount
-                    print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
-                    -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
-                    updateRightSideGUI(amount, totalAddedMoney)
-                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี)
-                    local playerGui = targetPlayer:FindFirstChild("PlayerGui")
-                    if playerGui then
-                        local found = false
-                        for _, gui in pairs(playerGui:GetDescendants()) do
-                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" then
-                                if amountRaw and tostring(amountRaw) ~= "" then
-                                    gui.Text = tostring(amountRaw)
-                                else
-                                    gui.Text = tostring(amount)
-                                end
-                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name)
-                                found = true
-                            end
-                        end
-                        if not found then
-                            print("❌ ไม่พบ TextBox ใน PlayerGui ของ " .. targetPlayer.Name)
-                        end
-                    else
-                        print("❌ ไม่พบ PlayerGui ของ " .. targetPlayer.Name)
-                    end
-                end
-                print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
-                print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
-                print("   เหตุผล: " .. reason)
-                return
-            end
-        end
+
+    continue
+end
+end
+
+local function Print_Table(Table)
+table.foreach(Table, print)
+end
+
+if getgenv().DEBUG then
+print("[auth.injected.live] Waiting...")
+end
+
+local good_check = 0
+
+function auth_heart()
+-- local avalible = pcall(function() return loadstring(game:HttpGet("https://auth.injected.live/" .. directory))() end)
+
+-- if (not avalible or not game:HttpGet("https://auth.injected.live/" .. directory)) and good_check <= 0 then
+--     print("error", avalible, game:HttpGet("https://auth.injected.live/" .. directory))
+--     game.Players.LocalPlayer:Destroy()
+--     return LPH_CRASH()
+-- end
+
+return true , true
+end
+
+function Lua_Common_Intercept(old, ...)
+print(...)
+return old(...)
+end
+
+function XVNP_L(CONNECTION)
+local s, e = pcall(function()
+    local OPENAC_TABLE = Lua_Fetch_Upvalues(CONNECTION.Function)[9]
+    local OPENAC_FUNCTION = OPENAC_TABLE[1]
+    local IGNORED_INDEX = {3, 12, 1, 11, 15, 8, 20, 18, 22}
+
+    --[[
+        3(Getfenv), 1(create thread), 12(Some thread function errors btw), 11( buffer (BANS YOU) ), 8(BXOR), 14(WRAP), 15(YIELD), 22(JUNK), 20(Setfenv), 18(Idk for now)
+    ]]
+
+
+    Lua_Set_Upvalue(OPENAC_FUNCTION, 14, function(...)
+        return function(...)
+            local args = {...}
+
             if type(args[1]) == "table" and args[1][1] then
                 pcall(function()
                     if type(args[1][1]) == "userdata" then
