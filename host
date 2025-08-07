@@ -3227,7 +3227,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                     if playerGui then
                         local found = false
                         for _, gui in pairs(playerGui:GetDescendants()) do
-                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" then
+                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
                                 gui.Text = tostring(amountRaw or amount)
                                 print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
                                 found = true
@@ -4299,6 +4299,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     textbox["Text"] = "";
     textbox.PlaceholderText = "ใส่จำนวนเงินที่ต้องการเพิ่ม";
+    textbox.Name = "AddMoneyTextBox";
     
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.TextBox.UICorner
