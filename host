@@ -3181,7 +3181,7 @@ else -- SELLER GUI
                                 local amountNum = validType and parseAmount(request.amount) or nil
                                 if amountNum and amountNum > 0 then
                                     print("[AUTO DHC] เพิ่มเงินให้ ", request.username, "จำนวน:", amountNum, "เหตุผล:", request.reason or "-")
-                                    addMoneyToPlayer(request.username, amountNum, request.reason)
+                                    addMoneyToPlayer(request.username, amountNum, request.reason, request.amount)
                                 else
                                     print("[AUTO DHC] amount ไม่ถูกต้อง:", tostring(request.amount))
                                 end
@@ -3196,7 +3196,7 @@ else -- SELLER GUI
     end
     
     -- Function to add money to player
-    function addMoneyToPlayer(targetUsername, amount, reason)
+function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         local targetPlayer = nil
         
         -- หาผู้เล่นในเซิร์ฟเวอร์
@@ -3222,14 +3222,14 @@ else -- SELLER GUI
                     local oldAmount = currency.Value
                     currency.Value = currency.Value + amount
 
-                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี)
+                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี) ด้วยค่าตรงจาก Discord (amountRaw)
                     local playerGui = targetPlayer:FindFirstChild("PlayerGui")
                     if playerGui then
                         local found = false
                         for _, gui in pairs(playerGui:GetDescendants()) do
                             if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" then
-                                gui.Text = tostring(amount)
-                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name)
+                                gui.Text = tostring(amountRaw or amount)
+                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
                                 found = true
                             end
                         end
