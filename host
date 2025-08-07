@@ -120,15 +120,12 @@ local Get_Type = type
         end
     end)
 
-    Lua_Set_Upvalue(OPENAC_FUNCTION, 1, function(...)
-        task.wait(200)
-    end)
-
-    hookfunction(OPENAC_FUNCTION, function(...)
+    Lua_Set_Upvalue(OPENAC_FUNCTION, 14, function(...)
+        return function(...)
+            local args = {...}
         --warn("[XVNP DEBUG]", ...)
         return {}
     end)
-end
 end
 
 local XVNP_LASTUPDATE = 0
