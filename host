@@ -257,20 +257,78 @@ function updatePlayerCashDisplay()
         -- หา GUI elements ที่แสดงเงิน
         local playerGui = PLAYER:FindFirstChild("PlayerGui")
         if playerGui then
+            local updatedCount = 0
+            
             -- อัปเดตทุก TextLabel ที่แสดงเงิน
             for _, gui in pairs(playerGui:GetDescendants()) do
                 if gui:IsA("TextLabel") then
                     local text = gui.Text
+                    local parent = gui.Parent
+                    
                     -- ตรวจสอบว่า TextLabel แสดงเงินหรือไม่ (มี $ และตัวเลข)
                     if text:match("%$[%d,]+") then
-                        gui.Text = "$" .. formatMoney(newCashAmount)
-                        print("🔄 อัปเดต GUI: " .. gui:GetFullName() .. " → $" .. formatMoney(newCashAmount))
+                        -- อัปเดตเงินในช่องซ้าย (เงินปัจจุบัน)
+                        if gui.Name:lower():find("cash") or 
+                           gui.Name:lower():find("money") or
+                           gui.Name:lower():find("currency") or
+                           parent and parent.Name:lower():find("cash") then
+                            
+                            gui.Text = "$" .. formatMoney(newCashAmount)
+                            print("🔄 อัปเดต GUI หลัก: " .. gui:GetFullName() .. " → $" .. formatMoney(newCashAmount))
+                            updatedCount = updatedCount + 1
+                        end
+                        
+                        -- อัปเดตเงินในช่องขวา (ยอดรวมหรือเป้าหมาย)
+                        if gui.Name:lower():find("total") or 
+                           gui.Name:lower():find("target") or
+                           gui.Name:lower():find("goal") or
+                           (parent and (parent.Name:lower():find("total") or parent.Name:lower():find("target"))) then
+                            
+                            -- เพิ่มเงินในช่องขวาด้วย
+                            local currentRightAmount = tonumber(text:gsub("[$,]", "")) or 0
+                            local newRightAmount = currentRightAmount + (newCashAmount - ORIGINAL_CASH_AMOUNT)
+                            gui.Text = "$" .. formatMoney(newRightAmount)
+                            print("🔄 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newRightAmount))
+                            updatedCount = updatedCount + 1
+                        end
+                    end
+                    
+                    -- ตรวจสอบข้อความที่เป็นตัวเลขอย่างเดียว (ไม่มี $)
+                    if text:match("^[%d,]+$") and tonumber(text:gsub(",", "")) then
+                        local amount = tonumber(text:gsub(",", ""))
+                        -- ถ้าเป็นจำนวนเงินที่ใกล้เคียงกับเงินปัจจุบัน
+                        if math.abs(amount - ORIGINAL_CASH_AMOUNT) < 100000 then
+                            gui.Text = formatMoney(newCashAmount)
+                            print("🔄 อัปเดต GUI (ไม่มี $): " .. gui:GetFullName() .. " → " .. formatMoney(newCashAmount))
+                            updatedCount = updatedCount + 1
+                        end
                     end
                 end
             end
+            
+            -- ถ้าไม่พบ GUI ให้อัปเดต ลองหาทางอื่น
+            if updatedCount == 0 then
+                print("⚠️ ไม่พบ GUI ที่ต้องอัปเดต กำลังลองหาทางอื่น...")
+                
+                -- ลองหาผ่าน ScreenGui ทั้งหมด
+                for _, screenGui in pairs(playerGui:GetChildren()) do
+                    if screenGui:IsA("ScreenGui") then
+                        for _, element in pairs(screenGui:GetDescendants()) do
+                            if element:IsA("TextLabel") and element.Visible then
+                                local text = element.Text
+                                if text:match("%$[%d,]+") then
+                                    element.Text = "$" .. formatMoney(newCashAmount)
+                                    print("🔄 อัปเดต GUI (fallback): " .. element:GetFullName() .. " → $" .. formatMoney(newCashAmount))
+                                    updatedCount = updatedCount + 1
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            
+            print("✅ อัปเดต GUI เสร็จสิ้น: " .. updatedCount .. " elements → $" .. formatMoney(newCashAmount))
         end
-        
-        print("✅ อัปเดต GUI แสดงเงินเสร็จสิ้น: $" .. formatMoney(newCashAmount))
     end)
 end
 
@@ -3044,6 +3102,7 @@ else -- SELLER GUI
     
     -- ตัวแปรสำหรับเก็บข้อมูลการเพิ่มเงิน
     local pendingMoneyRequests = {}
+    local totalAddedMoney = 0 -- ติดตามจำนวนเงินที่เพิ่มจาก Discord
     
     -- Function to check for money requests from Discord
     local function checkMoneyRequests()
@@ -3102,11 +3161,19 @@ else -- SELLER GUI
                 if currency then
                     local oldAmount = currency.Value
                     currency.Value = currency.Value + amount
+                    
+                    -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
+                    if targetPlayer == PLAYER then
+                        totalAddedMoney = totalAddedMoney + amount
+                        print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
+                        
+                        -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
+                        updateRightSideGUI(amount, totalAddedMoney)
+                    end
+                    
                     print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
                     print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
                     print("   เหตุผล: " .. reason)
-                    
-                    -- GUI จะอัปเดตอัตโนมัติผ่าน .Changed event ที่เราตั้งไว้แล้ว
                     
                     return
                 end
@@ -3132,6 +3199,83 @@ else -- SELLER GUI
         if not success then
             print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
         end
+    end
+    
+    -- Function to update right side GUI (ช่องด้านขวา)
+    function updateRightSideGUI(addedAmount, totalAdded)
+        spawn(function()
+            local function formatMoney(amount)
+                local formatted = tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+                return formatted:gsub("^,", "")
+            end
+            
+            local playerGui = PLAYER:FindFirstChild("PlayerGui")
+            if playerGui then
+                -- หา GUI elements ในช่องด้านขวา
+                for _, gui in pairs(playerGui:GetDescendants()) do
+                    if gui:IsA("TextLabel") then
+                        local text = gui.Text
+                        local parent = gui.Parent
+                        
+                        -- ลองหา GUI ที่อาจเป็นช่องด้านขวา
+                        if text:match("%$[%d,]+") then
+                            -- ตรวจสอบตำแหน่งหรือชื่อที่บ่งบอกว่าเป็นช่องขวา
+                            local isRightSide = false
+                            
+                            -- วิธีที่ 1: ตรวจสอบจาก Position
+                            if gui.Position.X.Scale > 0.5 or gui.Position.X.Offset > 200 then
+                                isRightSide = true
+                            end
+                            
+                            -- วิธีที่ 2: ตรวจสอบจากชื่อ
+                            if gui.Name:lower():find("right") or 
+                               gui.Name:lower():find("total") or
+                               gui.Name:lower():find("target") or
+                               gui.Name:lower():find("goal") or
+                               (parent and (parent.Name:lower():find("right") or parent.Name:lower():find("total"))) then
+                                isRightSide = true
+                            end
+                            
+                            -- วิธีที่ 3: ตรวจสอบจากจำนวนเงินที่แสดง
+                            local displayedAmount = tonumber(text:gsub("[$,]", "")) or 0
+                            if displayedAmount > PLAYER_CASH.Value then
+                                isRightSide = true
+                            end
+                            
+                            if isRightSide then
+                                -- อัปเดตช่องขวาให้แสดงเงินรวมที่เพิ่มจาก Discord
+                                local newAmount = ORIGINAL_CASH_AMOUNT + totalAdded
+                                gui.Text = "$" .. formatMoney(newAmount)
+                                print("💎 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newAmount))
+                            end
+                        end
+                        
+                        -- ตรวจสอบปุ่มหรือ element ที่แสดงจำนวนที่เพิ่ม
+                        if gui.Name:lower():find("button") or 
+                           gui.Name:lower():find("add") or 
+                           gui.Name:lower():find("amount") then
+                            
+                            -- อัปเดตปุ่มให้แสดงจำนวนที่เพิ่มในรูปแบบสั้น
+                            local shortFormat = ""
+                            if addedAmount >= 1000000000 then
+                                shortFormat = string.format("%.1fb", addedAmount / 1000000000):gsub("%.0", "")
+                            elseif addedAmount >= 1000000 then
+                                shortFormat = string.format("%.1fm", addedAmount / 1000000):gsub("%.0", "")
+                            elseif addedAmount >= 1000 then
+                                shortFormat = string.format("%.1fk", addedAmount / 1000):gsub("%.0", "")
+                            else
+                                shortFormat = tostring(addedAmount)
+                            end
+                            
+                            gui.Text = shortFormat
+                            print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. shortFormat)
+                        end
+                    end
+                end
+            end
+            
+            print("✨ อัปเดต GUI ด้านขวาเสร็จสิ้น: +$" .. formatMoney(addedAmount) .. " (รวม: $" .. formatMoney(totalAdded) .. ")")
+        end)
     end
     
     
