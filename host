@@ -1,41 +1,64 @@
 
 
 
+--[[
+-- Safe executor detection
 local exe_name, exe_version = "Unknown", "1.0"
-if identifyexecutor then
-    exe_name, exe_version = identifyexecutor()
-end
+pcall(function()
+    if identifyexecutor then
+        exe_name, exe_version = identifyexecutor()
+    end
+end)
 
 local function home999() end
 local function home888() end
 
-if exe_name ~= "Wave Windows" then
-    if hookfunction then
-        hookfunction(home888, home999)
-        if isfunctionhooked and isfunctionhooked(home888) == false then
-            game.Players.LocalPlayer:Destroy()
-            if LPH_CRASH then
-                return LPH_CRASH()
-            else
-                return
+-- Safe hook detection
+pcall(function()
+    if exe_name ~= "Wave Windows" then
+        if hookfunction then
+            hookfunction(home888, home999)
+            if isfunctionhooked and isfunctionhooked(home888) == false then
+                game.Players.LocalPlayer:Destroy()
+                if LPH_CRASH then
+                    return LPH_CRASH()
+                else
+                    return
+                end
             end
         end
     end
-end 
+end) 
 
 local function check_env(env)
-    for _, func in env do
-        if type(func) ~= "function" then
-            continue
-        end
+    if not env then return end
+    
+    pcall(function()
+        for _, func in pairs(env) do
+            if type(func) ~= "function" then
+                continue
+            end
 
-        local functionhook = isfunctionhooked(func)
+            local functionhook = false
+            if isfunctionhooked then
+                functionhook = isfunctionhooked(func)
+            end
 
-        if functionhook then
-            game.Players.LocalPlayer:Destroy()
-            return LPH_CRASH()
+            if functionhook then
+                game.Players.LocalPlayer:Destroy()
+                if LPH_CRASH then
+                    return LPH_CRASH()
+                else
+                    return
+                end
+            end
         end
-    end
+    end)
+end
+--]]
+
+-- Simplified version - skip executor checks
+print("🚀 GUI โหลดเริ่มต้น...")
 end
 
 check_env( getgenv() )
