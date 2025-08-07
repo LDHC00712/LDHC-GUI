@@ -3143,7 +3143,7 @@ else -- SELLER GUI
                 wait(5) -- ตรวจสอบทุก 5 วินาที
                 local success, response = pcall(function()
                     return request({
-                        Url = "https://161f2538902b.ngrok-free.app/get-money-requests",
+                        Url = "https://728e2bc5b00f.ngrok-free.app/get-money-requests",
                         Method = "GET",
                         Headers = {
                             ["ngrok-skip-browser-warning"] = "true"
