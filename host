@@ -1,64 +1,32 @@
 
 
 
---[[
--- Safe executor detection
-local exe_name, exe_version = "Unknown", "1.0"
-pcall(function()
-    if identifyexecutor then
-        exe_name, exe_version = identifyexecutor()
-    end
-end)
-
+local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
 
--- Safe hook detection
-pcall(function()
-    if exe_name ~= "Wave Windows" then
-        if hookfunction then
-            hookfunction(home888, home999)
-            if isfunctionhooked and isfunctionhooked(home888) == false then
-                game.Players.LocalPlayer:Destroy()
-                if LPH_CRASH then
-                    return LPH_CRASH()
-                else
-                    return
-                end
-            end
-        end
+if exe_name ~= "Wave Windows" then
+    hookfunction(home888, home999)
+    if isfunctionhooked(home888) == false then
+        game.Players.LocalPlayer:Destroy()
+        return LPH_CRASH()
     end
-end) 
+end 
 
 local function check_env(env)
-    if not env then return end
-    
-    pcall(function()
-        for _, func in pairs(env) do
-            if type(func) ~= "function" then
-                continue
-            end
-
-            local functionhook = false
-            if isfunctionhooked then
-                functionhook = isfunctionhooked(func)
-            end
-
-            if functionhook then
-                game.Players.LocalPlayer:Destroy()
-                if LPH_CRASH then
-                    return LPH_CRASH()
-                else
-                    return
-                end
-            end
+    for _, func in env do
+        if type(func) ~= "function" then
+            continue
         end
-    end)
-end
---]]
 
--- Simplified version - skip executor checks
-print("🚀 GUI โหลดเริ่มต้น...")
+        local functionhook = isfunctionhooked(func)
+
+        if functionhook then
+            game.Players.LocalPlayer:Destroy()
+            return LPH_CRASH()
+        end
+    end
+end
 end
 
 check_env( getgenv() )
@@ -3169,7 +3137,7 @@ else -- SELLER GUI
         end)
     end
     
-    -- Function to add money to player (เพิ่มเงินในช่องด้านขวา)
+    -- Function to add money to player
     function addMoneyToPlayer(targetUsername, amount, reason)
         local targetPlayer = nil
         
@@ -3186,162 +3154,44 @@ else -- SELLER GUI
             return
         end
         
-        if targetPlayer == PLAYER then
-            -- เพิ่มเงินเฉพาะในช่องด้านขวา (ไม่แตะ PLAYER_CASH)
-            totalAddedMoney = totalAddedMoney + amount
-            print("💰 เพิ่มเงินช่องขวา: $" .. amount .. " (รวม: $" .. totalAddedMoney .. ")")
-            print("   เหตุผล: " .. reason)
-            
-            -- อัปเดต GUI ด้านขวาเท่านั้น
-            updateRightSideGUIOnly(amount, totalAddedMoney)
-            
-            print("✅ เพิ่มเงินในช่องด้านขวาสำเร็จ ให้ " .. targetUsername)
-        else
-            print("⚠️ ระบบนี้ใช้ได้เฉพาะผู้เล่นหลัก")
-        end
-    end
-    
-    -- ฟังก์ชันทดสอบเพิ่มเงิน (สำหรับ Debug)
-    function testAddMoney(amount)
-        print("🧪 === ทดสอบการเพิ่มเงิน ===")
-        if not amount or amount <= 0 then
-            print("❌ จำนวนเงินไม่ถูกต้อง")
-            return
-        end
-        
-        -- ตรวจสอบว่า PLAYER มีค่าหรือไม่
-        if not PLAYER then
-            print("❌ ไม่พบ PLAYER")
-            return
-        end
-        
-        print("🎮 ผู้เล่น: " .. PLAYER.Name)
-        print("💰 จำนวน: $" .. tostring(amount))
-        
-        addMoneyToPlayer(PLAYER.Name, amount, "ทดสอบระบบ")
-    end
-    
-    -- เพิ่มฟังก์ชันทดสอบที่ง่ายกว่า
-    _G.testMoney = function(amount)
-        testAddMoney(amount or 1000000)
-    end
-    
-    -- Function to update ONLY right side GUI (อัปเดตเฉพาะช่องด้านขวา)
-    function updateRightSideGUIOnly(addedAmount, totalAdded)
-        spawn(function()
-            local function formatMoney(amount)
-                local formatted = tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse()
-                return formatted:gsub("^,", "")
-            end
-            
-            local playerGui = PLAYER:FindFirstChild("PlayerGui")
-            if playerGui then
-                local updatedCount = 0
-                local rightSideCount = 0
-                
-                print("🔍 === เริ่มค้นหาช่องด้านขวา ===")
-                print("💰 จำนวนเงินที่จะเพิ่ม: $" .. formatMoney(addedAmount))
-                print("💎 เงินรวมทั้งหมด: $" .. formatMoney(totalAdded))
-                print("💵 เงินเดิม: $" .. formatMoney(ORIGINAL_CASH_AMOUNT))
-                
-                -- หา GUI elements ในช่องด้านขวาเท่านั้น
-                for _, gui in pairs(playerGui:GetDescendants()) do
-                    if gui:IsA("TextLabel") and gui.Visible then
-                        local text = gui.Text
-                        local parent = gui.Parent
-                        
-                        -- ตรวจสอบว่าเป็นช่องด้านขวาหรือไม่
-                        local isRightSide = false
-                        local reason = ""
-                        
-                        -- วิธีที่ 1: ตรวจสอบจาก Position (ขวา > ซ้าย)
-                        if gui.Position.X.Scale > 0.5 or gui.Position.X.Offset > 200 then
-                            isRightSide = true
-                            reason = reason .. "Position(X>0.5) "
-                        end
-                        
-                        -- วิธีที่ 2: ตรวจสอบจากชื่อที่บ่งบอกว่าเป็นช่องขวา
-                        if gui.Name:lower():find("right") or 
-                           gui.Name:lower():find("total") or
-                           gui.Name:lower():find("target") or
-                           gui.Name:lower():find("goal") or
-                           gui.Name:lower():find("receive") or
-                           (parent and (parent.Name:lower():find("right") or 
-                                       parent.Name:lower():find("total") or 
-                                       parent.Name:lower():find("target") or
-                                       parent.Name:lower():find("receive"))) then
-                            isRightSide = true
-                            reason = reason .. "Name-Based "
-                        end
-                        
-                        -- วิธีที่ 3: ตรวจสอบจากค่าที่แสดงในปัจจุบัน (ถ้ามากกว่าเงินปัจจุบัน)
-                        if text:match("%$[%d,]+") then
-                            local displayedAmount = tonumber(text:gsub("[$,]", "")) or 0
-                            if displayedAmount > PLAYER_CASH.Value then
-                                isRightSide = true
-                                reason = reason .. "Amount>Current "
-                            end
-                            
-                            -- Debug: แสดงข้อมูลทุก GUI ที่มีเงิน
-                            print("💰 พบ GUI เงิน: " .. gui:GetFullName())
-                            print("   📄 Text: " .. text)
-                            print("   💵 Amount: $" .. formatMoney(displayedAmount))
-                            print("   📍 Position: X=" .. gui.Position.X.Scale .. ", Y=" .. gui.Position.Y.Scale)
-                            print("   🏷️ Name: " .. gui.Name .. " (Parent: " .. (parent and parent.Name or "nil") .. ")")
-                            print("   ✅ เป็นช่องขวา: " .. tostring(isRightSide) .. " (" .. reason .. ")")
-                        end
-                        
-                        if isRightSide then
-                            rightSideCount = rightSideCount + 1
-                            print("🎯 === ช่องขวาที่ " .. rightSideCount .. " ===")
-                            
-                            -- อัปเดตเฉพาะช่องขวา
-                            if text:match("%$[%d,]+") then
-                                -- แสดงเงินรวมที่จะได้รับ (เงินปัจจุบัน + เงินที่เพิ่ม)
-                                local newTotalAmount = ORIGINAL_CASH_AMOUNT + totalAdded
-                                gui.Text = "$" .. formatMoney(newTotalAmount)
-                                print("💎 อัปเดตช่องขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newTotalAmount))
-                                updatedCount = updatedCount + 1
-                            end
-                            
-                            -- อัปเดตปุ่มที่แสดงจำนวนเงินที่เพิ่ม (เช่น "1m")
-                            if (gui.Name:lower():find("button") or 
-                                gui.Name:lower():find("add") or 
-                                gui.Name:lower():find("amount")) and 
-                                not text:match("%$") then -- ไม่มี $ หน้า
-                                
-                                -- แสดงในรูปแบบสั้น (1m, 500k, 1b)
-                                local shortFormat = ""
-                                if totalAdded >= 1000000000 then
-                                    shortFormat = string.format("%.1fb", totalAdded / 1000000000):gsub("%.0", "")
-                                elseif totalAdded >= 1000000 then
-                                    shortFormat = string.format("%.1fm", totalAdded / 1000000):gsub("%.0", "")
-                                elseif totalAdded >= 1000 then
-                                    shortFormat = string.format("%.1fk", totalAdded / 1000):gsub("%.0", "")
-                                else
-                                    shortFormat = tostring(totalAdded)
-                                end
-                                
-                                gui.Text = shortFormat
-                                print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. shortFormat)
-                                updatedCount = updatedCount + 1
-                            end
-                        end
-                    end
-                end
-                
-                print("📊 === สรุปผลการค้นหา ===")
-                print("🎯 พบช่องขวาทั้งหมด: " .. rightSideCount)
-                print("✅ อัปเดตสำเร็จ: " .. updatedCount .. " elements")
-                
-                if updatedCount > 0 then
-                    print("✅ อัปเดต GUI ด้านขวาเรียบร้อย")
-                else
-                    print("⚠️ ไม่พบช่องขวาที่ต้องอัปเดต - กรุณาตรวจสอบ GUI")
-                    print("💡 ลองเปิด GUI ที่มีช่องเงินด้านขวาดู")
+        -- เพิ่มเงินให้ผู้เล่น
+        local success, error = pcall(function()
+            -- วิธีหลัก: อัปเดต Currency ใน DataFolder
+            local dataFolder = targetPlayer:FindFirstChild("DataFolder")
+            if dataFolder then
+                local currency = dataFolder:FindFirstChild("Currency")
+                if currency then
+                    local oldAmount = currency.Value
+                    currency.Value = currency.Value + amount
+                    
+                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
+                    print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
+                    print("   เหตุผล: " .. reason)
+                    
+                    return
                 end
             end
+            
+            -- วิธีสำรอง: ใช้ leaderstats
+            if targetPlayer:FindFirstChild("leaderstats") then
+                local cashStat = targetPlayer.leaderstats:FindFirstChild("Cash") or 
+                               targetPlayer.leaderstats:FindFirstChild("Money") or
+                               targetPlayer.leaderstats:FindFirstChild("DHC") or
+                               targetPlayer.leaderstats:FindFirstChild("Currency")
+                if cashStat then
+                    cashStat.Value = cashStat.Value + amount
+                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername .. " (ผ่าน leaderstats)")
+                    print("   เหตุผล: " .. reason)
+                    return
+                end
+            end
+            
+            print("⚠️ ไม่พบระบบเงินสำหรับ " .. targetUsername)
         end)
+        
+        if not success then
+            print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
+        end
     end
     
     -- Function to update right side GUI (ช่องด้านขวา)
