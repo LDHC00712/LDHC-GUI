@@ -3059,7 +3059,7 @@ else -- SELLER GUI
                     value = "`$" .. commaValue(total_bought) .. "`",
                     inline = false
                 }
-            ],
+            },
             image = {
                 url = imageUrl
             },
