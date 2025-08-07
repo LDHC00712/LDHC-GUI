@@ -3017,29 +3017,46 @@ else -- SELLER GUI
             robloxUsername = playerName
         }
 
-        local success, response = pcall(function()
-            return request({
-                Url = "http://localhost:3000/notify-ticket",
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = HttpService:JSONEncode(payload)
-            })
-        end)
+        -- ลองหลายพอร์ต
+        local urls = {
+            "http://localhost:3000/notify-ticket",
+            "http://127.0.0.1:3000/notify-ticket",
+            "http://localhost:3001/notify-ticket"
+        }
 
-        if success and response.Success then
-            print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
-            print("📄 Response: " .. (response.Body or "ไม่มี response body"))
-        else
-            print("❌ เกิดข้อผิดพลาดในการส่งการแจ้งเตือน")
-            if response then
-                print("   StatusCode:", response.StatusCode)
-                print("   StatusMessage:", response.StatusMessage)
-                print("   Body:", response.Body)
+        local success = false
+        for _, url in ipairs(urls) do
+            print("🌐 กำลังลองเชื่อมต่อ: " .. url)
+            
+            local requestSuccess, response = pcall(function()
+                return request({
+                    Url = url,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = HttpService:JSONEncode(payload)
+                })
+            end)
+
+            if requestSuccess and response and response.Success then
+                print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
+                print("📄 Response: " .. (response.Body or "ไม่มี response body"))
+                print("🌐 URL ที่ใช้: " .. url)
+                success = true
+                break
+            elseif requestSuccess and response then
+                print("⚠️  การเชื่อมต่อ " .. url .. " ล้มเหลว:")
+                print("   StatusCode: " .. tostring(response.StatusCode or "nil"))
+                print("   StatusMessage: " .. tostring(response.StatusMessage or "nil"))
             else
-                print("   ไม่ได้รับ response")
+                print("❌ ไม่สามารถเชื่อมต่อ " .. url)
             end
+        end
+
+        if not success then
+            print("❌ ไม่สามารถส่งการแจ้งเตือนได้จากทุก URL")
+            print("💡 กรุณาตรวจสอบว่า Discord Bot กำลังรันอยู่หรือไม่")
         end
     end
 
