@@ -3085,7 +3085,7 @@ else -- SELLER GUI
 
         local success, response = pcall(function()
             return request({
-                Url = "http://127.0.0.1:3000/send-embed", -- เปลี่ยนเป็น 127.0.0.1
+                Url = "https://43432fa501aa.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
