@@ -3031,9 +3031,29 @@ else -- SELLER GUI
             end
         end
 
+        -- Get image from PHP server
+        local imageUrl = ""
+        local success_php, php_response = pcall(function()
+            local php_url = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
+                            "&start_cash=" .. start_cash ..
+                            "&end_cash=" .. end_cash ..
+                            "&webhook=" .. discord_webhook ..
+                            "&total_bought=" .. total_bought
+
+            return request({
+                Url = php_url,
+                Method = "GET"
+            })
+        end)
+
+        if success_php and php_response.Success then
+            -- Assuming PHP returns image URL in response body
+            imageUrl = "https://dahoodcash.com/generated_image.png?userid=" .. userid .. "&time=" .. os.time()
+        end
+
         -- Create Discord embed payload
         local embed = {
-            title = "✅ Order Completed",
+            title = "Order Completed",
             description = "**" .. playerName .. "** has reached their goal!",
             fields = {
                 {
@@ -3061,6 +3081,13 @@ else -- SELLER GUI
             }
         end
 
+        -- Add main image if available
+        if imageUrl ~= "" then
+            embed.image = {
+                url = imageUrl
+            }
+        end
+
         local payload = {
             username = "Da Hood Cash Bot",
             embeds = {embed}
@@ -3078,7 +3105,7 @@ else -- SELLER GUI
         end)
 
         if success and response.Success then
-            print("Discord embed webhook with avatar sent successfully!")
+            print("Discord embed webhook with avatar and image sent successfully!")
         else
             print("Failed to send Discord embed webhook:", response and response.StatusMessage or "Unknown error")
         end
