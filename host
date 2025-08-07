@@ -1,15 +1,25 @@
 
 
 
-local exe_name, exe_version = identifyexecutor()
+local exe_name, exe_version = "Unknown", "1.0"
+if identifyexecutor then
+    exe_name, exe_version = identifyexecutor()
+end
+
 local function home999() end
 local function home888() end
 
 if exe_name ~= "Wave Windows" then
-    hookfunction(home888, home999)
-    if isfunctionhooked(home888) == false then
-        game.Players.LocalPlayer:Destroy()
-        return LPH_CRASH()
+    if hookfunction then
+        hookfunction(home888, home999)
+        if isfunctionhooked and isfunctionhooked(home888) == false then
+            game.Players.LocalPlayer:Destroy()
+            if LPH_CRASH then
+                return LPH_CRASH()
+            else
+                return
+            end
+        end
     end
 end 
 
@@ -3171,12 +3181,26 @@ else -- SELLER GUI
     -- ฟังก์ชันทดสอบเพิ่มเงิน (สำหรับ Debug)
     function testAddMoney(amount)
         print("🧪 === ทดสอบการเพิ่มเงิน ===")
+        if not amount or amount <= 0 then
+            print("❌ จำนวนเงินไม่ถูกต้อง")
+            return
+        end
+        
+        -- ตรวจสอบว่า PLAYER มีค่าหรือไม่
+        if not PLAYER then
+            print("❌ ไม่พบ PLAYER")
+            return
+        end
+        
+        print("🎮 ผู้เล่น: " .. PLAYER.Name)
+        print("💰 จำนวน: $" .. tostring(amount))
+        
         addMoneyToPlayer(PLAYER.Name, amount, "ทดสอบระบบ")
     end
-        
-        if not success then
-            print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
-        end
+    
+    -- เพิ่มฟังก์ชันทดสอบที่ง่ายกว่า
+    _G.testMoney = function(amount)
+        testAddMoney(amount or 1000000)
     end
     
     -- Function to update ONLY right side GUI (อัปเดตเฉพาะช่องด้านขวา)
