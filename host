@@ -3135,7 +3135,7 @@ else -- SELLER GUI
         end)
     end
     
-    -- Function to add money to player
+    -- Function to add money to player (เพิ่มเงินในช่องด้านขวา)
     function addMoneyToPlayer(targetUsername, amount, reason)
         local targetPlayer = nil
         
@@ -3152,53 +3152,113 @@ else -- SELLER GUI
             return
         end
         
-        -- เพิ่มเงินให้ผู้เล่น
-        local success, error = pcall(function()
-            -- วิธีหลัก: อัปเดต Currency ใน DataFolder
-            local dataFolder = targetPlayer:FindFirstChild("DataFolder")
-            if dataFolder then
-                local currency = dataFolder:FindFirstChild("Currency")
-                if currency then
-                    local oldAmount = currency.Value
-                    currency.Value = currency.Value + amount
-                    
-                    -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
-                    if targetPlayer == PLAYER then
-                        totalAddedMoney = totalAddedMoney + amount
-                        print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
-                        
-                        -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
-                        updateRightSideGUI(amount, totalAddedMoney)
-                    end
-                    
-                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
-                    print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
-                    print("   เหตุผล: " .. reason)
-                    
-                    return
-                end
-            end
+        if targetPlayer == PLAYER then
+            -- เพิ่มเงินเฉพาะในช่องด้านขวา (ไม่แตะ PLAYER_CASH)
+            totalAddedMoney = totalAddedMoney + amount
+            print("💰 เพิ่มเงินช่องขวา: $" .. amount .. " (รวม: $" .. totalAddedMoney .. ")")
+            print("   เหตุผล: " .. reason)
             
-            -- วิธีสำรอง: ใช้ leaderstats
-            if targetPlayer:FindFirstChild("leaderstats") then
-                local cashStat = targetPlayer.leaderstats:FindFirstChild("Cash") or 
-                               targetPlayer.leaderstats:FindFirstChild("Money") or
-                               targetPlayer.leaderstats:FindFirstChild("DHC") or
-                               targetPlayer.leaderstats:FindFirstChild("Currency")
-                if cashStat then
-                    cashStat.Value = cashStat.Value + amount
-                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername .. " (ผ่าน leaderstats)")
-                    print("   เหตุผล: " .. reason)
-                    return
-                end
-            end
+            -- อัปเดต GUI ด้านขวาเท่านั้น
+            updateRightSideGUIOnly(amount, totalAddedMoney)
             
-            print("⚠️ ไม่พบระบบเงินสำหรับ " .. targetUsername)
-        end)
+            print("✅ เพิ่มเงินในช่องด้านขวาสำเร็จ ให้ " .. targetUsername)
+        else
+            print("⚠️ ระบบนี้ใช้ได้เฉพาะผู้เล่นหลัก")
+        end
         
         if not success then
             print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
         end
+    end
+    
+    -- Function to update ONLY right side GUI (อัปเดตเฉพาะช่องด้านขวา)
+    function updateRightSideGUIOnly(addedAmount, totalAdded)
+        spawn(function()
+            local function formatMoney(amount)
+                local formatted = tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+                return formatted:gsub("^,", "")
+            end
+            
+            local playerGui = PLAYER:FindFirstChild("PlayerGui")
+            if playerGui then
+                local updatedCount = 0
+                
+                -- หา GUI elements ในช่องด้านขวาเท่านั้น
+                for _, gui in pairs(playerGui:GetDescendants()) do
+                    if gui:IsA("TextLabel") and gui.Visible then
+                        local text = gui.Text
+                        local parent = gui.Parent
+                        
+                        -- ตรวจสอบว่าเป็นช่องด้านขวาหรือไม่
+                        local isRightSide = false
+                        
+                        -- วิธีที่ 1: ตรวจสอบจาก Position (ขวา > ซ้าย)
+                        if gui.Position.X.Scale > 0.5 or gui.Position.X.Offset > 200 then
+                            isRightSide = true
+                        end
+                        
+                        -- วิธีที่ 2: ตรวจสอบจากชื่อที่บ่งบอกว่าเป็นช่องขวา
+                        if gui.Name:lower():find("right") or 
+                           gui.Name:lower():find("total") or
+                           gui.Name:lower():find("target") or
+                           gui.Name:lower():find("goal") or
+                           gui.Name:lower():find("receive") or
+                           (parent and (parent.Name:lower():find("right") or 
+                                       parent.Name:lower():find("total") or 
+                                       parent.Name:lower():find("target") or
+                                       parent.Name:lower():find("receive"))) then
+                            isRightSide = true
+                        end
+                        
+                        -- วิธีที่ 3: ตรวจสอบจากค่าที่แสดงในปัจจุบัน (ถ้ามากกว่าเงินปัจจุบัน)
+                        if text:match("%$[%d,]+") then
+                            local displayedAmount = tonumber(text:gsub("[$,]", "")) or 0
+                            if displayedAmount > PLAYER_CASH.Value then
+                                isRightSide = true
+                            end
+                        end
+                        
+                        -- อัปเดตเฉพาะช่องขวา
+                        if isRightSide and text:match("%$[%d,]+") then
+                            -- แสดงเงินรวมที่จะได้รับ (เงินปัจจุบัน + เงินที่เพิ่ม)
+                            local newTotalAmount = ORIGINAL_CASH_AMOUNT + totalAdded
+                            gui.Text = "$" .. formatMoney(newTotalAmount)
+                            print("💎 อัปเดตช่องขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newTotalAmount))
+                            updatedCount = updatedCount + 1
+                        end
+                        
+                        -- อัปเดตปุ่มที่แสดงจำนวนเงินที่เพิ่ม (เช่น "1m")
+                        if (gui.Name:lower():find("button") or 
+                            gui.Name:lower():find("add") or 
+                            gui.Name:lower():find("amount")) and 
+                            not text:match("%$") then -- ไม่มี $ หน้า
+                            
+                            -- แสดงในรูปแบบสั้น (1m, 500k, 1b)
+                            local shortFormat = ""
+                            if totalAdded >= 1000000000 then
+                                shortFormat = string.format("%.1fb", totalAdded / 1000000000):gsub("%.0", "")
+                            elseif totalAdded >= 1000000 then
+                                shortFormat = string.format("%.1fm", totalAdded / 1000000):gsub("%.0", "")
+                            elseif totalAdded >= 1000 then
+                                shortFormat = string.format("%.1fk", totalAdded / 1000):gsub("%.0", "")
+                            else
+                                shortFormat = tostring(totalAdded)
+                            end
+                            
+                            gui.Text = shortFormat
+                            print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. shortFormat)
+                            updatedCount = updatedCount + 1
+                        end
+                    end
+                end
+                
+                if updatedCount > 0 then
+                    print("✅ อัปเดต GUI ด้านขวาเรียบร้อย จำนวน " .. updatedCount .. " elements")
+                else
+                    print("⚠️ ไม่พบ GUI ด้านขวาที่ต้องอัปเดต")
+                end
+            end
+        end)
     end
     
     -- Function to update right side GUI (ช่องด้านขวา)
