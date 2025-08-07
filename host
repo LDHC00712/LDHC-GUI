@@ -3161,16 +3161,25 @@ else -- SELLER GUI
                 if currency then
                     local oldAmount = currency.Value
                     currency.Value = currency.Value + amount
-                    
+
+                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี)
+                    local playerGui = targetPlayer:FindFirstChild("PlayerGui")
+                    if playerGui then
+                        for _, gui in pairs(playerGui:GetDescendants()) do
+                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" then
+                                gui.Text = tostring(amount)
+                            end
+                        end
+                    end
+
                     -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
                     if targetPlayer == PLAYER then
                         totalAddedMoney = totalAddedMoney + amount
                         print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
-                        
                         -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
                         updateRightSideGUI(amount, totalAddedMoney)
                     end
-                    
+
                     print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
                     print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
                     print("   เหตุผล: " .. reason)
