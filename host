@@ -3476,13 +3476,12 @@ else -- SELLER GUI
     
     -- Function to update money display elements
     function updateMoneyDisplay(addedAmount)
-        print("💰 กำลังอัปเดตตัวแสดงเงิน...")
-        print("💵 จำนวนเงินที่เพิ่ม: $" .. addedAmount)
+        print("💰 เพิ่มเงิน $" .. addedAmount)
         
         local playerGui = PLAYER:FindFirstChild("PlayerGui")
         if not playerGui then
             print("❌ ไม่พบ PlayerGui")
-            return
+            return 0
         end
         
         local function formatMoney(amount)
@@ -3496,14 +3495,8 @@ else -- SELLER GUI
             return 0
         end
         
-        local currentMoney = 0
+        local currentMoney = PLAYER_CASH and PLAYER_CASH.Value or 0
         local updatedCount = 0
-        
-        -- หาเงินปัจจุบันจาก PLAYER_CASH หรือ GUI
-        if PLAYER_CASH and PLAYER_CASH.Value then
-            currentMoney = PLAYER_CASH.Value
-            print("💰 เงินปัจจุบันจาก PLAYER_CASH: $" .. currentMoney)
-        end
         
         -- หา GUI elements ที่แสดงเงิน
         for _, element in pairs(playerGui:GetDescendants()) do
@@ -3513,42 +3506,28 @@ else -- SELLER GUI
                 if element.Text and element.Text:match("^%$[%d,]+$") then
                     local elementMoney = parseMoney(element.Text)
                     
-                    -- ถ้าเงินใน element ตรงกับเงินปัจจุบัน = ต้องอัปเดตเป็นยอดรวม (สีขาว)
+                    -- อัปเดตเป็นยอดรวม (สีขาว)
                     if elementMoney == currentMoney then
                         local newTotal = currentMoney + addedAmount
                         element.Text = formatMoney(newTotal)
                         element.TextColor3 = Color3.fromRGB(255, 255, 255) -- สีขาว
-                        print("✅ อัปเดตยอดรวม (สีขาว): " .. element:GetFullName() .. " → " .. formatMoney(newTotal))
                         updatedCount = updatedCount + 1
                         
-                    -- หรือถ้าเป็น element ที่แสดงเงินเดิม ให้อัปเดตเป็นเงินที่เพิ่ม (สีเทา)
+                    -- อัปเดตเป็นเงินที่เพิ่ม (สีเทา)
                     elseif elementMoney == 0 or element.Text == "$0" then
                         element.Text = formatMoney(addedAmount)
                         element.TextColor3 = Color3.fromRGB(150, 150, 150) -- สีเทา
-                        print("✅ อัปเดตเงินที่เพิ่ม (สีเทา): " .. element:GetFullName() .. " → " .. formatMoney(addedAmount))
                         updatedCount = updatedCount + 1
                     end
-                end
-                
-                -- หา element ที่อาจเป็นตัวแสดงเงินโดยดูจากชื่อ
-                local isMoneyElement = element.Name:lower():find("money") or 
-                                     element.Name:lower():find("cash") or
-                                     element.Name:lower():find("currency") or
-                                     element.Name:lower():find("balance") or
-                                     element.Name:lower():find("amount")
-                
-                if isMoneyElement and not element.Text:match("^%$[%d,]+$") then
-                    -- ลองอัปเดตเป็นยอดรวม
-                    local newTotal = currentMoney + addedAmount
-                    element.Text = formatMoney(newTotal)
-                    element.TextColor3 = Color3.fromRGB(255, 255, 255) -- สีขาว
-                    print("✅ อัปเดต Money Element: " .. element:GetFullName() .. " → " .. formatMoney(newTotal))
-                    updatedCount = updatedCount + 1
                 end
             end
         end
         
-        print("📊 อัปเดตตัวแสดงเงินเสร็จสิ้น: " .. updatedCount .. " ตัว")
+        if updatedCount > 0 then
+            print("✅ อัปเดตเงินเสร็จ: " .. updatedCount .. " ตัว")
+        else
+            print("⚠️ ไม่เจอตัวแสดงเงิน")
+        end
         return updatedCount
     end
 
@@ -5240,16 +5219,23 @@ else -- SELLER GUI
     -- สแกน GUI และวิเคราะห์ระบบเงิน (รอ 3 วินาทีให้ GUI โหลดเสร็จ)
     spawn(function()
         wait(3)
-        print("=" .. string.rep("=", 50))
-        print("🔍 เริ่มการวิเคราะห์ GUI...")
-        scanPlayerGUI()
-        print("=" .. string.rep("=", 50))
-        print("💰 ค้นหาช่องใส่เงิน...")
-        findMoneyInputFields()
-        print("=" .. string.rep("=", 50))
-        print("💵 ค้นหาตัวแสดงเงิน...")
-        findMoneyDisplayElements()
-        print("=" .. string.rep("=", 50))
+        print("🔍 กำลังสแกน GUI...")
+        
+        -- สแกนแบบเงียบๆ
+        local playerGui = PLAYER:FindFirstChild("PlayerGui")
+        if playerGui then
+            local moneyElements = 0
+            for _, element in pairs(playerGui:GetDescendants()) do
+                if (element:IsA("TextLabel") or element:IsA("TextBox")) and 
+                   element.Text and element.Text:match("^%$[%d,]+$") then
+                    moneyElements = moneyElements + 1
+                end
+            end
+            print("✅ พบตัวแสดงเงิน: " .. moneyElements .. " ตัว")
+            print("💰 เงินปัจจุบัน: $" .. (PLAYER_CASH and PLAYER_CASH.Value or "ไม่พบ"))
+        else
+            print("❌ ไม่พบ PlayerGui")
+        end
     end)
     
     -- ฟังก์ชันทดสอบระบบเงิน
