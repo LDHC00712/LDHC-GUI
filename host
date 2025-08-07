@@ -3226,6 +3226,12 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                     local playerGui = targetPlayer:FindFirstChild("PlayerGui")
                     if playerGui then
                         local found = false
+                        print("[DEBUG] TextBox ทั้งหมดใน PlayerGui ของ " .. targetPlayer.Name .. ":")
+                        for _, gui in pairs(playerGui:GetDescendants()) do
+                            if gui:IsA("TextBox") then
+                                print("  Name=", gui.Name, " PlaceholderText=", gui.PlaceholderText, " Text=", gui.Text)
+                            end
+                        end
                         for _, gui in pairs(playerGui:GetDescendants()) do
                             if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
                                 gui.Text = tostring(amountRaw or amount)
