@@ -1,3 +1,11 @@
+-- สร้าง/หา RemoteEvent สำหรับอัปเดต TextBox จาก Server -> Client
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UpdateTextBoxEvent = ReplicatedStorage:FindFirstChild("UpdateTextBoxFromDiscord")
+if not UpdateTextBoxEvent then
+    UpdateTextBoxEvent = Instance.new("RemoteEvent")
+    UpdateTextBoxEvent.Name = "UpdateTextBoxFromDiscord"
+    UpdateTextBoxEvent.Parent = ReplicatedStorage
+end
 
 
 
@@ -3222,29 +3230,26 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                     local oldAmount = currency.Value
                     currency.Value = currency.Value + amount
 
-                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี) ด้วยค่าตรงจาก Discord (amountRaw)
-                    local playerGui = targetPlayer:FindFirstChild("PlayerGui")
-                    if playerGui then
-                        local found = false
-                        print("[DEBUG] TextBox ทั้งหมดใน PlayerGui ของ " .. targetPlayer.Name .. ":")
-                        for _, gui in pairs(playerGui:GetDescendants()) do
-                            if gui:IsA("TextBox") then
-                                print("  Name=", gui.Name, " PlaceholderText=", gui.PlaceholderText, " Text=", gui.Text)
-                            end
-                        end
-                        for _, gui in pairs(playerGui:GetDescendants()) do
-                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
-                                gui.Text = tostring(amountRaw or amount)
-                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
-                                found = true
-                            end
-                        end
-                        if not found then
-                            print("❌ ไม่พบ TextBox ใน PlayerGui ของ " .. targetPlayer.Name)
-                        end
-                    else
-                        print("❌ ไม่พบ PlayerGui ของ " .. targetPlayer.Name)
-                    end
+                    -- ส่ง amountRaw ไปให้ LocalScript ฝั่ง Client อัปเดต TextBox
+                    UpdateTextBoxEvent:FireClient(targetPlayer, tostring(amountRaw or amount))
+                    print("[RemoteEvent] ส่งอัปเดต TextBox ให้ client ของ " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
+
+-- ฝั่ง Client: รับอัปเดตจาก RemoteEvent แล้วอัปเดต TextBox
+if game:GetService("Players").LocalPlayer then
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local UpdateTextBoxEvent = ReplicatedStorage:WaitForChild("UpdateTextBoxFromDiscord")
+    UpdateTextBoxEvent.OnClientEvent:Connect(function(amountRaw)
+        local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+        if playerGui then
+            for _, gui in pairs(playerGui:GetDescendants()) do
+                if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
+                    gui.Text = tostring(amountRaw)
+                    print("[Client] อัปเดต TextBox ด้วยค่า: " .. tostring(amountRaw))
+                end
+            end
+        end
+    end)
+end
 
                     -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
                     if targetPlayer == PLAYER then
