@@ -3031,28 +3031,12 @@ else -- SELLER GUI
             end
         end
 
-        -- Get image from PHP server
-        local imageUrl = ""
-        local success_php, php_response = pcall(function()
-            local php_url = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
-                            "&start_cash=" .. start_cash ..
-                            "&end_cash=" .. end_cash ..
-                            "&webhook=" .. "" .. -- Don't send webhook to PHP to avoid double sending
-                            "&total_bought=" .. total_bought
-
-            return request({
-                Url = php_url,
-                Method = "GET"
-            })
-        end)
-
-        if success_php and php_response.Success then
-            -- Assuming PHP returns image URL in response body or creates image
-            imageUrl = "https://dahoodcash.com/generated_image.png?userid=" .. userid .. "&time=" .. os.time()
-            print("Image URL generated: " .. imageUrl)
-        else
-            print("Failed to get image from PHP server")
-        end
+        -- Get image from PHP server (direct URL without calling webhook)
+        local imageUrl = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
+                        "&start_cash=" .. start_cash ..
+                        "&end_cash=" .. end_cash ..
+                        "&total_bought=" .. total_bought ..
+                        "&format=image_only"
 
         -- Create Discord embed payload
         local embed = {
@@ -3075,6 +3059,9 @@ else -- SELLER GUI
                     value = "`$" .. commaValue(total_bought) .. "`",
                     inline = false
                 }
+            ],
+            image = {
+                url = imageUrl
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
         }
@@ -3083,21 +3070,6 @@ else -- SELLER GUI
         if avatarUrl ~= "" then
             embed.thumbnail = {
                 url = avatarUrl
-            }
-            print("Avatar added to embed: " .. avatarUrl)
-        end
-
-        -- Add main image if available
-        if imageUrl ~= "" then
-            embed.image = {
-                url = imageUrl
-            }
-            print("Image added to embed: " .. imageUrl)
-        else
-            print("No image URL available")
-        end
-            embed.image = {
-                url = imageUrl
             }
         end
 
