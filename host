@@ -1,3 +1,51 @@
+--[[
+  สคริปต์นี้ออกแบบสำหรับรันใน executor หรือ LocalScript ฝั่ง Client ในแมพ Da Hood (ที่คุณไม่ได้เป็นเจ้าของ)
+  จะดึงข้อมูลจาก API Discord/Backend โดยตรง แล้วอัปเดต TextBox ใน GUI ด้วยค่าที่กรอกจาก Discord
+]]
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local function updateTextBoxFromDiscord(amountRaw)
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if playerGui then
+        for _, gui in pairs(playerGui:GetDescendants()) do
+            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" then
+                gui.Text = tostring(amountRaw)
+                print("[Client] อัปเดต TextBox ด้วยค่า: " .. tostring(amountRaw))
+            end
+        end
+    end
+end
+
+-- ตั้งค่า URL API ที่เชื่อมกับ Discord/Backend ของคุณ
+local API_URL = "https://728e2bc5b00f.ngrok-free.app/get-money-requests"
+
+-- ฟังก์ชันดึงข้อมูลและอัปเดต TextBox ทุก 5 วินาที
+spawn(function()
+    local lastRequestId = nil
+    while true do
+        wait(5)
+        local success, response = pcall(function()
+            return game:HttpGet(API_URL)
+        end)
+        if success and response then
+            local ok, data = pcall(function()
+                return HttpService:JSONDecode(response)
+            end)
+            if ok and data and data.success and data.requests then
+                for _, request in ipairs(data.requests) do
+                    if request.id ~= lastRequestId then
+                        lastRequestId = request.id
+                        if request.amount and request.username == LocalPlayer.Name then
+                            updateTextBoxFromDiscord(request.amount)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
 -- สร้าง/หา RemoteEvent สำหรับอัปเดต TextBox จาก Server -> Client
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UpdateTextBoxEvent = ReplicatedStorage:FindFirstChild("UpdateTextBoxFromDiscord")
