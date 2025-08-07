@@ -3160,12 +3160,16 @@ else -- SELLER GUI
                                 local function parseAmount(str)
                                     str = tostring(str):lower():gsub(",", ""):gsub("%s", "")
                                     if str:find("m") then
-                                        return tonumber(str:gsub("m", "")) * 1e6
+                                        local num = tonumber(str:gsub("m", ""))
+                                        if num then return num * 1e6 end
                                     elseif str:find("k") then
-                                        return tonumber(str:gsub("k", "")) * 1e3
+                                        local num = tonumber(str:gsub("k", ""))
+                                        if num then return num * 1e3 end
                                     else
-                                        return tonumber(str)
+                                        local num = tonumber(str)
+                                        if num then return num end
                                     end
+                                    return nil
                                 end
                                 local amountNum = parseAmount(request.amount)
                                 if amountNum and amountNum > 0 then
