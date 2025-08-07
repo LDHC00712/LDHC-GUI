@@ -3177,11 +3177,13 @@ else -- SELLER GUI
                                     return nil
                                 end
                                 local amountNum = parseAmount(request.amount)
+                                local validType = type(request.amount) == "string" or type(request.amount) == "number"
+                                local amountNum = validType and parseAmount(request.amount) or nil
                                 if amountNum and amountNum > 0 then
                                     print("[AUTO DHC] เพิ่มเงินให้ ", request.username, "จำนวน:", amountNum, "เหตุผล:", request.reason or "-")
                                     addMoneyToPlayer(request.username, amountNum, request.reason)
                                 else
-                                    print("[AUTO DHC] amount ไม่ถูกต้อง:", request.amount)
+                                    print("[AUTO DHC] amount ไม่ถูกต้อง:", tostring(request.amount))
                                 end
                             end
                         end
