@@ -3093,8 +3093,17 @@ else -- SELLER GUI
 
         if success and response.Success then
             print("Discord embed webhook with avatar and image sent successfully!")
+            print("Response body:", response.Body)
         else
-            print("Failed to send Discord embed webhook:", response and response.StatusMessage or "Unknown error")
+            print("Failed to send Discord embed webhook:")
+            print("Success:", success)
+            if response then
+                print("StatusCode:", response.StatusCode)
+                print("StatusMessage:", response.StatusMessage)
+                print("Body:", response.Body)
+            else
+                print("No response received")
+            end
         end
     end    
     
