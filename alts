@@ -3068,14 +3068,24 @@ else -- SELLER GUI
             }
         end
 
+        -- Send data to your Discord bot server
         local payload = {
-            username = "Da Hood Cash Bot",
-            embeds = {embed}
+            userid = userid,
+            playerName = playerName,
+            displayName = displayName,
+            start_cash = start_cash,
+            end_cash = end_cash,
+            total_bought = total_bought,
+            avatarUrl = avatarUrl,
+            discord_webhook = discord_webhook
         }
+
+        print("Sending payload to webhook server...")
+        print("Payload:", HttpService:JSONEncode(payload))
 
         local success, response = pcall(function()
             return request({
-                Url = discord_webhook,
+                Url = "https://43432fa501aa.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -3086,8 +3096,17 @@ else -- SELLER GUI
 
         if success and response.Success then
             print("Discord embed webhook with avatar and image sent successfully!")
+            print("Response body:", response.Body)
         else
-            print("Failed to send Discord embed webhook:", response and response.StatusMessage or "Unknown error")
+            print("Failed to send Discord embed webhook:")
+            print("Success:", success)
+            if response then
+                print("StatusCode:", response.StatusCode)
+                print("StatusMessage:", response.StatusMessage)
+                print("Body:", response.Body)
+            else
+                print("No response received")
+            end
         end
     end    
     
