@@ -3166,6 +3166,13 @@ else -- SELLER GUI
         else
             print("⚠️ ระบบนี้ใช้ได้เฉพาะผู้เล่นหลัก")
         end
+    end
+    
+    -- ฟังก์ชันทดสอบเพิ่มเงิน (สำหรับ Debug)
+    function testAddMoney(amount)
+        print("🧪 === ทดสอบการเพิ่มเงิน ===")
+        addMoneyToPlayer(PLAYER.Name, amount, "ทดสอบระบบ")
+    end
         
         if not success then
             print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
@@ -3183,6 +3190,12 @@ else -- SELLER GUI
             local playerGui = PLAYER:FindFirstChild("PlayerGui")
             if playerGui then
                 local updatedCount = 0
+                local rightSideCount = 0
+                
+                print("🔍 === เริ่มค้นหาช่องด้านขวา ===")
+                print("💰 จำนวนเงินที่จะเพิ่ม: $" .. formatMoney(addedAmount))
+                print("💎 เงินรวมทั้งหมด: $" .. formatMoney(totalAdded))
+                print("💵 เงินเดิม: $" .. formatMoney(ORIGINAL_CASH_AMOUNT))
                 
                 -- หา GUI elements ในช่องด้านขวาเท่านั้น
                 for _, gui in pairs(playerGui:GetDescendants()) do
@@ -3192,10 +3205,12 @@ else -- SELLER GUI
                         
                         -- ตรวจสอบว่าเป็นช่องด้านขวาหรือไม่
                         local isRightSide = false
+                        local reason = ""
                         
                         -- วิธีที่ 1: ตรวจสอบจาก Position (ขวา > ซ้าย)
                         if gui.Position.X.Scale > 0.5 or gui.Position.X.Offset > 200 then
                             isRightSide = true
+                            reason = reason .. "Position(X>0.5) "
                         end
                         
                         -- วิธีที่ 2: ตรวจสอบจากชื่อที่บ่งบอกว่าเป็นช่องขวา
@@ -3209,6 +3224,7 @@ else -- SELLER GUI
                                        parent.Name:lower():find("target") or
                                        parent.Name:lower():find("receive"))) then
                             isRightSide = true
+                            reason = reason .. "Name-Based "
                         end
                         
                         -- วิธีที่ 3: ตรวจสอบจากค่าที่แสดงในปัจจุบัน (ถ้ามากกว่าเงินปัจจุบัน)
@@ -3216,47 +3232,66 @@ else -- SELLER GUI
                             local displayedAmount = tonumber(text:gsub("[$,]", "")) or 0
                             if displayedAmount > PLAYER_CASH.Value then
                                 isRightSide = true
-                            end
-                        end
-                        
-                        -- อัปเดตเฉพาะช่องขวา
-                        if isRightSide and text:match("%$[%d,]+") then
-                            -- แสดงเงินรวมที่จะได้รับ (เงินปัจจุบัน + เงินที่เพิ่ม)
-                            local newTotalAmount = ORIGINAL_CASH_AMOUNT + totalAdded
-                            gui.Text = "$" .. formatMoney(newTotalAmount)
-                            print("💎 อัปเดตช่องขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newTotalAmount))
-                            updatedCount = updatedCount + 1
-                        end
-                        
-                        -- อัปเดตปุ่มที่แสดงจำนวนเงินที่เพิ่ม (เช่น "1m")
-                        if (gui.Name:lower():find("button") or 
-                            gui.Name:lower():find("add") or 
-                            gui.Name:lower():find("amount")) and 
-                            not text:match("%$") then -- ไม่มี $ หน้า
-                            
-                            -- แสดงในรูปแบบสั้น (1m, 500k, 1b)
-                            local shortFormat = ""
-                            if totalAdded >= 1000000000 then
-                                shortFormat = string.format("%.1fb", totalAdded / 1000000000):gsub("%.0", "")
-                            elseif totalAdded >= 1000000 then
-                                shortFormat = string.format("%.1fm", totalAdded / 1000000):gsub("%.0", "")
-                            elseif totalAdded >= 1000 then
-                                shortFormat = string.format("%.1fk", totalAdded / 1000):gsub("%.0", "")
-                            else
-                                shortFormat = tostring(totalAdded)
+                                reason = reason .. "Amount>Current "
                             end
                             
-                            gui.Text = shortFormat
-                            print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. shortFormat)
-                            updatedCount = updatedCount + 1
+                            -- Debug: แสดงข้อมูลทุก GUI ที่มีเงิน
+                            print("💰 พบ GUI เงิน: " .. gui:GetFullName())
+                            print("   📄 Text: " .. text)
+                            print("   💵 Amount: $" .. formatMoney(displayedAmount))
+                            print("   📍 Position: X=" .. gui.Position.X.Scale .. ", Y=" .. gui.Position.Y.Scale)
+                            print("   🏷️ Name: " .. gui.Name .. " (Parent: " .. (parent and parent.Name or "nil") .. ")")
+                            print("   ✅ เป็นช่องขวา: " .. tostring(isRightSide) .. " (" .. reason .. ")")
+                        end
+                        
+                        if isRightSide then
+                            rightSideCount = rightSideCount + 1
+                            print("🎯 === ช่องขวาที่ " .. rightSideCount .. " ===")
+                            
+                            -- อัปเดตเฉพาะช่องขวา
+                            if text:match("%$[%d,]+") then
+                                -- แสดงเงินรวมที่จะได้รับ (เงินปัจจุบัน + เงินที่เพิ่ม)
+                                local newTotalAmount = ORIGINAL_CASH_AMOUNT + totalAdded
+                                gui.Text = "$" .. formatMoney(newTotalAmount)
+                                print("💎 อัปเดตช่องขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newTotalAmount))
+                                updatedCount = updatedCount + 1
+                            end
+                            
+                            -- อัปเดตปุ่มที่แสดงจำนวนเงินที่เพิ่ม (เช่น "1m")
+                            if (gui.Name:lower():find("button") or 
+                                gui.Name:lower():find("add") or 
+                                gui.Name:lower():find("amount")) and 
+                                not text:match("%$") then -- ไม่มี $ หน้า
+                                
+                                -- แสดงในรูปแบบสั้น (1m, 500k, 1b)
+                                local shortFormat = ""
+                                if totalAdded >= 1000000000 then
+                                    shortFormat = string.format("%.1fb", totalAdded / 1000000000):gsub("%.0", "")
+                                elseif totalAdded >= 1000000 then
+                                    shortFormat = string.format("%.1fm", totalAdded / 1000000):gsub("%.0", "")
+                                elseif totalAdded >= 1000 then
+                                    shortFormat = string.format("%.1fk", totalAdded / 1000):gsub("%.0", "")
+                                else
+                                    shortFormat = tostring(totalAdded)
+                                end
+                                
+                                gui.Text = shortFormat
+                                print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. shortFormat)
+                                updatedCount = updatedCount + 1
+                            end
                         end
                     end
                 end
                 
+                print("📊 === สรุปผลการค้นหา ===")
+                print("🎯 พบช่องขวาทั้งหมด: " .. rightSideCount)
+                print("✅ อัปเดตสำเร็จ: " .. updatedCount .. " elements")
+                
                 if updatedCount > 0 then
-                    print("✅ อัปเดต GUI ด้านขวาเรียบร้อย จำนวน " .. updatedCount .. " elements")
+                    print("✅ อัปเดต GUI ด้านขวาเรียบร้อย")
                 else
-                    print("⚠️ ไม่พบ GUI ด้านขวาที่ต้องอัปเดต")
+                    print("⚠️ ไม่พบช่องขวาที่ต้องอัปเดต - กรุณาตรวจสอบ GUI")
+                    print("💡 ลองเปิด GUI ที่มีช่องเงินด้านขวาดู")
                 end
             end
         end)
