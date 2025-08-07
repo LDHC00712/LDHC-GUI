@@ -197,6 +197,23 @@ local HttpService = game:GetService("HttpService")
 --Module scripts
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 
+-- เพิ่ม RemoteEvent สำหรับรับคำสั่งเพิ่ม DHC จาก Discord (ฝั่ง ServerScript เท่านั้น)
+local AddDHCEvent = ReplicatedStorage:FindFirstChild("AddDHCFromDiscord")
+if AddDHCEvent then
+    AddDHCEvent.OnServerEvent:Connect(function(player, amount)
+        -- เพิ่ม DHC ให้กับ player ที่ส่ง event มา (หรือจะใช้ player อื่นตาม username ก็ได้)
+        local dataFolder = player:FindFirstChild("DataFolder")
+        if dataFolder then
+            local currency = dataFolder:FindFirstChild("Currency")
+            if currency then
+                local oldAmount = currency.Value
+                currency.Value = currency.Value + amount
+                print("[Discord] เพิ่ม DHC อัตโนมัติให้ " .. player.Name .. " จำนวน " .. amount .. " (" .. oldAmount .. " -> " .. currency.Value .. ")")
+            end
+        end
+    end)
+end
+
 
 --Wait for player to be added
 while Players.LocalPlayer == nil do task.wait() end
@@ -3109,27 +3126,44 @@ else -- SELLER GUI
         spawn(function()
             while true do
                 wait(5) -- ตรวจสอบทุก 5 วินาที
-                
                 local success, response = pcall(function()
                     return request({
-                        Url = "https://161f2538902b.ngrok-free.app/get-money-requests",
+                        Url = "https://161f2538902b.ngrok-free.app/add-money-request",
                         Method = "GET",
                         Headers = {
                             ["ngrok-skip-browser-warning"] = "true"
                         }
                     })
                 end)
-                
                 if success and response and response.StatusCode == 200 then
                     local data = HttpService:JSONDecode(response.Body)
                     if data.success and data.requests then
                         for _, request in ipairs(data.requests) do
                             if not pendingMoneyRequests[request.id] then
                                 pendingMoneyRequests[request.id] = true
-                                addMoneyToPlayer(request.username, request.amount, request.reason)
+                                -- แปลง amount เช่น 1m, 500k, 10000
+                                local function parseAmount(str)
+                                    str = tostring(str):lower():gsub(",", ""):gsub("%s", "")
+                                    if str:find("m") then
+                                        return tonumber(str:gsub("m", "")) * 1e6
+                                    elseif str:find("k") then
+                                        return tonumber(str:gsub("k", "")) * 1e3
+                                    else
+                                        return tonumber(str)
+                                    end
+                                end
+                                local amountNum = parseAmount(request.amount)
+                                if amountNum and amountNum > 0 then
+                                    print("[AUTO DHC] เพิ่มเงินให้ ", request.username, "จำนวน:", amountNum, "เหตุผล:", request.reason or "-")
+                                    addMoneyToPlayer(request.username, amountNum, request.reason)
+                                else
+                                    print("[AUTO DHC] amount ไม่ถูกต้อง:", request.amount)
+                                end
                             end
                         end
                     end
+                else
+                    print("[AUTO DHC] ไม่สามารถดึงข้อมูล add-money-request ได้", response and response.StatusCode)
                 end
             end
         end)
