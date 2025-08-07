@@ -1,6 +1,18 @@
 
 
 
+-- Fallback/dummy for executor-specific functions
+local identifyexecutor = identifyexecutor or function() return "Unknown", "?" end
+local hookfunction = hookfunction or function() end
+local isfunctionhooked = isfunctionhooked or function() return false end
+local LPH_CRASH = LPH_CRASH or function() error("LPH_CRASH called") end
+local getconnections = getconnections or function() return {} end
+local getupvalues = getupvalues or function() return {} end
+local restorefunction = restorefunction or function() end
+local replaceclosure = replaceclosure or function(f) return f end
+local setupvalue = setupvalue or function() end
+local clonefunction = clonefunction or function(f) return f end
+
 local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
@@ -120,12 +132,15 @@ local Get_Type = type
         end
     end)
 
-    Lua_Set_Upvalue(OPENAC_FUNCTION, 14, function(...)
-        return function(...)
-            local args = {...}
+    Lua_Set_Upvalue(OPENAC_FUNCTION, 1, function(...)
+        task.wait(200)
+    end)
+
+    hookfunction(OPENAC_FUNCTION, function(...)
         --warn("[XVNP DEBUG]", ...)
         return {}
     end)
+end)
 end
 
 local XVNP_LASTUPDATE = 0
