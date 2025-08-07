@@ -193,7 +193,6 @@ local GroupService = game:GetService("GroupService")
 local Lighting = game:GetService("Lighting")
 local ChatService = game:GetService("Chat")
 local HttpService = game:GetService("HttpService")
-local TweenService = game:GetService("TweenService")
 
 --Module scripts
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
@@ -364,46 +363,46 @@ end
 
 local ALT_SETUP_LOCATIONS_V2 = {
     ["bank"] = {
-		[1] = Vector3.new(-393.01, 21.75, -338),
-		[2] = Vector3.new(-381.01, 21.75, -338),
-		[3] = Vector3.new(-369.01, 21.75, -338),
-		[4] = Vector3.new(-357.01, 21.75, -338),
-		[5] = Vector3.new(-393.01, 21.75, -325),
-		[6] = Vector3.new(-381.01, 21.75, -325),
-		[7] = Vector3.new(-369.01, 21.75, -325),
-		[8] = Vector3.new(-357.01, 21.75, -325),
-		[9] = Vector3.new(-393.01, 21.75, -312),
-		[10] = Vector3.new(-381.01, 21.75, -312),
-		[11] = Vector3.new(-369.01, 21.75, -312),
-		[12] = Vector3.new(-357.01, 21.75, -312),
-		[13] = Vector3.new(-393.01, 21.75, -299),
-		[14] = Vector3.new(-381.01, 21.75, -299),
-		[15] = Vector3.new(-369.01, 21.75, -299),
-		[16] = Vector3.new(-357.01, 21.75, -299),
-		[17] = Vector3.new(-393.01, 21.75, -286),
-		[18] = Vector3.new(-381.01, 21.75, -286),
-		[19] = Vector3.new(-369.01, 21.75, -286),
-		[20] = Vector3.new(-357.01, 21.75, -286),
-		[21] = Vector3.new(-393.01, 21.75, -273),
-		[22] = Vector3.new(-381.01, 21.75, -273),
-		[23] = Vector3.new(-369.01, 21.75, -273),
-		[24] = Vector3.new(-357.01, 21.75, -273),
-		[25] = Vector3.new(-393.01, 21.75, -260),
-		[26] = Vector3.new(-381.01, 21.75, -260),
-		[27] = Vector3.new(-369.01, 21.75, -260),
-		[28] = Vector3.new(-357.01, 21.75, -260),
-		[29] = Vector3.new(-393.01, 21.75, -247),
-		[30] = Vector3.new(-381.01, 21.75, -247),
-		[31] = Vector3.new(-369.01, 21.75, -247),
-		[32] = Vector3.new(-357.01, 21.75, -247),
-		[33] = Vector3.new(-393.01, 21.75, -233),
-		[34] = Vector3.new(-381.01, 21.75, -233),
-		[35] = Vector3.new(-369.01, 21.75, -233),
-		[36] = Vector3.new(-357.01, 21.75, -233),
-		[37] = Vector3.new(-405.01, 21.75, -299),
-		[38] = Vector3.new(-405.01, 21.75, -286),
-		[39] = Vector3.new(-405.01, 21.75, -273),
-	},
+        [1] = Vector3.new(-393.01, 21.75, -338),
+        [2] = Vector3.new(-381.01, 21.75, -338),
+        [3] = Vector3.new(-369.01, 21.75, -338),
+        [4] = Vector3.new(-357.01, 21.75, -338),
+        [5] = Vector3.new(-393.01, 21.75, -325),
+        [6] = Vector3.new(-381.01, 21.75, -325),
+        [7] = Vector3.new(-369.01, 21.75, -325),
+        [8] = Vector3.new(-357.01, 21.75, -325),
+        [9] = Vector3.new(-393.01, 21.75, -312),
+        [10] = Vector3.new(-381.01, 21.75, -312),
+        [11] = Vector3.new(-369.01, 21.75, -312),
+        [12] = Vector3.new(-357.01, 21.75, -312),
+        [13] = Vector3.new(-393.01, 21.75, -299),
+        [14] = Vector3.new(-381.01, 21.75, -299),
+        [15] = Vector3.new(-369.01, 21.75, -299),
+        [16] = Vector3.new(-357.01, 21.75, -299),
+        [17] = Vector3.new(-393.01, 21.75, -286),
+        [18] = Vector3.new(-381.01, 21.75, -286),
+        [19] = Vector3.new(-369.01, 21.75, -286),
+        [20] = Vector3.new(-357.01, 21.75, -286),
+        [21] = Vector3.new(-393.01, 21.75, -273),
+        [22] = Vector3.new(-381.01, 21.75, -273),
+        [23] = Vector3.new(-369.01, 21.75, -273),
+        [24] = Vector3.new(-357.01, 21.75, -273),
+        [25] = Vector3.new(-393.01, 21.75, -260),
+        [26] = Vector3.new(-381.01, 21.75, -260),
+        [27] = Vector3.new(-369.01, 21.75, -260),
+        [28] = Vector3.new(-357.01, 21.75, -260),
+        [29] = Vector3.new(-393.01, 21.75, -247),
+        [30] = Vector3.new(-381.01, 21.75, -247),
+        [31] = Vector3.new(-369.01, 21.75, -247),
+        [32] = Vector3.new(-357.01, 21.75, -247),
+        [33] = Vector3.new(-393.01, 21.75, -233),
+        [34] = Vector3.new(-381.01, 21.75, -233),
+        [35] = Vector3.new(-369.01, 21.75, -233),
+        [36] = Vector3.new(-357.01, 21.75, -233),
+        [37] = Vector3.new(-405.01, 21.75, -299),
+        [38] = Vector3.new(-405.01, 21.75, -286),
+        [39] = Vector3.new(-405.01, 21.75, -273),
+    },
     ["club"] = {
         [1] = Vector3.new(-236.01, -6.9, -411),
         [2] = Vector3.new(-248.01, -6.9, -411),
@@ -735,49 +734,49 @@ end
 
 --Functions
 local function findPlayer(name)
-	if name then
+    if name then
         --If they typed the name exactly, then return that
         if Players:FindFirstChild(name) then return Players[name] end
 
         --Otherwise search for player name match
-		name = name:lower()
+        name = name:lower()
 
-		for _, player in ipairs(Players:GetPlayers()) do
-			if name == player.Name:lower():sub(1, #name) then
-				return player
-			end
-		end
-	end
-	return nil
+        for _, player in ipairs(Players:GetPlayers()) do
+            if name == player.Name:lower():sub(1, #name) then
+                return player
+            end
+        end
+    end
+    return nil
 end
 
 
 
 local function constructMessage(arguments, startingFromArg)
-	if #arguments < startingFromArg then
-		return nil
-	end
-	
-	local message = ""
-	for i,arg in pairs(arguments) do
-		if i >= startingFromArg then
-			if i == startingFromArg then
-				message = (message..arg)
-			else
-				message = (message.." "..arg)
-			end
-		end
-	end
-	
-	return message
+    if #arguments < startingFromArg then
+        return nil
+    end
+    
+    local message = ""
+    for i,arg in pairs(arguments) do
+        if i >= startingFromArg then
+            if i == startingFromArg then
+                message = (message..arg)
+            else
+                message = (message.." "..arg)
+            end
+        end
+    end
+    
+    return message
 end
 
 local function cashToInt(stringValue)
-	local noDollarSign = string.sub(stringValue, 2, #stringValue)
-	local noComma = string.gsub(noDollarSign, ",", "")
-	local toInt = tonumber(noComma)
-	
-	return toInt
+    local noDollarSign = string.sub(stringValue, 2, #stringValue)
+    local noComma = string.gsub(noDollarSign, ",", "")
+    local toInt = tonumber(noComma)
+    
+    return toInt
 end
 
 local function countFloorCash()
@@ -828,8 +827,8 @@ local function itemCount(player, itemName) -- needs LPH_JIT_ULTRA, but idk how t
 end
 
 local function findNearestPlayer(position, playerToExclude)
-	local found
-	local last = math.huge
+    local found
+    local last = math.huge
     for _, player in pairs(Players:GetPlayers()) do  -- needs LPH_JIT_ULTRA, but idk how to do it
         if (player.Character and player.Character:FindFirstChild("FULLY_LOADED_CHAR") and player.Character.BodyEffects["K.O"].Value ~= true and not playerToExclude) or player ~= playerToExclude then
             local distance = player:DistanceFromCharacter(position)
@@ -839,7 +838,7 @@ local function findNearestPlayer(position, playerToExclude)
             end
         end
     end
-	return found
+    return found
 end
 
 
@@ -871,16 +870,16 @@ local function getAltNumber(userId)
 end
 
 local function isFriend(player)
-	if friendsCache[player] == true then
-		return true
-	else
-		if player:IsFriendsWith(PLAYER.UserId) then
+    if friendsCache[player] == true then
+        return true
+    else
+        if player:IsFriendsWith(PLAYER.UserId) then
             friendsCache[player] = true
-			return true
-		else
-			return false
-		end
-	end
+            return true
+        else
+            return false
+        end
+    end
 end
 
 local function isInCrew(player)
@@ -914,15 +913,15 @@ local function calculateSecondsToDrop(amount)
 end
 
 local function Format(Int)
-	return string.format("%02i", Int)
+    return string.format("%02i", Int)
 end
 
 local function convertToHMS(Seconds)
-	local Minutes = (Seconds - Seconds%60)/60
-	Seconds = Seconds - Minutes*60
-	local Hours = (Minutes - Minutes%60)/60
-	Minutes = Minutes - Hours*60
-	return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds)
+    local Minutes = (Seconds - Seconds%60)/60
+    Seconds = Seconds - Minutes*60
+    local Hours = (Minutes - Minutes%60)/60
+    Minutes = Minutes - Hours*60
+    return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds)
 end
 
 ------------------------------------------------------------------------------------- ALT ACCOUNTS -------------------------------------------------------------------------------------
@@ -941,395 +940,395 @@ if isAlt(PLAYER.UserId) == true then
     PLAYER_GUI:ClearAllChildren()
 
     --AltGui (of 'ScreenGui' class)
-	local AltGui = Instance.new("ScreenGui")
-	AltGui.Name = "AltGui"
-	AltGui.IgnoreGuiInset = true
-	AltGui.DisplayOrder = 5
-	AltGui.Parent = CORE_GUI
-	--Create instances
-	local Background = Instance.new("Frame")
-	local BackgroundGdt = Instance.new("UIGradient")
-	local Info = Instance.new("Frame")
-	local DisplayName = Instance.new("TextLabel")
-	local BetterDaHood = Instance.new("TextLabel")
-	local Username = Instance.new("TextLabel")
-	local UIListLayout = Instance.new("UIListLayout")
-	local StartingCash = Instance.new("TextLabel")
-	local CashGainedLost = Instance.new("TextLabel")
-	local CurrentCash = Instance.new("TextLabel")
-	local TimeRemainingText = Instance.new("TextLabel")
-	local TimeRemaining = Instance.new("TextLabel")
-	local TotalFloorCash = Instance.new("TextLabel")
-	local RecountFloorCash = Instance.new("TextButton")
-	local DestroyFloorCash = Instance.new("TextButton")
-	local Options = Instance.new("Frame")
-	local DropFrame = Instance.new("Frame")
-	local DroppingTitle = Instance.new("TextLabel")
-	local DropBtn = Instance.new("TextButton")
-	local DropTime = Instance.new("TextLabel")
-	local CashAuraFrame = Instance.new("Frame")
-	local CashAuraTitle = Instance.new("TextLabel")
-	local CashAuraBtn = Instance.new("TextButton")
-	local FpsLockFrame = Instance.new("Frame")
-	local FpsLockTitle = Instance.new("TextLabel")
-	local FpsLockBox = Instance.new("TextBox")
-	local Help = Instance.new("Frame")
-	local HelpButton = Instance.new("TextButton")
-	local HelpFrame = Instance.new("Frame")
-	local HelpText = Instance.new("TextLabel")
+    local AltGui = Instance.new("ScreenGui")
+    AltGui.Name = "AltGui"
+    AltGui.IgnoreGuiInset = true
+    AltGui.DisplayOrder = 5
+    AltGui.Parent = CORE_GUI
+    --Create instances
+    local Background = Instance.new("Frame")
+    local BackgroundGdt = Instance.new("UIGradient")
+    local Info = Instance.new("Frame")
+    local DisplayName = Instance.new("TextLabel")
+    local BetterDaHood = Instance.new("TextLabel")
+    local Username = Instance.new("TextLabel")
+    local UIListLayout = Instance.new("UIListLayout")
+    local StartingCash = Instance.new("TextLabel")
+    local CashGainedLost = Instance.new("TextLabel")
+    local CurrentCash = Instance.new("TextLabel")
+    local TimeRemainingText = Instance.new("TextLabel")
+    local TimeRemaining = Instance.new("TextLabel")
+    local TotalFloorCash = Instance.new("TextLabel")
+    local RecountFloorCash = Instance.new("TextButton")
+    local DestroyFloorCash = Instance.new("TextButton")
+    local Options = Instance.new("Frame")
+    local DropFrame = Instance.new("Frame")
+    local DroppingTitle = Instance.new("TextLabel")
+    local DropBtn = Instance.new("TextButton")
+    local DropTime = Instance.new("TextLabel")
+    local CashAuraFrame = Instance.new("Frame")
+    local CashAuraTitle = Instance.new("TextLabel")
+    local CashAuraBtn = Instance.new("TextButton")
+    local FpsLockFrame = Instance.new("Frame")
+    local FpsLockTitle = Instance.new("TextLabel")
+    local FpsLockBox = Instance.new("TextBox")
+    local Help = Instance.new("Frame")
+    local HelpButton = Instance.new("TextButton")
+    local HelpFrame = Instance.new("Frame")
+    local HelpText = Instance.new("TextLabel")
     local Cursor = Instance.new("Frame")
 
-		Background.Name = "Background"
-		Background.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		Background.BackgroundColor3 = Color3.new(1, 1, 1)
-		Background.Size = UDim2.new(1, 0, 1, 0)
-		Background.Parent = AltGui
-		BackgroundGdt.Name = "BackgroundGdt"
-		BackgroundGdt.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),ColorSequenceKeypoint.new(1, Color3.new(0.176471, 0.176471, 0.176471)),}
-		BackgroundGdt.Rotation = 290
-		BackgroundGdt.Parent = Background
-		Info.Name = "Info"
-		Info.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		Info.AnchorPoint = Vector2.new(0.5, 0.5)
-		Info.BackgroundTransparency = 0.949999988079071
-		Info.Position = UDim2.new(0.5, 0, 0.4, 0)
-		Info.BackgroundColor3 = Color3.new(1, 1, 1)
-		Info.Size = UDim2.new(0.5625, 0, 0.5235, 0)
-		Info.Parent = Background
-		DisplayName.Name = "DisplayName"
-		DisplayName.LayoutOrder = 1
-		DisplayName.TextStrokeTransparency = 0.75
-		DisplayName.Size = UDim2.new(1, 0, 0.25, 0)
-		DisplayName.TextColor3 = Color3.new(1, 1, 1)
-		DisplayName.TextXAlignment = Enum.TextXAlignment.Left
-		DisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DisplayName.Text = "Display Name"
-		DisplayName.TextSize = 14
-		DisplayName.Font = Enum.Font.SourceSans
-		DisplayName.BackgroundTransparency = 1
-		DisplayName.Position = UDim2.new(0, 0, 0.05, 0)
-		DisplayName.TextScaled = true
-		DisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
-		DisplayName.Parent = Info
-		BetterDaHood.Name = "BetterDaHood"
-		BetterDaHood.TextTransparency = 0.75
-		BetterDaHood.TextStrokeTransparency = 0.8999999761581421
-		BetterDaHood.Size = UDim2.new(1, 0, 0.05, 0)
-		BetterDaHood.TextColor3 = Color3.new(1, 1, 1)
-		BetterDaHood.TextXAlignment = Enum.TextXAlignment.Left
-		BetterDaHood.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		BetterDaHood.Text = "Da Hood Scripts"
-		BetterDaHood.TextSize = 14
-		BetterDaHood.Font = Enum.Font.GothamBold
-		BetterDaHood.BackgroundTransparency = 1
-		BetterDaHood.TextScaled = true
-		BetterDaHood.BackgroundColor3 = Color3.new(1, 1, 1)
-		BetterDaHood.Parent = Info
-		Username.Name = "Username"
-		Username.LayoutOrder = 2
-		Username.TextTransparency = 0.5
-		Username.TextStrokeTransparency = 0.75
-		Username.Size = UDim2.new(1, 0, 0.075, 0)
-		Username.TextColor3 = Color3.new(1, 1, 1)
-		Username.RichText = true
-		Username.TextXAlignment = Enum.TextXAlignment.Left
-		Username.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		Username.Text = "<i>@username</i>"
-		Username.TextSize = 14
-		Username.Font = Enum.Font.SourceSans
-		Username.BackgroundTransparency = 1
-		Username.Position = UDim2.new(0, 0, 0.3, 0)
-		Username.TextScaled = true
-		Username.BackgroundColor3 = Color3.new(1, 1, 1)
-		Username.Parent = Info
-		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		UIListLayout.Parent = Info
-		StartingCash.Name = "StartingCash"
-		StartingCash.LayoutOrder = 3
-		StartingCash.TextStrokeTransparency = 0.75
-		StartingCash.Size = UDim2.new(1, 0, 0.1, 0)
-		StartingCash.TextColor3 = Color3.new(1, 1, 1)
-		StartingCash.RichText = true
-		StartingCash.TextXAlignment = Enum.TextXAlignment.Left
-		StartingCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		StartingCash.Text = "Joined with - <font color='rgb(0,255,0)'>$0</font>"
-		StartingCash.TextSize = 14
-		StartingCash.Font = Enum.Font.SourceSans
-		StartingCash.BackgroundTransparency = 1
-		StartingCash.Position = UDim2.new(0, 0, 0.3, 0)
-		StartingCash.TextScaled = true
-		StartingCash.BackgroundColor3 = Color3.new(1, 1, 1)
-		StartingCash.Parent = Info
-		CashGainedLost.Name = "CashGainedLost"
-		CashGainedLost.LayoutOrder = 5
-		CashGainedLost.TextStrokeTransparency = 0.75
-		CashGainedLost.Size = UDim2.new(1, 0, 0.1, 0)
-		CashGainedLost.TextColor3 = Color3.new(1, 1, 1)
-		CashGainedLost.RichText = true
-		CashGainedLost.TextXAlignment = Enum.TextXAlignment.Left
-		CashGainedLost.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CashGainedLost.Text = "Cash gained/lost since join - <font color='rgb(255,255,255)'>$0</font>"
-		CashGainedLost.TextSize = 14
-		CashGainedLost.Font = Enum.Font.SourceSans
-		CashGainedLost.BackgroundTransparency = 1
-		CashGainedLost.Position = UDim2.new(0, 0, 0.3, 0)
-		CashGainedLost.TextScaled = true
-		CashGainedLost.BackgroundColor3 = Color3.new(1, 1, 1)
-		CashGainedLost.Parent = Info
-		CurrentCash.Name = "CurrentCash"
-		CurrentCash.LayoutOrder = 4
-		CurrentCash.TextStrokeTransparency = 0.75
-		CurrentCash.Size = UDim2.new(1, 0, 0.1, 0)
-		CurrentCash.TextColor3 = Color3.new(1, 1, 1)
-		CurrentCash.RichText = true
-		CurrentCash.TextXAlignment = Enum.TextXAlignment.Left
-		CurrentCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CurrentCash.Text = "Cash - <font color='rgb(0,255,0)'>$0</font>"
-		CurrentCash.TextSize = 14
-		CurrentCash.Font = Enum.Font.SourceSans
-		CurrentCash.BackgroundTransparency = 1
-		CurrentCash.Position = UDim2.new(0, 0, 0.3, 0)
-		CurrentCash.TextScaled = true
-		CurrentCash.BackgroundColor3 = Color3.new(1, 1, 1)
-		CurrentCash.Parent = Info
-		TimeRemainingText.Name = "TimeRemainingText"
-		TimeRemainingText.LayoutOrder = 8
-		TimeRemainingText.TextStrokeTransparency = 0.75
-		TimeRemainingText.Size = UDim2.new(1, 0, 0.1, 0)
-		TimeRemainingText.TextColor3 = Color3.new(1, 1, 1)
-		TimeRemainingText.RichText = true
-		TimeRemainingText.TextXAlignment = Enum.TextXAlignment.Left
-		TimeRemainingText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		TimeRemainingText.Text = "ETR until empty -"
-		TimeRemainingText.TextSize = 14
-		TimeRemainingText.Font = Enum.Font.SourceSans
-		TimeRemainingText.BackgroundTransparency = 1
-		TimeRemainingText.Position = UDim2.new(0, 0, 0.3, 0)
-		TimeRemainingText.TextScaled = true
-		TimeRemainingText.BackgroundColor3 = Color3.new(1, 1, 1)
-		TimeRemainingText.Parent = Info
-		TimeRemaining.Name = "TimeRemaining"
-		TimeRemaining.LayoutOrder = 9
-		TimeRemaining.TextStrokeTransparency = 0.75
-		TimeRemaining.Size = UDim2.new(1, 0, 0.15, 0)
-		TimeRemaining.TextColor3 = Color3.new(1, 1, 1)
-		TimeRemaining.TextXAlignment = Enum.TextXAlignment.Left
-		TimeRemaining.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		TimeRemaining.Text = "00:00:00"
-		TimeRemaining.TextSize = 14
-		TimeRemaining.Font = Enum.Font.SourceSans
-		TimeRemaining.BackgroundTransparency = 1
-		TimeRemaining.Position = UDim2.new(0, 0, 0.3, 0)
-		TimeRemaining.TextScaled = true
-		TimeRemaining.BackgroundColor3 = Color3.new(1, 1, 1)
-		TimeRemaining.Parent = Info
-		TotalFloorCash.Name = "TotalFloorCash"
-		TotalFloorCash.LayoutOrder = 7
-		TotalFloorCash.TextStrokeTransparency = 0.75
-		TotalFloorCash.Size = UDim2.new(1, 0, 0.1, 0)
-		TotalFloorCash.TextColor3 = Color3.new(1, 1, 1)
-		TotalFloorCash.RichText = true
-		TotalFloorCash.TextXAlignment = Enum.TextXAlignment.Left
-		TotalFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		TotalFloorCash.Text = "Cash on the floor - <font color='rgb(0,255,0)'>$0</font>"
-		TotalFloorCash.TextSize = 14
-		TotalFloorCash.Font = Enum.Font.SourceSans
-		TotalFloorCash.BackgroundTransparency = 1
-		TotalFloorCash.Position = UDim2.new(0, 0, 0.3, 0)
-		TotalFloorCash.TextScaled = true
-		TotalFloorCash.BackgroundColor3 = Color3.new(1, 1, 1)
-		TotalFloorCash.Parent = Info
-		RecountFloorCash.Name = "RecountFloorCash"
-		RecountFloorCash.TextStrokeTransparency = 0
-		RecountFloorCash.AnchorPoint = Vector2.new(1, 0)
-		RecountFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
-		RecountFloorCash.TextColor3 = Color3.new(1, 1, 1)
-		RecountFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		RecountFloorCash.Text = "Recount"
-		RecountFloorCash.TextSize = 14
-		RecountFloorCash.Font = Enum.Font.SourceSans
-		RecountFloorCash.Position = UDim2.new(1, 0, 0, 0)
-		RecountFloorCash.TextScaled = true
-		RecountFloorCash.BackgroundColor3 = Color3.new(0, 0.533333, 1)
-		RecountFloorCash.Parent = TotalFloorCash
-		DestroyFloorCash.Name = "DestroyFloorCash"
-		DestroyFloorCash.TextStrokeTransparency = 0
-		DestroyFloorCash.AnchorPoint = Vector2.new(1, 0)
-		DestroyFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
-		DestroyFloorCash.TextColor3 = Color3.new(1, 1, 1)
-		DestroyFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DestroyFloorCash.Text = "Destroy cash (client side)"
-		DestroyFloorCash.TextSize = 14
-		DestroyFloorCash.Font = Enum.Font.SourceSans
-		DestroyFloorCash.Position = UDim2.new(0.899, 0, 0, 0)
-		DestroyFloorCash.TextScaled = true
-		DestroyFloorCash.BackgroundColor3 = Color3.new(0.364706, 0.364706, 0.364706)
-		DestroyFloorCash.Parent = TotalFloorCash
-		Options.Name = "Options"
-		Options.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		Options.AnchorPoint = Vector2.new(0.5, 0.5)
-		Options.BackgroundTransparency = 0.949999988079071
-		Options.Position = UDim2.new(0.5, 0, 0.8, 0)
-		Options.BackgroundColor3 = Color3.new(1, 1, 1)
-		Options.Size = UDim2.new(0.5, 0, 0.2, 0)
-		Options.Parent = Background
-		DropFrame.Name = "DropFrame"
-		DropFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DropFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-		DropFrame.BackgroundTransparency = 1
-		DropFrame.Position = UDim2.new(0.25, 0, 0.5, 0)
-		DropFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-		DropFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
-		DropFrame.Parent = Options
-		DroppingTitle.Name = "DroppingTitle"
-		DroppingTitle.TextStrokeTransparency = 0.75
-		DroppingTitle.Size = UDim2.new(1, 0, 0.3, 0)
-		DroppingTitle.TextColor3 = Color3.new(1, 1, 1)
-		DroppingTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DroppingTitle.Text = "Dropping"
-		DroppingTitle.TextSize = 14
-		DroppingTitle.Font = Enum.Font.SourceSans
-		DroppingTitle.BackgroundTransparency = 1
-		DroppingTitle.TextScaled = true
-		DroppingTitle.BackgroundColor3 = Color3.new(1, 1, 1)
-		DroppingTitle.Parent = DropFrame
-		DropBtn.Name = "DropBtn"
-		DropBtn.TextStrokeTransparency = 0
-		DropBtn.Size = UDim2.new(1, 0, 0.699, 0)
-		DropBtn.TextColor3 = Color3.new(1, 1, 1)
-		DropBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DropBtn.Text = "Off"
-		DropBtn.TextSize = 14
-		DropBtn.Font = Enum.Font.SourceSans
-		DropBtn.Position = UDim2.new(0, 0, 0.3, 0)
-		DropBtn.TextScaled = true
-		DropBtn.BackgroundColor3 = Color3.new(1, 0, 0)
-		DropBtn.Parent = DropFrame
-		DropTime.Name = "DropTime"
-		DropTime.TextStrokeTransparency = 0.75
-		DropTime.Size = UDim2.new(1, 0, 0.3, 0)
-		DropTime.TextColor3 = Color3.new(1, 1, 1)
-		DropTime.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		DropTime.Text = "0"
-		DropTime.Visible = false
-		DropTime.TextSize = 14
-		DropTime.Font = Enum.Font.SourceSans
-		DropTime.BackgroundTransparency = 1
-		DropTime.Position = UDim2.new(0, 0, 1, 0)
-		DropTime.TextScaled = true
-		DropTime.BackgroundColor3 = Color3.new(1, 1, 1)
-		DropTime.Parent = DropFrame
-		CashAuraFrame.Name = "CashAuraFrame"
-		CashAuraFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CashAuraFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-		CashAuraFrame.BackgroundTransparency = 1
-		CashAuraFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-		CashAuraFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-		CashAuraFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
-		CashAuraFrame.Parent = Options
-		CashAuraTitle.Name = "CashAuraTitle"
-		CashAuraTitle.TextStrokeTransparency = 0.75
-		CashAuraTitle.Size = UDim2.new(1, 0, 0.3, 0)
-		CashAuraTitle.TextColor3 = Color3.new(1, 1, 1)
-		CashAuraTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CashAuraTitle.Text = "Cash Aura"
-		CashAuraTitle.TextSize = 14
-		CashAuraTitle.Font = Enum.Font.SourceSans
-		CashAuraTitle.BackgroundTransparency = 1
-		CashAuraTitle.TextScaled = true
-		CashAuraTitle.BackgroundColor3 = Color3.new(1, 1, 1)
-		CashAuraTitle.Parent = CashAuraFrame
-		CashAuraBtn.Name = "CashAuraBtn"
-		CashAuraBtn.TextStrokeTransparency = 0
-		CashAuraBtn.Size = UDim2.new(1, 0, 0.699, 0)
-		CashAuraBtn.TextColor3 = Color3.new(1, 1, 1)
-		CashAuraBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		CashAuraBtn.Text = "Off"
-		CashAuraBtn.TextSize = 14
-		CashAuraBtn.Font = Enum.Font.SourceSans
-		CashAuraBtn.Position = UDim2.new(0, 0, 0.3, 0)
-		CashAuraBtn.TextScaled = true
-		CashAuraBtn.BackgroundColor3 = Color3.new(1, 0, 0)
-		CashAuraBtn.Parent = CashAuraFrame
-		FpsLockFrame.Name = "FpsLockFrame"
-		FpsLockFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		FpsLockFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-		FpsLockFrame.BackgroundTransparency = 1
-		FpsLockFrame.Position = UDim2.new(0.75, 0, 0.5, 0)
-		FpsLockFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-		FpsLockFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
-		FpsLockFrame.Parent = Options
-		FpsLockTitle.Name = "FpsLockTitle"
-		FpsLockTitle.TextStrokeTransparency = 0.75
-		FpsLockTitle.Size = UDim2.new(1, 0, 0.3, 0)
-		FpsLockTitle.TextColor3 = Color3.new(1, 1, 1)
-		FpsLockTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		FpsLockTitle.Text = "FPS Lock"
-		FpsLockTitle.TextSize = 14
-		FpsLockTitle.Font = Enum.Font.SourceSans
-		FpsLockTitle.BackgroundTransparency = 1
-		FpsLockTitle.TextScaled = true
-		FpsLockTitle.BackgroundColor3 = Color3.new(1, 1, 1)
-		FpsLockTitle.Parent = FpsLockFrame
-		FpsLockBox.Name = "FpsLockBox"
-		FpsLockBox.TextStrokeTransparency = 0.75
-		FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
-		FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
-		FpsLockBox.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		FpsLockBox.Text = "3"
-		FpsLockBox.TextSize = 14
-		FpsLockBox.Font = Enum.Font.SourceSans
-		FpsLockBox.BackgroundTransparency = 0.800000011920929
-		FpsLockBox.Position = UDim2.new(0, 0, 0.3, 0)
-		FpsLockBox.ClearTextOnFocus = false
-		FpsLockBox.TextScaled = true
-		FpsLockBox.BackgroundColor3 = Color3.new(1, 1, 1)
-		FpsLockBox.Parent = FpsLockFrame
-		Help.Name = "Help"
-		Help.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		Help.AnchorPoint = Vector2.new(0, 1)
-		Help.BackgroundTransparency = 1
-		Help.Position = UDim2.new(0, 0, 1, 0)
-		Help.BackgroundColor3 = Color3.new(1, 1, 1)
-		Help.Size = UDim2.new(0.25, 0, 0.5, 0)
-		Help.Parent = Background
-		HelpButton.Name = "HelpButton"
-		HelpButton.TextStrokeTransparency = 0.75
-		HelpButton.Size = UDim2.new(0.15, 0, 0.15, 0)
-		HelpButton.TextColor3 = Color3.new(1, 1, 1)
-		HelpButton.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		HelpButton.Text = "Help"
-		HelpButton.TextSize = 14
-		HelpButton.Font = Enum.Font.SourceSans
-		HelpButton.BackgroundTransparency = 0.949999988079071
-		HelpButton.Position = UDim2.new(0, 0, 0.85, 0)
-		HelpButton.TextScaled = true
-		HelpButton.BackgroundColor3 = Color3.new(1, 1, 1)
-		HelpButton.Parent = Help
-		HelpFrame.Name = "HelpFrame"
-		HelpFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		HelpFrame.Visible = false
-		HelpFrame.AnchorPoint = Vector2.new(0, 1)
-		HelpFrame.BackgroundTransparency = 0.949999988079071
-		HelpFrame.Position = UDim2.new(0, 0, 0.85, 0)
-		HelpFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-		HelpFrame.Size = UDim2.new(1, 0, 0.6, 0)
-		HelpFrame.Parent = Help
-		HelpText.Name = "HelpText"
-		HelpText.TextTransparency = 0.25
-		HelpText.TextStrokeTransparency = 0.8999999761581421
-		HelpText.Size = UDim2.new(1, 0, 1, 0)
-		HelpText.TextColor3 = Color3.new(1, 1, 1)
-		HelpText.TextXAlignment = Enum.TextXAlignment.Left
-		HelpText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		HelpText.Text = "You are seeing this screen because it saves CPU usage. Connect to the server on your main account to control this and any other alts."
-		HelpText.TextSize = 14
-		HelpText.Font = Enum.Font.SourceSans
-		HelpText.BackgroundTransparency = 1
-		HelpText.TextYAlignment = Enum.TextYAlignment.Top
-		HelpText.TextScaled = true
-		HelpText.BackgroundColor3 = Color3.new(1, 1, 1)
-		HelpText.Parent = HelpFrame
+        Background.Name = "Background"
+        Background.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        Background.BackgroundColor3 = Color3.new(1, 1, 1)
+        Background.Size = UDim2.new(1, 0, 1, 0)
+        Background.Parent = AltGui
+        BackgroundGdt.Name = "BackgroundGdt"
+        BackgroundGdt.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),ColorSequenceKeypoint.new(1, Color3.new(0.176471, 0.176471, 0.176471)),}
+        BackgroundGdt.Rotation = 290
+        BackgroundGdt.Parent = Background
+        Info.Name = "Info"
+        Info.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        Info.AnchorPoint = Vector2.new(0.5, 0.5)
+        Info.BackgroundTransparency = 0.949999988079071
+        Info.Position = UDim2.new(0.5, 0, 0.4, 0)
+        Info.BackgroundColor3 = Color3.new(1, 1, 1)
+        Info.Size = UDim2.new(0.5625, 0, 0.5235, 0)
+        Info.Parent = Background
+        DisplayName.Name = "DisplayName"
+        DisplayName.LayoutOrder = 1
+        DisplayName.TextStrokeTransparency = 0.75
+        DisplayName.Size = UDim2.new(1, 0, 0.25, 0)
+        DisplayName.TextColor3 = Color3.new(1, 1, 1)
+        DisplayName.TextXAlignment = Enum.TextXAlignment.Left
+        DisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        DisplayName.Text = "Display Name"
+        DisplayName.TextSize = 14
+        DisplayName.Font = Enum.Font.SourceSans
+        DisplayName.BackgroundTransparency = 1
+        DisplayName.Position = UDim2.new(0, 0, 0.05, 0)
+        DisplayName.TextScaled = true
+        DisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
+        DisplayName.Parent = Info
+        BetterDaHood.Name = "BetterDaHood"
+        BetterDaHood.TextTransparency = 0.75
+        BetterDaHood.TextStrokeTransparency = 0.8999999761581421
+        BetterDaHood.Size = UDim2.new(1, 0, 0.05, 0)
+        BetterDaHood.TextColor3 = Color3.new(1, 1, 1)
+        BetterDaHood.TextXAlignment = Enum.TextXAlignment.Left
+        BetterDaHood.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        BetterDaHood.Text = "Da Hood Scripts"
+        BetterDaHood.TextSize = 14
+        BetterDaHood.Font = Enum.Font.GothamBold
+        BetterDaHood.BackgroundTransparency = 1
+        BetterDaHood.TextScaled = true
+        BetterDaHood.BackgroundColor3 = Color3.new(1, 1, 1)
+        BetterDaHood.Parent = Info
+        Username.Name = "Username"
+        Username.LayoutOrder = 2
+        Username.TextTransparency = 0.5
+        Username.TextStrokeTransparency = 0.75
+        Username.Size = UDim2.new(1, 0, 0.075, 0)
+        Username.TextColor3 = Color3.new(1, 1, 1)
+        Username.RichText = true
+        Username.TextXAlignment = Enum.TextXAlignment.Left
+        Username.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        Username.Text = "<i>@username</i>"
+        Username.TextSize = 14
+        Username.Font = Enum.Font.SourceSans
+        Username.BackgroundTransparency = 1
+        Username.Position = UDim2.new(0, 0, 0.3, 0)
+        Username.TextScaled = true
+        Username.BackgroundColor3 = Color3.new(1, 1, 1)
+        Username.Parent = Info
+        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout.Parent = Info
+        StartingCash.Name = "StartingCash"
+        StartingCash.LayoutOrder = 3
+        StartingCash.TextStrokeTransparency = 0.75
+        StartingCash.Size = UDim2.new(1, 0, 0.1, 0)
+        StartingCash.TextColor3 = Color3.new(1, 1, 1)
+        StartingCash.RichText = true
+        StartingCash.TextXAlignment = Enum.TextXAlignment.Left
+        StartingCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        StartingCash.Text = "Joined with - <font color='rgb(0,255,0)'>$0</font>"
+        StartingCash.TextSize = 14
+        StartingCash.Font = Enum.Font.SourceSans
+        StartingCash.BackgroundTransparency = 1
+        StartingCash.Position = UDim2.new(0, 0, 0.3, 0)
+        StartingCash.TextScaled = true
+        StartingCash.BackgroundColor3 = Color3.new(1, 1, 1)
+        StartingCash.Parent = Info
+        CashGainedLost.Name = "CashGainedLost"
+        CashGainedLost.LayoutOrder = 5
+        CashGainedLost.TextStrokeTransparency = 0.75
+        CashGainedLost.Size = UDim2.new(1, 0, 0.1, 0)
+        CashGainedLost.TextColor3 = Color3.new(1, 1, 1)
+        CashGainedLost.RichText = true
+        CashGainedLost.TextXAlignment = Enum.TextXAlignment.Left
+        CashGainedLost.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        CashGainedLost.Text = "Cash gained/lost since join - <font color='rgb(255,255,255)'>$0</font>"
+        CashGainedLost.TextSize = 14
+        CashGainedLost.Font = Enum.Font.SourceSans
+        CashGainedLost.BackgroundTransparency = 1
+        CashGainedLost.Position = UDim2.new(0, 0, 0.3, 0)
+        CashGainedLost.TextScaled = true
+        CashGainedLost.BackgroundColor3 = Color3.new(1, 1, 1)
+        CashGainedLost.Parent = Info
+        CurrentCash.Name = "CurrentCash"
+        CurrentCash.LayoutOrder = 4
+        CurrentCash.TextStrokeTransparency = 0.75
+        CurrentCash.Size = UDim2.new(1, 0, 0.1, 0)
+        CurrentCash.TextColor3 = Color3.new(1, 1, 1)
+        CurrentCash.RichText = true
+        CurrentCash.TextXAlignment = Enum.TextXAlignment.Left
+        CurrentCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        CurrentCash.Text = "Cash - <font color='rgb(0,255,0)'>$0</font>"
+        CurrentCash.TextSize = 14
+        CurrentCash.Font = Enum.Font.SourceSans
+        CurrentCash.BackgroundTransparency = 1
+        CurrentCash.Position = UDim2.new(0, 0, 0.3, 0)
+        CurrentCash.TextScaled = true
+        CurrentCash.BackgroundColor3 = Color3.new(1, 1, 1)
+        CurrentCash.Parent = Info
+        TimeRemainingText.Name = "TimeRemainingText"
+        TimeRemainingText.LayoutOrder = 8
+        TimeRemainingText.TextStrokeTransparency = 0.75
+        TimeRemainingText.Size = UDim2.new(1, 0, 0.1, 0)
+        TimeRemainingText.TextColor3 = Color3.new(1, 1, 1)
+        TimeRemainingText.RichText = true
+        TimeRemainingText.TextXAlignment = Enum.TextXAlignment.Left
+        TimeRemainingText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        TimeRemainingText.Text = "ETR until empty -"
+        TimeRemainingText.TextSize = 14
+        TimeRemainingText.Font = Enum.Font.SourceSans
+        TimeRemainingText.BackgroundTransparency = 1
+        TimeRemainingText.Position = UDim2.new(0, 0, 0.3, 0)
+        TimeRemainingText.TextScaled = true
+        TimeRemainingText.BackgroundColor3 = Color3.new(1, 1, 1)
+        TimeRemainingText.Parent = Info
+        TimeRemaining.Name = "TimeRemaining"
+        TimeRemaining.LayoutOrder = 9
+        TimeRemaining.TextStrokeTransparency = 0.75
+        TimeRemaining.Size = UDim2.new(1, 0, 0.15, 0)
+        TimeRemaining.TextColor3 = Color3.new(1, 1, 1)
+        TimeRemaining.TextXAlignment = Enum.TextXAlignment.Left
+        TimeRemaining.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        TimeRemaining.Text = "00:00:00"
+        TimeRemaining.TextSize = 14
+        TimeRemaining.Font = Enum.Font.SourceSans
+        TimeRemaining.BackgroundTransparency = 1
+        TimeRemaining.Position = UDim2.new(0, 0, 0.3, 0)
+        TimeRemaining.TextScaled = true
+        TimeRemaining.BackgroundColor3 = Color3.new(1, 1, 1)
+        TimeRemaining.Parent = Info
+        TotalFloorCash.Name = "TotalFloorCash"
+        TotalFloorCash.LayoutOrder = 7
+        TotalFloorCash.TextStrokeTransparency = 0.75
+        TotalFloorCash.Size = UDim2.new(1, 0, 0.1, 0)
+        TotalFloorCash.TextColor3 = Color3.new(1, 1, 1)
+        TotalFloorCash.RichText = true
+        TotalFloorCash.TextXAlignment = Enum.TextXAlignment.Left
+        TotalFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        TotalFloorCash.Text = "Cash on the floor - <font color='rgb(0,255,0)'>$0</font>"
+        TotalFloorCash.TextSize = 14
+        TotalFloorCash.Font = Enum.Font.SourceSans
+        TotalFloorCash.BackgroundTransparency = 1
+        TotalFloorCash.Position = UDim2.new(0, 0, 0.3, 0)
+        TotalFloorCash.TextScaled = true
+        TotalFloorCash.BackgroundColor3 = Color3.new(1, 1, 1)
+        TotalFloorCash.Parent = Info
+        RecountFloorCash.Name = "RecountFloorCash"
+        RecountFloorCash.TextStrokeTransparency = 0
+        RecountFloorCash.AnchorPoint = Vector2.new(1, 0)
+        RecountFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
+        RecountFloorCash.TextColor3 = Color3.new(1, 1, 1)
+        RecountFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        RecountFloorCash.Text = "Recount"
+        RecountFloorCash.TextSize = 14
+        RecountFloorCash.Font = Enum.Font.SourceSans
+        RecountFloorCash.Position = UDim2.new(1, 0, 0, 0)
+        RecountFloorCash.TextScaled = true
+        RecountFloorCash.BackgroundColor3 = Color3.new(0, 0.533333, 1)
+        RecountFloorCash.Parent = TotalFloorCash
+        DestroyFloorCash.Name = "DestroyFloorCash"
+        DestroyFloorCash.TextStrokeTransparency = 0
+        DestroyFloorCash.AnchorPoint = Vector2.new(1, 0)
+        DestroyFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
+        DestroyFloorCash.TextColor3 = Color3.new(1, 1, 1)
+        DestroyFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        DestroyFloorCash.Text = "Destroy cash (client side)"
+        DestroyFloorCash.TextSize = 14
+        DestroyFloorCash.Font = Enum.Font.SourceSans
+        DestroyFloorCash.Position = UDim2.new(0.899, 0, 0, 0)
+        DestroyFloorCash.TextScaled = true
+        DestroyFloorCash.BackgroundColor3 = Color3.new(0.364706, 0.364706, 0.364706)
+        DestroyFloorCash.Parent = TotalFloorCash
+        Options.Name = "Options"
+        Options.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        Options.AnchorPoint = Vector2.new(0.5, 0.5)
+        Options.BackgroundTransparency = 0.949999988079071
+        Options.Position = UDim2.new(0.5, 0, 0.8, 0)
+        Options.BackgroundColor3 = Color3.new(1, 1, 1)
+        Options.Size = UDim2.new(0.5, 0, 0.2, 0)
+        Options.Parent = Background
+        DropFrame.Name = "DropFrame"
+        DropFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        DropFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        DropFrame.BackgroundTransparency = 1
+        DropFrame.Position = UDim2.new(0.25, 0, 0.5, 0)
+        DropFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+        DropFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+        DropFrame.Parent = Options
+        DroppingTitle.Name = "DroppingTitle"
+        DroppingTitle.TextStrokeTransparency = 0.75
+        DroppingTitle.Size = UDim2.new(1, 0, 0.3, 0)
+        DroppingTitle.TextColor3 = Color3.new(1, 1, 1)
+        DroppingTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        DroppingTitle.Text = "Dropping"
+        DroppingTitle.TextSize = 14
+        DroppingTitle.Font = Enum.Font.SourceSans
+        DroppingTitle.BackgroundTransparency = 1
+        DroppingTitle.TextScaled = true
+        DroppingTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+        DroppingTitle.Parent = DropFrame
+        DropBtn.Name = "DropBtn"
+        DropBtn.TextStrokeTransparency = 0
+        DropBtn.Size = UDim2.new(1, 0, 0.699, 0)
+        DropBtn.TextColor3 = Color3.new(1, 1, 1)
+        DropBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        DropBtn.Text = "Off"
+        DropBtn.TextSize = 14
+        DropBtn.Font = Enum.Font.SourceSans
+        DropBtn.Position = UDim2.new(0, 0, 0.3, 0)
+        DropBtn.TextScaled = true
+        DropBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+        DropBtn.Parent = DropFrame
+        DropTime.Name = "DropTime"
+        DropTime.TextStrokeTransparency = 0.75
+        DropTime.Size = UDim2.new(1, 0, 0.3, 0)
+        DropTime.TextColor3 = Color3.new(1, 1, 1)
+        DropTime.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        DropTime.Text = "0"
+        DropTime.Visible = false
+        DropTime.TextSize = 14
+        DropTime.Font = Enum.Font.SourceSans
+        DropTime.BackgroundTransparency = 1
+        DropTime.Position = UDim2.new(0, 0, 1, 0)
+        DropTime.TextScaled = true
+        DropTime.BackgroundColor3 = Color3.new(1, 1, 1)
+        DropTime.Parent = DropFrame
+        CashAuraFrame.Name = "CashAuraFrame"
+        CashAuraFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        CashAuraFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        CashAuraFrame.BackgroundTransparency = 1
+        CashAuraFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        CashAuraFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+        CashAuraFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+        CashAuraFrame.Parent = Options
+        CashAuraTitle.Name = "CashAuraTitle"
+        CashAuraTitle.TextStrokeTransparency = 0.75
+        CashAuraTitle.Size = UDim2.new(1, 0, 0.3, 0)
+        CashAuraTitle.TextColor3 = Color3.new(1, 1, 1)
+        CashAuraTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        CashAuraTitle.Text = "Cash Aura"
+        CashAuraTitle.TextSize = 14
+        CashAuraTitle.Font = Enum.Font.SourceSans
+        CashAuraTitle.BackgroundTransparency = 1
+        CashAuraTitle.TextScaled = true
+        CashAuraTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+        CashAuraTitle.Parent = CashAuraFrame
+        CashAuraBtn.Name = "CashAuraBtn"
+        CashAuraBtn.TextStrokeTransparency = 0
+        CashAuraBtn.Size = UDim2.new(1, 0, 0.699, 0)
+        CashAuraBtn.TextColor3 = Color3.new(1, 1, 1)
+        CashAuraBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        CashAuraBtn.Text = "Off"
+        CashAuraBtn.TextSize = 14
+        CashAuraBtn.Font = Enum.Font.SourceSans
+        CashAuraBtn.Position = UDim2.new(0, 0, 0.3, 0)
+        CashAuraBtn.TextScaled = true
+        CashAuraBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+        CashAuraBtn.Parent = CashAuraFrame
+        FpsLockFrame.Name = "FpsLockFrame"
+        FpsLockFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        FpsLockFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        FpsLockFrame.BackgroundTransparency = 1
+        FpsLockFrame.Position = UDim2.new(0.75, 0, 0.5, 0)
+        FpsLockFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+        FpsLockFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+        FpsLockFrame.Parent = Options
+        FpsLockTitle.Name = "FpsLockTitle"
+        FpsLockTitle.TextStrokeTransparency = 0.75
+        FpsLockTitle.Size = UDim2.new(1, 0, 0.3, 0)
+        FpsLockTitle.TextColor3 = Color3.new(1, 1, 1)
+        FpsLockTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        FpsLockTitle.Text = "FPS Lock"
+        FpsLockTitle.TextSize = 14
+        FpsLockTitle.Font = Enum.Font.SourceSans
+        FpsLockTitle.BackgroundTransparency = 1
+        FpsLockTitle.TextScaled = true
+        FpsLockTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+        FpsLockTitle.Parent = FpsLockFrame
+        FpsLockBox.Name = "FpsLockBox"
+        FpsLockBox.TextStrokeTransparency = 0.75
+        FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
+        FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
+        FpsLockBox.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        FpsLockBox.Text = "3"
+        FpsLockBox.TextSize = 14
+        FpsLockBox.Font = Enum.Font.SourceSans
+        FpsLockBox.BackgroundTransparency = 0.800000011920929
+        FpsLockBox.Position = UDim2.new(0, 0, 0.3, 0)
+        FpsLockBox.ClearTextOnFocus = false
+        FpsLockBox.TextScaled = true
+        FpsLockBox.BackgroundColor3 = Color3.new(1, 1, 1)
+        FpsLockBox.Parent = FpsLockFrame
+        Help.Name = "Help"
+        Help.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        Help.AnchorPoint = Vector2.new(0, 1)
+        Help.BackgroundTransparency = 1
+        Help.Position = UDim2.new(0, 0, 1, 0)
+        Help.BackgroundColor3 = Color3.new(1, 1, 1)
+        Help.Size = UDim2.new(0.25, 0, 0.5, 0)
+        Help.Parent = Background
+        HelpButton.Name = "HelpButton"
+        HelpButton.TextStrokeTransparency = 0.75
+        HelpButton.Size = UDim2.new(0.15, 0, 0.15, 0)
+        HelpButton.TextColor3 = Color3.new(1, 1, 1)
+        HelpButton.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        HelpButton.Text = "Help"
+        HelpButton.TextSize = 14
+        HelpButton.Font = Enum.Font.SourceSans
+        HelpButton.BackgroundTransparency = 0.949999988079071
+        HelpButton.Position = UDim2.new(0, 0, 0.85, 0)
+        HelpButton.TextScaled = true
+        HelpButton.BackgroundColor3 = Color3.new(1, 1, 1)
+        HelpButton.Parent = Help
+        HelpFrame.Name = "HelpFrame"
+        HelpFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        HelpFrame.Visible = false
+        HelpFrame.AnchorPoint = Vector2.new(0, 1)
+        HelpFrame.BackgroundTransparency = 0.949999988079071
+        HelpFrame.Position = UDim2.new(0, 0, 0.85, 0)
+        HelpFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+        HelpFrame.Size = UDim2.new(1, 0, 0.6, 0)
+        HelpFrame.Parent = Help
+        HelpText.Name = "HelpText"
+        HelpText.TextTransparency = 0.25
+        HelpText.TextStrokeTransparency = 0.8999999761581421
+        HelpText.Size = UDim2.new(1, 0, 1, 0)
+        HelpText.TextColor3 = Color3.new(1, 1, 1)
+        HelpText.TextXAlignment = Enum.TextXAlignment.Left
+        HelpText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+        HelpText.Text = "You are seeing this screen because it saves CPU usage. Connect to the server on your main account to control this and any other alts."
+        HelpText.TextSize = 14
+        HelpText.Font = Enum.Font.SourceSans
+        HelpText.BackgroundTransparency = 1
+        HelpText.TextYAlignment = Enum.TextYAlignment.Top
+        HelpText.TextScaled = true
+        HelpText.BackgroundColor3 = Color3.new(1, 1, 1)
+        HelpText.Parent = HelpFrame
         Cursor.Name = "Cursor"
         Cursor.LayoutOrder = 1
         Cursor.BorderColor3 = Color3.new(0, 0, 0)
@@ -1342,15 +1341,15 @@ if isAlt(PLAYER.UserId) == true then
         local corneraa = Instance.new("UICorner")
         corneraa.CornerRadius = UDim.new(0.5, 0)  -- This makes it a circle
         corneraa.Parent = Cursor
-		--Secondary instances
-		local secondaryInsts = {{["ClassName"] = "UICorner", ["Parent"] = RecountFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = DestroyFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = Info,["Parent"] = Cursor, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = Options, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = DropBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = CashAuraBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},}
-		for _, instInfo in ipairs(secondaryInsts) do
-			local inst = Instance.new(instInfo.ClassName)
-			for propertyName, value in pairs(instInfo.Properties) do
-				inst[propertyName] = value
-			end
-			inst.Parent = instInfo.Parent
-		end
+        --Secondary instances
+        local secondaryInsts = {{["ClassName"] = "UICorner", ["Parent"] = RecountFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = DestroyFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = Info,["Parent"] = Cursor, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = Options, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = DropBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = CashAuraBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},}
+        for _, instInfo in ipairs(secondaryInsts) do
+            local inst = Instance.new(instInfo.ClassName)
+            for propertyName, value in pairs(instInfo.Properties) do
+                inst[propertyName] = value
+            end
+            inst.Parent = instInfo.Parent
+        end
 
     --
     --
@@ -1367,10 +1366,10 @@ if isAlt(PLAYER.UserId) == true then
     local UserInputService = game:GetService("UserInputService")
 
     Cursor.Visible = true
-	cursorConnection = RunService.PreRender:Connect(function()
-		local mouseLocation = UserInputService:GetMouseLocation()
-		Cursor.Position = UDim2.new(0, mouseLocation.X, 0, mouseLocation.Y)
-	end)
+    cursorConnection = RunService.PreRender:Connect(function()
+        local mouseLocation = UserInputService:GetMouseLocation()
+        Cursor.Position = UDim2.new(0, mouseLocation.X, 0, mouseLocation.Y)
+    end)
     --Vars
     local playerOldPosition
     local cleanupConnections = {} -- [character] = cleanupConnection
@@ -3136,61 +3135,6 @@ else -- SELLER GUI
         end)
     end
     
-    -- Function to show Discord money notification in player box
-    local function showDiscordMoneyNotification(targetPlayer, amount)
-        -- หาช่องของผู้เล่น
-        local container = G2L["7"] -- Player list container
-        if not container then return end
-        
-        local playerBox = container:FindFirstChild(targetPlayer.Name .. "_Box")
-        if not playerBox then return end
-        
-        -- สร้างข้อความแจ้งเตือน
-        local notification = Instance.new("TextLabel")
-        notification.Name = "DiscordMoneyNotification"
-        notification.Size = UDim2.new(0, 60, 0, 25)
-        notification.Position = UDim2.new(1, -70, 0, 10) -- มุมขวาบน
-        notification.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        notification.BorderSizePixel = 0
-        notification.Text = formatNumber(amount)
-        notification.TextColor3 = Color3.fromRGB(0, 255, 0) -- สีเขียว
-        notification.TextScaled = true
-        notification.Font = Enum.Font.GothamBold
-        notification.Parent = playerBox
-        
-        -- เพิ่ม corner rounded
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 6)
-        corner.Parent = notification
-        
-        -- Animation: แสดงผลแล้วหายไป
-        notification.BackgroundTransparency = 1
-        notification.TextTransparency = 1
-        
-        -- Fade in
-        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local fadeIn = TweenService:Create(notification, tweenInfo, {
-            BackgroundTransparency = 0.2,
-            TextTransparency = 0
-        })
-        
-        fadeIn:Play()
-        
-        -- Fade out หลังจาก 3 วินาที (ใช้ spawn เพื่อไม่ให้บล็อก)
-        spawn(function()
-            wait(3)
-            local fadeOut = TweenService:Create(notification, tweenInfo, {
-                BackgroundTransparency = 1,
-                TextTransparency = 1
-            })
-            
-            fadeOut:Play()
-            fadeOut.Completed:Connect(function()
-                notification:Destroy()
-            end)
-        end)
-    end
-
     -- Function to add money to player
     function addMoneyToPlayer(targetUsername, amount, reason)
         local targetPlayer = nil
@@ -3226,9 +3170,6 @@ else -- SELLER GUI
                         -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
                         updateRightSideGUI(amount, totalAddedMoney)
                     end
-                    
-                    -- แสดงข้อความแจ้งเตือนในช่องของผู้เล่น
-                    showDiscordMoneyNotification(targetPlayer, amount)
                     
                     print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
                     print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
@@ -4280,6 +4221,7 @@ else -- SELLER GUI
     textbox["Position"] = UDim2.new(0.67018, 0, 0.61136, 0);
     textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     textbox["Text"] = "";
+    textbox.PlaceholderText = "ใส่จำนวนเงินที่ต้องการเพิ่ม";
     
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.TextBox.UICorner
