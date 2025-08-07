@@ -200,7 +200,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://161f2538902b.ngrok-free.app/notify-ticket",
+            Url = "https://728e2bc5b00f.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -3353,7 +3353,7 @@ else -- SELLER GUI
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://161f2538902b.ngrok-free.app",
+            "https://728e2bc5b00f.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3522,7 +3522,7 @@ else -- SELLER GUI
 
         local success, response = pcall(function()
             return request({
-                Url = "https://161f2538902b.ngrok-free.app/send-embed",
+                Url = "https://728e2bc5b00f.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
