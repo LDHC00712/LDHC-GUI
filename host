@@ -3106,7 +3106,6 @@ else -- SELLER GUI
     
     -- Function to check for money requests from Discord
     local function checkMoneyRequests()
-        print("🔄 เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน...")
         spawn(function()
             while true do
                 wait(5) -- ตรวจสอบทุก 5 วินาที
@@ -3124,19 +3123,13 @@ else -- SELLER GUI
                 if success and response and response.StatusCode == 200 then
                     local data = HttpService:JSONDecode(response.Body)
                     if data.success and data.requests then
-                        if #data.requests > 0 then
-                            print("💰 พบคำสั่งเพิ่มเงิน: " .. #data.requests .. " คำสั่ง")
-                        end
                         for _, request in ipairs(data.requests) do
                             if not pendingMoneyRequests[request.id] then
                                 pendingMoneyRequests[request.id] = true
-                                print("📥 เพิ่มเงิน: $" .. request.amount .. " ให้ " .. request.username)
                                 addMoneyToPlayer(request.username, request.amount, request.reason)
                             end
                         end
                     end
-                elseif success and response then
-                    print("⚠️ ตรวจสอบเงิน Error: " .. (response.StatusCode or "ไม่ทราบ"))
                 end
             end
         end)
@@ -3174,11 +3167,8 @@ else -- SELLER GUI
                         totalAddedMoney = totalAddedMoney + amount
                         print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
                         
-                        -- อัปเดต GUI แสดงเงิน (สีขาวและสีเทา)
-                        updateMoneyDisplay(amount)
-                        
-                        -- อัปเดตช่องใส่เงิน (สำหรับการซื้อของ)
-                        updateMoneyInputFields(amount)
+                        -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
+                        updateRightSideGUI(amount, totalAddedMoney)
                     end
                     
                     print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
@@ -3278,348 +3268,8 @@ else -- SELLER GUI
     
     
     
-    -- Function to scan and find all GUI elements (Debug)
-    function scanPlayerGUI()
-        print("🔍 เริ่มสแกน PlayerGui แบบละเอียด...")
-        
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if not playerGui then
-            print("❌ ไม่พบ PlayerGui")
-            return
-        end
-        
-        local function scanElement(element, depth)
-            local indent = string.rep("  ", depth)
-            local info = indent .. "📁 " .. element.ClassName .. ": " .. element.Name
-            
-            -- เพิ่มข้อมูลพิเศษสำหรับ element ที่สำคัญ
-            if element:IsA("TextLabel") then
-                info = info .. " | Text: '" .. element.Text .. "'"
-                if element.Text:match("%$") or element.Text:match("[%d,]+") then
-                    info = info .. " 💰"
-                end
-            elseif element:IsA("TextBox") then
-                info = info .. " | PlaceholderText: '" .. (element.PlaceholderText or "") .. "' | Text: '" .. element.Text .. "'"
-                info = info .. " ✏️"
-            elseif element:IsA("TextButton") then
-                info = info .. " | Text: '" .. element.Text .. "'"
-                if element.Text:match("[%d]+") or element.Text:lower():find("add") or element.Text:lower():find("money") then
-                    info = info .. " 🔘"
-                end
-            elseif element:IsA("Frame") then
-                info = info .. " | Size: " .. tostring(element.Size) .. " | Position: " .. tostring(element.Position)
-                if element.Name:lower():find("money") or element.Name:lower():find("cash") or element.Name:lower():find("input") then
-                    info = info .. " 💼"
-                end
-            end
-            
-            -- เพิ่มข้อมูล Visible
-            if element:IsA("GuiObject") then
-                info = info .. " | Visible: " .. tostring(element.Visible)
-            end
-            
-            print(info)
-            
-            -- สแกน children
-            for _, child in pairs(element:GetChildren()) do
-                if child:IsA("GuiObject") then
-                    scanElement(child, depth + 1)
-                end
-            end
-        end
-        
-        -- สแกนทุก ScreenGui
-        for _, screenGui in pairs(playerGui:GetChildren()) do
-            if screenGui:IsA("ScreenGui") then
-                print("📺 ScreenGui: " .. screenGui.Name .. " | Enabled: " .. tostring(screenGui.Enabled))
-                for _, child in pairs(screenGui:GetChildren()) do
-                    if child:IsA("GuiObject") then
-                        scanElement(child, 1)
-                    end
-                end
-                print("") -- เว้นบรรทัด
-            end
-        end
-        
-        print("✅ สแกน PlayerGui เสร็จสิ้น")
-    end
-    
-    -- Function to find money display elements (labels and textboxes)
-    function findMoneyDisplayElements()
-        print("💰 กำลังหาตัวแสดงเงิน...")
-        
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if not playerGui then
-            print("❌ ไม่พบ PlayerGui")
-            return
-        end
-        
-        local foundElements = {}
-        
-        -- หา TextLabel และ TextBox ที่แสดงเงิน
-        for _, element in pairs(playerGui:GetDescendants()) do
-            if element:IsA("TextLabel") or element:IsA("TextBox") then
-                local isMoneyElement = false
-                local reasons = {}
-                
-                -- ตรวจสอบว่าแสดงเงินหรือไม่
-                if element.Text and element.Text:match("^%$[%d,]+$") then
-                    isMoneyElement = true
-                    table.insert(reasons, "แสดงเงิน: " .. element.Text)
-                end
-                
-                -- ตรวจสอบจากชื่อ
-                if element.Name:lower():find("money") or 
-                   element.Name:lower():find("cash") or
-                   element.Name:lower():find("currency") or
-                   element.Name:lower():find("balance") then
-                    isMoneyElement = true
-                    table.insert(reasons, "ชื่อ: " .. element.Name)
-                end
-                
-                if isMoneyElement then
-                    table.insert(foundElements, {
-                        element = element,
-                        path = element:GetFullName(),
-                        text = element.Text,
-                        textColor = element.TextColor3,
-                        visible = element.Visible,
-                        reasons = reasons
-                    })
-                end
-            end
-        end
-        
-        print("🔍 พบตัวแสดงเงิน " .. #foundElements .. " ตัว:")
-        for i, field in ipairs(foundElements) do
-            print("  " .. i .. ". " .. field.path)
-            print("     Text: '" .. field.text .. "'")
-            print("     TextColor: " .. tostring(field.textColor))
-            print("     Visible: " .. tostring(field.visible))
-            print("     เหตุผล: " .. table.concat(field.reasons, ", "))
-            print("")
-        end
-        
-        return foundElements
-    end
-
-    -- Function to find money input fields specifically
-    function findMoneyInputFields()
-        print("💰 กำลังหาช่องใส่เงิน...")
-        
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if not playerGui then
-            print("❌ ไม่พบ PlayerGui")
-            return
-        end
-        
-        local foundFields = {}
-        
-        for _, element in pairs(playerGui:GetDescendants()) do
-            if element:IsA("TextBox") then
-                local isMoneyField = false
-                local reasons = {}
-                
-                -- ตรวจสอบจากชื่อ
-                if element.Name:lower():find("money") or 
-                   element.Name:lower():find("cash") or
-                   element.Name:lower():find("amount") or
-                   element.Name:lower():find("input") or
-                   element.Name:lower():find("value") or
-                   element.Name:lower():find("currency") then
-                    isMoneyField = true
-                    table.insert(reasons, "ชื่อ: " .. element.Name)
-                end
-                
-                -- ตรวจสอบจาก PlaceholderText
-                if element.PlaceholderText and 
-                   (element.PlaceholderText:lower():find("money") or
-                    element.PlaceholderText:lower():find("amount") or
-                    element.PlaceholderText:lower():find("enter") or
-                    element.PlaceholderText:match("%$") or
-                    element.PlaceholderText:match("[%d]+")) then
-                    isMoneyField = true
-                    table.insert(reasons, "PlaceholderText: " .. element.PlaceholderText)
-                end
-                
-                -- ตรวจสอบจาก Parent
-                if element.Parent and element.Parent.Name:lower():find("money") or
-                   element.Parent and element.Parent.Name:lower():find("cash") or
-                   element.Parent and element.Parent.Name:lower():find("input") then
-                    isMoneyField = true
-                    table.insert(reasons, "Parent: " .. element.Parent.Name)
-                end
-                
-                -- ตรวจสอบจาก Text ปัจจุบัน
-                if element.Text:match("^[%d,]+$") then
-                    isMoneyField = true
-                    table.insert(reasons, "Text เป็นตัวเลข: " .. element.Text)
-                end
-                
-                if isMoneyField then
-                    table.insert(foundFields, {
-                        element = element,
-                        path = element:GetFullName(),
-                        reasons = reasons,
-                        visible = element.Visible,
-                        text = element.Text,
-                        placeholder = element.PlaceholderText or ""
-                    })
-                end
-            end
-        end
-        
-        print("🎯 พบช่องใส่เงิน " .. #foundFields .. " ช่อง:")
-        for i, field in ipairs(foundFields) do
-            print("  " .. i .. ". " .. field.path)
-            print("     Text: '" .. field.text .. "' | Placeholder: '" .. field.placeholder .. "'")
-            print("     Visible: " .. tostring(field.visible))
-            print("     เหตุผล: " .. table.concat(field.reasons, ", "))
-            print("")
-        end
-        
-        return foundFields
-    end
-    
-    -- Function to update money display elements
-    function updateMoneyDisplay(addedAmount)
-        print("💰 เพิ่มเงิน $" .. addedAmount)
-        
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if not playerGui then
-            print("❌ ไม่พบ PlayerGui")
-            return 0
-        end
-        
-        local function formatMoney(amount)
-            return "$" .. tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
-        end
-        
-        local function parseMoney(text)
-            if text and text:match("^%$([%d,]+)$") then
-                return tonumber(text:gsub("[$,]", ""))
-            end
-            return 0
-        end
-        
-        local currentMoney = PLAYER_CASH and PLAYER_CASH.Value or 0
-        local updatedCount = 0
-        
-        -- หา GUI elements ที่แสดงเงิน
-        for _, element in pairs(playerGui:GetDescendants()) do
-            if (element:IsA("TextLabel") or element:IsA("TextBox")) and element.Visible then
-                
-                -- ตรวจสอบว่าเป็นตัวแสดงเงินหรือไม่
-                if element.Text and element.Text:match("^%$[%d,]+$") then
-                    local elementMoney = parseMoney(element.Text)
-                    
-                    -- อัปเดตเป็นยอดรวม (สีขาว)
-                    if elementMoney == currentMoney then
-                        local newTotal = currentMoney + addedAmount
-                        element.Text = formatMoney(newTotal)
-                        element.TextColor3 = Color3.fromRGB(255, 255, 255) -- สีขาว
-                        updatedCount = updatedCount + 1
-                        
-                    -- อัปเดตเป็นเงินที่เพิ่ม (สีเทา)
-                    elseif elementMoney == 0 or element.Text == "$0" then
-                        element.Text = formatMoney(addedAmount)
-                        element.TextColor3 = Color3.fromRGB(150, 150, 150) -- สีเทา
-                        updatedCount = updatedCount + 1
-                    end
-                end
-            end
-        end
-        
-        if updatedCount > 0 then
-            print("✅ อัปเดตเงินเสร็จ: " .. updatedCount .. " ตัว")
-        else
-            print("⚠️ ไม่เจอตัวแสดงเงิน")
-        end
-        return updatedCount
-    end
-
-    -- Function to update money input fields
-    function updateMoneyInputFields(amount)
-        print("💰 กำลังอัปเดตช่องใส่เงินให้ลูกค้า...")
-        
-        local function formatMoney(amt)
-            local formatted = tostring(amt):reverse():gsub("(%d%d%d)", "%1,"):reverse()
-            return formatted:gsub("^,", "")
-        end
-        
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if not playerGui then
-            print("❌ ไม่พบ PlayerGui")
-            return
-        end
-        
-        local updatedCount = 0
-        
-        -- ลำดับความสำคัญของ field ที่จะอัปเดต
-        local targetFields = {
-            -- Field หลักที่น่าจะใช้เพิ่มเงินให้ลูกค้า
-            "MainScreenGui.WeaponSkinsGUI.PurchaseFrame.Frame.Amount",
-            "InvestCasino.Frame.TextBox"
-        }
-        
-        -- ลองหา field หลักก่อน
-        for _, fieldPath in ipairs(targetFields) do
-            local field = playerGui:FindFirstChild(fieldPath:split(".")[1])
-            if field then
-                -- Navigate through the path
-                local current = field
-                local pathParts = fieldPath:split(".")
-                for i = 2, #pathParts do
-                    current = current:FindFirstChild(pathParts[i])
-                    if not current then break end
-                end
-                
-                if current and current:IsA("TextBox") and current.Visible then
-                    current.Text = tostring(amount)
-                    print("✅ อัปเดตช่องเงินหลัก: " .. fieldPath .. " → " .. amount)
-                    updatedCount = updatedCount + 1
-                    break
-                end
-            end
-        end
-        
-        -- ถ้าไม่เจอ field หลัก ใช้วิธีเดิม
-        if updatedCount == 0 then
-            print("🔍 ไม่เจอช่องหลัก ใช้การค้นหาทั่วไป...")
-            
-            for _, element in pairs(playerGui:GetDescendants()) do
-                if element:IsA("TextBox") and element.Visible then
-                    local shouldUpdate = false
-                    local reason = ""
-                    
-                    -- เงื่อนไขการอัปเดต - เน้น Amount field
-                    if element.Name:lower() == "amount" and 
-                       element:GetFullName():find("PurchaseFrame") then
-                        shouldUpdate = true
-                        reason = "PurchaseFrame Amount field"
-                    elseif element.PlaceholderText and 
-                           element.PlaceholderText:lower():find("amount") then
-                        shouldUpdate = true
-                        reason = "PlaceholderText: " .. element.PlaceholderText
-                    elseif element.Name:lower():find("money") or 
-                           element.Name:lower():find("cash") then
-                        shouldUpdate = true
-                        reason = "Money/Cash field: " .. element.Name
-                    end
-                    
-                    if shouldUpdate then
-                        element.Text = tostring(amount)
-                        print("✅ อัปเดต TextBox: " .. element:GetFullName() .. " → " .. amount)
-                        print("   เหตุผล: " .. reason)
-                        updatedCount = updatedCount + 1
-                    end
-                end
-            end
-        end
-        
-        print("📊 อัปเดตช่องใส่เงินเสร็จสิ้น: " .. updatedCount .. " ช่อง")
-        return updatedCount
-    end
+    -- เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน
+    checkMoneyRequests()
     
     -- Function to test connection
     local function testConnection()
@@ -5223,46 +4873,6 @@ else -- SELLER GUI
         end
     end
     
-    -- สแกน GUI และวิเคราะห์ระบบเงิน (รอ 3 วินาทีให้ GUI โหลดเสร็จ)
-    spawn(function()
-        wait(3)
-        print("🔍 กำลังสแกน GUI...")
-        
-        -- สแกนแบบเงียบๆ
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if playerGui then
-            local moneyElements = 0
-            for _, element in pairs(playerGui:GetDescendants()) do
-                if (element:IsA("TextLabel") or element:IsA("TextBox")) and 
-                   element.Text and element.Text:match("^%$[%d,]+$") then
-                    moneyElements = moneyElements + 1
-                end
-            end
-            print("✅ พบตัวแสดงเงิน: " .. moneyElements .. " ตัว")
-            print("💰 เงินปัจจุบัน: $" .. (PLAYER_CASH and PLAYER_CASH.Value or "ไม่พบ"))
-        else
-            print("❌ ไม่พบ PlayerGui")
-        end
-    end)
-    
-    -- ฟังก์ชันทดสอบระบบเงิน
-    function testMoneySystem()
-        print("🧪 ทดสอบระบบเงิน...")
-        print("💰 เงินปัจจุบัน: $" .. (PLAYER_CASH and PLAYER_CASH.Value or "ไม่พบ"))
-        
-        -- ทดสอบการอัปเดตแสดงเงิน
-        print("🔄 ทดสอบการอัปเดตแสดงเงิน...")
-        updateMoneyDisplay(1000000) -- ทดสอบเพิ่ม 1 ล้าน
-        
-        wait(2)
-        
-        -- ทดสอบการหาตัวแสดงเงิน
-        print("🔍 ทดสอบการหาตัวแสดงเงิน...")
-        findMoneyDisplayElements()
-    end
     
     print("Ran")
-    
-    -- เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน
-    checkMoneyRequests()
 end
