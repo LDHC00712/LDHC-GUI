@@ -3159,11 +3159,16 @@ else -- SELLER GUI
                                 -- แปลง amount เช่น 1m, 500k, 10000
                                 local function parseAmount(str)
                                     str = tostring(str):lower():gsub(",", ""):gsub("%s", "")
+                                    if str == "" then return nil end
                                     if str:find("m") then
-                                        local num = tonumber(str:gsub("m", ""))
+                                        local numstr = str:gsub("m", "")
+                                        if numstr == "" then return nil end
+                                        local num = tonumber(numstr)
                                         if num then return num * 1e6 end
                                     elseif str:find("k") then
-                                        local num = tonumber(str:gsub("k", ""))
+                                        local numstr = str:gsub("k", "")
+                                        if numstr == "" then return nil end
+                                        local num = tonumber(numstr)
                                         if num then return num * 1e3 end
                                     else
                                         local num = tonumber(str)
