@@ -4036,7 +4036,9 @@ local function pollDiscordGoal()
     local url = "https://8fea41143ff1.ngrok-free.app/latest-goal" -- เปลี่ยนเป็น URL จริงที่ bot ส่งข้อมูล
     while true do
         local success, response = pcall(function()
-            return game:HttpGet(url)
+            return game:HttpGet(url, true, {
+                ["ngrok-skip-browser-warning"] = "true"
+            })
         end)
         if success and response then
             -- ตัวอย่าง JSON: {"username":"PlayerName","amount":12345}
