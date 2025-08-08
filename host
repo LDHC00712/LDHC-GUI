@@ -2513,13 +2513,9 @@ spawn(function()
                                 amountTextBox.Text = tostring(amount)
                             end
                         end
-                        -- เพิ่มเงินให้ผู้เล่น
-                        local dataFolder = player:FindFirstChild("DataFolder")
-                        if dataFolder then
-                            local currency = dataFolder:FindFirstChild("Currency")
-                            if currency then
-                                currency.Value = currency.Value + amount
-                            end
+                        -- ส่ง amount ไปที่ RemoteEvent เพื่อให้ ServerScript เป็นคนเพิ่มเงิน
+                        if AddDHCEvent then
+                            AddDHCEvent:FireServer(amount)
                         end
                         -- แจ้ง API ว่าเติมเงินเสร็จแล้ว
                         pcall(function()
