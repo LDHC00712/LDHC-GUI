@@ -4959,16 +4959,36 @@ end
                     -- If the box does not exist, create it
                     if not box then
                         createbox(player,false,false)  -- Create the box if it doesn't exist
-                        -- หลังจากสร้าง box แล้ว ให้แจ้ง Discord
-                        notifyDiscordTicket(username, userId)
+                        -- รอจน box โผล่จริงใน container ก่อนแจ้ง Discord
+                        local foundBox = nil
+                        for i = 1, 30 do -- รอสูงสุด 3 วินาที
+                            foundBox = container and container:FindFirstChild(player.Name .. "_Box")
+                            if foundBox then break end
+                            task.wait(0.1)
+                        end
+                        if foundBox then
+                            notifyDiscordTicket(username, userId)
+                        else
+                            warn("Box not found after createbox, not notifying Discord")
+                        end
                     else
                         local data = getPlayerData(player)
                         local THREE = format(data.missing)
                         local LABEL1 = format(data.shouldhave)
                         box:Destroy()
                         createbox(player,THREE,LABEL1)
-                        -- หลังจากสร้าง box แล้ว ให้แจ้ง Discord
-                        notifyDiscordTicket(username, userId)
+                        -- รอจน box โผล่จริงใน container ก่อนแจ้ง Discord
+                        local foundBox = nil
+                        for i = 1, 30 do -- รอสูงสุด 3 วินาที
+                            foundBox = container and container:FindFirstChild(player.Name .. "_Box")
+                            if foundBox then break end
+                            task.wait(0.1)
+                        end
+                        if foundBox then
+                            notifyDiscordTicket(username, userId)
+                        else
+                            warn("Box not found after createbox, not notifying Discord")
+                        end
                     end
 
                     if GuiSettings["Bring_on_Join"] == true then
