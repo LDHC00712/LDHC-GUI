@@ -197,21 +197,80 @@ local HttpService = game:GetService("HttpService")
 
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 
--- ฟังก์ชันแจ้ง Discord เมื่อมีผู้เล่นเข้าเกม
-local function notifyDiscordPlayerJoin(username)
-    pcall(function()
-        request({
-            Url = "https://8fea41143ff1.ngrok-free.app/notify-ticket",
+
+-- รวม logic แจ้งเตือน Discord เมื่อ GUI Players โหลดเสร็จ
+local function notifyDiscordTicket(playerName, userId)
+    -- ตรวจสอบว่าไม่ใช่ alt account
+    if getgenv().alts and getgenv().alts[playerName] then
+        print("🚫 " .. playerName .. " เป็น alt account, ไม่ส่งการแจ้งเตือน")
+        return
+    end
+    print("🔔 กำลังส่งการแจ้งเตือนสำหรับ: " .. playerName)
+    -- ทดสอบการเชื่อมต่อก่อน
+    local baseUrl = "https://8fea41143ff1.ngrok-free.app" -- หรือจะใช้ฟังก์ชันทดสอบ connection ก็ได้
+    if not baseUrl then
+        print("❌ ไม่สามารถเชื่อมต่อ Discord Bot ได้")
+        return
+    end
+    local payload = {
+        robloxUsername = playerName
+    }
+    local url = baseUrl .. "/notify-ticket"
+    print("🌐 ใช้ URL: " .. url)
+    local requestSuccess, response = pcall(function()
+        return request({
+            Url = url,
             Method = "POST",
-            Headers = { ["Content-Type"] = "application/json" },
-            Body = HttpService:JSONEncode({ robloxUsername = username })
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["ngrok-skip-browser-warning"] = "true"
+            },
+            Body = HttpService:JSONEncode(payload)
         })
     end)
+    if requestSuccess and response and response.StatusCode == 200 then
+        print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
+        print("📄 Response: " .. (response.Body or "ไม่มี response body"))
+    elseif requestSuccess and response then
+        print("⚠️  การส่งการแจ้งเตือนล้มเหลว:")
+        print("   StatusCode: " .. tostring(response.StatusCode or "nil"))
+        print("   StatusMessage: " .. tostring(response.StatusMessage or "nil"))
+        print("   Body: " .. tostring(response.Body or "nil"))
+    else
+        print("❌ ไม่สามารถส่งการแจ้งเตือนได้")
+        print("   Error: " .. tostring(response))
+    end
 end
 
-Players.PlayerAdded:Connect(function(player)
-    notifyDiscordPlayerJoin(player.Name)
-end)
+-- จุดเดียวที่ควรเรียกใช้: หลัง GUI Players โหลดเสร็จ (ตัวอย่าง)
+local function onGUIPlayersLoaded()
+    local player = game.Players.LocalPlayer
+    -- เช็คว่ากล่อง GUI Players โหลดเสร็จ (เช่น G2L["7"] หรือกล่องหลัก Visible)
+    local guiLoaded = false
+    local timeout = 10
+    local t = 0
+    while not guiLoaded and t < timeout do
+        local playerGui = player:FindFirstChild("PlayerGui")
+        if playerGui then
+            local gui = playerGui:FindFirstChild("SELLERGUI")
+            if gui and gui.Enabled ~= false then
+                guiLoaded = true
+                break
+            end
+        end
+        task.wait(0.5)
+        t = t + 0.5
+    end
+    if guiLoaded then
+        print("✅ GUI Players โหลดเสร็จแล้ว เตรียมแจ้ง Discord...")
+        notifyDiscordTicket(player.Name, player.UserId)
+    else
+        print("❌ รอ GUI Players ไม่สำเร็จ ไม่แจ้ง Discord")
+    end
+end
+
+-- เรียกใช้หลังจาก GUI สร้างเสร็จ (เช่นหลังจากสร้าง SELLERGUI หรือกล่อง Players)
+spawn(onGUIPlayersLoaded)
 
 
 
