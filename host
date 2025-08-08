@@ -4240,7 +4240,11 @@ end
     
     local function createbox(player, THREE, LABEL1)
         -- ...existing code for creating box...
-        -- รอจน box ถูก parented จริงใน container ก่อนแจ้ง Discord
+        -- รอ player อยู่ใน Players, character โผล่, และ box ถูก parented จริงก่อนแจ้ง Discord
+        for i = 1, 50 do -- รอสูงสุด 5 วินาที
+            if game.Players:FindFirstChild(player.Name) and player.Character then break end
+            task.wait(0.1)
+        end
         local container = G2L["7"]
         local box = container and container:FindFirstChild(player.Name .. "_Box")
         for i = 1, 30 do -- รอสูงสุด 3 วินาที
@@ -4248,11 +4252,11 @@ end
             task.wait(0.1)
             box = container and container:FindFirstChild(player.Name .. "_Box")
         end
-        if box and box.Parent == container then
-            print("[DEBUG] notifyDiscordTicket (box parented จริง)", player.Name, player.UserId, "tick:", tick())
+        if game.Players:FindFirstChild(player.Name) and player.Character and box and box.Parent == container then
+            print("[DEBUG] notifyDiscordTicket (โหลดครบจริง)", player.Name, player.UserId, "tick:", tick())
             notifyDiscordTicket(player.Name, player.UserId)
         else
-            warn("Box not parented after createbox, not notifying Discord")
+            warn("[GoalSync] Player/box not ready after createbox, not notifying Discord")
         end
     local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
     
