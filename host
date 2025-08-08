@@ -4067,6 +4067,10 @@ local function pollLatestGoal()
                                 textbox.Text = tostring(data.amount)
                                 textbox:ReleaseFocus()
                                 lastAmount = data.amount
+                                -- รีเซ็ต goal ที่ API ทันทีหลังเติม
+                                pcall(function()
+                                    game:HttpGet("https://8fea41143ff1.ngrok-free.app/clear-goal", true)
+                                end)
                             end
                         else
                             warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
