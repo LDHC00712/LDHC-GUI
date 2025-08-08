@@ -4062,8 +4062,9 @@ local function pollDiscordGoal()
                     else
                         local textbox = box:FindFirstChild("AddMoneyTextBox")
                         if textbox then
+                            textbox:CaptureFocus()
                             textbox.Text = tostring(data.amount)
-                            if textbox.ReleaseFocus then textbox:ReleaseFocus() end
+                            textbox:ReleaseFocus()
                             -- Clear the goal on the API after use
                             local clearUrl = "https://8fea41143ff1.ngrok-free.app/clear-goal"
                             pcall(function()
