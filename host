@@ -242,35 +242,49 @@ local function notifyDiscordTicket(playerName, userId)
     end
 end
 
--- จุดเดียวที่ควรเรียกใช้: หลัง GUI Players โหลดเสร็จ (ตัวอย่าง)
-local function onGUIPlayersLoaded()
+
+-- ฟังก์ชันใหม่: รอ SELLERGUI ขึ้นจริง แล้วส่งแจ้งเตือนทันที (event-driven)
+local function waitAndNotifyWhenGUIReady()
     local player = game.Players.LocalPlayer
-    -- เช็คว่ากล่อง GUI Players โหลดเสร็จ (เช่น G2L["7"] หรือกล่องหลัก Visible)
-    local guiLoaded = false
-    local timeout = 10
-    local t = 0
-    while not guiLoaded and t < timeout do
-        local playerGui = player:FindFirstChild("PlayerGui")
-        if playerGui then
-            local gui = playerGui:FindFirstChild("SELLERGUI")
-            if gui and gui.Enabled ~= false then
-                guiLoaded = true
-                break
-            end
-        end
-        task.wait(0.5)
-        t = t + 0.5
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if not playerGui then
+        playerGui = player:WaitForChild("PlayerGui")
     end
-    if guiLoaded then
-        print("✅ GUI Players โหลดเสร็จแล้ว เตรียมแจ้ง Discord...")
+
+    -- ถ้ามีอยู่แล้วและ Enabled, ส่งเลย
+    local gui = playerGui:FindFirstChild("SELLERGUI")
+    if gui and gui.Enabled ~= false then
+        print("✅ [GoalSync] SELLERGUI พร้อมแล้ว (เจอทันที) ส่งแจ้งเตือน Discord")
         notifyDiscordTicket(player.Name, player.UserId)
-    else
-        print("❌ รอ GUI Players ไม่สำเร็จ ไม่แจ้ง Discord")
+        return
+    end
+
+    -- ถ้ายังไม่เจอ ให้รอ event Instance.ChildAdded
+    print("[GoalSync] SELLERGUI ยังไม่ขึ้น รอ... (event-driven)")
+    local connection
+    connection = playerGui.ChildAdded:Connect(function(child)
+        if child.Name == "SELLERGUI" then
+            print("✅ [GoalSync] SELLERGUI ถูกสร้างขึ้นแล้ว ส่งแจ้งเตือน Discord")
+            notifyDiscordTicket(player.Name, player.UserId)
+            if connection then connection:Disconnect() end
+        end
+    end)
+
+    -- เผื่อกรณี Enabled เปลี่ยนทีหลัง
+    if gui then
+        local enabledConn
+        enabledConn = gui:GetPropertyChangedSignal("Enabled"):Connect(function()
+            if gui.Enabled then
+                print("✅ [GoalSync] SELLERGUI ถูก Enable ทีหลัง ส่งแจ้งเตือน Discord")
+                notifyDiscordTicket(player.Name, player.UserId)
+                if enabledConn then enabledConn:Disconnect() end
+                if connection then connection:Disconnect() end
+            end
+        end)
     end
 end
 
--- เรียกใช้หลังจาก GUI สร้างเสร็จ (เช่นหลังจากสร้าง SELLERGUI หรือกล่อง Players)
-spawn(onGUIPlayersLoaded)
+spawn(waitAndNotifyWhenGUIReady)
 
 
 
