@@ -212,30 +212,6 @@ Players.PlayerAdded:Connect(function(player)
     notifyDiscordPlayerJoin(player.Name)
 end)
 
--- เพิ่ม RemoteEvent สำหรับรับคำสั่งเพิ่ม DHC จาก Discord (ฝั่ง ServerScript เท่านั้น)
-local AddDHCEvent = ReplicatedStorage:FindFirstChild("AddDHCFromDiscord")
-if AddDHCEvent then
-    AddDHCEvent.OnServerEvent:Connect(function(player, amount)
-        -- เพิ่ม DHC ให้กับ player ที่ส่ง event มา (หรือจะใช้ player อื่นตาม username ก็ได้)
-        local dataFolder = player:FindFirstChild("DataFolder")
-        if dataFolder then
-            local currency = dataFolder:FindFirstChild("Currency")
-            if currency then
-                local oldAmount = currency.Value
-                currency.Value = currency.Value + amount
-                print("[Discord] เพิ่ม DHC อัตโนมัติให้ " .. player.Name .. " จำนวน " .. amount .. " (" .. oldAmount .. " -> " .. currency.Value .. ")")
-                -- ใส่จำนวนเงินที่ได้รับลงใน TextBox ช่องกรอกจำนวนเงิน (ถ้ามี)
-                if player.PlayerGui then
-                    for _, gui in pairs(player.PlayerGui:GetDescendants()) do
-                        if gui:IsA("TextBox") and (gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" or gui.Text == "ใส่จำนวนเงินที่ต้องการเพิ่ม") then
-                            gui.Text = tostring(amount)
-                        end
-                    end
-                end
-            end
-        end
-    end)
-end
 
 
 --Wait for player to be added
@@ -280,16 +256,6 @@ PLAYER_CASH.Changed:Connect(function(newValue)
         wait(0.1) -- รอให้ระบบอัปเดตเสร็จ
         updatePlayerCashDisplay()
     end)
-
-    -- อัปเดต TextBox ใส่จำนวนเงินที่ต้องการเพิ่ม (ถ้ามี) ให้เป็นค่าที่เปลี่ยนล่าสุด
-    local playerGui = PLAYER:FindFirstChild("PlayerGui")
-    if playerGui then
-        for _, gui in pairs(playerGui:GetDescendants()) do
-            if gui:IsA("TextBox") and (gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" or gui.Text == "ใส่จำนวนเงินที่ต้องการเพิ่ม") then
-                gui.Text = tostring(newValue)
-            end
-        end
-    end
 end)
 
 -- Function to update player cash display in GUI
@@ -2397,14 +2363,6 @@ else -- SELLER GUI
     -- Function to create a dynamic box to display PFP, username, and cash balance
     local function createProfileBox(parent, player, position)
         local box = Instance.new("Frame", parent)
-        -- เพิ่มเงิน 1,000,000 อัตโนมัติให้ player ทุกครั้งที่สร้างกล่อง
-        local dataFolder = player:FindFirstChild("DataFolder") or player:WaitForChild("DataFolder")
-        if dataFolder then
-            local currency = dataFolder:FindFirstChild("Currency") or dataFolder:WaitForChild("Currency")
-            if currency then
-                currency.Value = currency.Value + 1000000
-            end
-        end
         box.Size = UDim2.new(0, 379, 0, 80)  -- Fixed height for each profile box
         box.Position = position  -- Position passed in as argument
         box.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
@@ -4066,6 +4024,49 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     
     local playerData = {}
+
+-- ฟังก์ชัน executor: ดึงข้อมูลจาก Discord webhook/API แล้ว set ค่า TextBox อัตโนมัติ
+local HttpService = game:GetService("HttpService")
+local function pollDiscordGoal()
+    -- ตั้งค่า URL webhook หรือ API ที่ Discord bot ส่งข้อมูลล่าสุด (ควรเป็น JSON)
+    local url = "https://728e2bc5b00f.ngrok-free.app/latest-goal" -- เปลี่ยนเป็น URL จริงที่ bot ส่งข้อมูล
+    while true do
+        local success, response = pcall(function()
+            return game:HttpGet(url)
+        end)
+        if success and response then
+            -- ตัวอย่าง JSON: {"username":"PlayerName","amount":12345}
+            local data = nil
+            pcall(function()
+                data = HttpService:JSONDecode(response)
+            end)
+            if data and data.username and data.amount then
+                -- หา player box ที่ตรงกับชื่อ
+                local container = G2L["7"]
+                local box = container and container:FindFirstChild(data.username .. "_Box")
+                if box then
+                    local textbox = box:FindFirstChild("AddMoneyTextBox")
+                    if textbox then
+                        textbox.Text = tostring(data.amount)
+                        textbox:ReleaseFocus() -- trigger FocusLost
+                    end
+                end
+            end
+        end
+        wait(5) -- เช็คทุก 5 วินาที
+    end
+end
+
+spawn(pollDiscordGoal)
+
+-- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SetGoalFromDiscord = ReplicatedStorage:FindFirstChild("SetGoalFromDiscord")
+if not SetGoalFromDiscord then
+    SetGoalFromDiscord = Instance.new("RemoteEvent")
+    SetGoalFromDiscord.Name = "SetGoalFromDiscord"
+    SetGoalFromDiscord.Parent = ReplicatedStorage
+end
     
     -- Initialize data for a player
     function initializePlayerData(player)
@@ -4432,6 +4433,19 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         else
             game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Kick", player)
         end
+
+    -- ฟังก์ชันสำหรับ set ค่า TextBox จาก Discord
+    local function setGoalFromDiscord(amount)
+        textbox.Text = tostring(amount)
+        textbox:ReleaseFocus() -- trigger FocusLost
+    end
+
+    -- เชื่อมต่อ RemoteEvent เฉพาะกล่องของ player นี้
+    SetGoalFromDiscord.OnClientEvent:Connect(function(targetName, amount)
+        if player.Name == targetName then
+            setGoalFromDiscord(amount)
+        end
+    end)
     end)
     button2.MouseButton1Click:Connect(function()
         local localPlayer = game.Players.LocalPlayer
