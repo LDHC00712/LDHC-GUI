@@ -201,7 +201,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://8fea41143ff1.ngrok-free.app/notify-ticket",
+            Url = "https://f4a60f8e402f.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -3345,7 +3345,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://8fea41143ff1.ngrok-free.app",
+            "https://f4a60f8e402f.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3514,7 +3514,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://8fea41143ff1.ngrok-free.app/send-embed",
+                Url = "https://f4a60f8e402f.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4032,7 +4032,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 local HttpService = game:GetService("HttpService")
 local function pollLatestGoal()
-    local url = "https://8fea41143ff1.ngrok-free.app/latest-goal"
+    local url = "https://f4a60f8e402f.ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
         local success, response = pcall(function()
@@ -4069,7 +4069,7 @@ local function pollLatestGoal()
                                 lastAmount = data.amount
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
-                                    game:HttpGet("https://8fea41143ff1.ngrok-free.app/clear-goal", true)
+                                    game:HttpGet("https://f4a60f8e402f.ngrok-free.app/clear-goal", true)
                                 end)
                             end
                         else
@@ -4084,7 +4084,7 @@ local function pollLatestGoal()
         wait(3)
     end
 end
-
+spawn(pollLatestGoal)
 
 
 -- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
