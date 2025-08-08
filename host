@@ -197,105 +197,21 @@ local HttpService = game:GetService("HttpService")
 
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 
-
--- รวม logic แจ้งเตือน Discord เมื่อ GUI Players โหลดเสร็จ
-local function notifyDiscordTicket(playerName, userId)
-    -- ตรวจสอบว่าไม่ใช่ alt account
-    if getgenv().alts and getgenv().alts[playerName] then
-        print("🚫 " .. playerName .. " เป็น alt account, ไม่ส่งการแจ้งเตือน")
-        return
-    end
-    print("🔔 กำลังส่งการแจ้งเตือนสำหรับ: " .. playerName)
-    -- ทดสอบการเชื่อมต่อก่อน
-    local baseUrl = "https://8fea41143ff1.ngrok-free.app" -- หรือจะใช้ฟังก์ชันทดสอบ connection ก็ได้
-    if not baseUrl then
-        print("❌ ไม่สามารถเชื่อมต่อ Discord Bot ได้")
-        return
-    end
-    local payload = {
-        robloxUsername = playerName
-    }
-    local url = baseUrl .. "/notify-ticket"
-    print("🌐 ใช้ URL: " .. url)
-    local requestSuccess, response = pcall(function()
-        return request({
-            Url = url,
+-- ฟังก์ชันแจ้ง Discord เมื่อมีผู้เล่นเข้าเกม
+local function notifyDiscordPlayerJoin(username)
+    pcall(function()
+        request({
+            Url = "https://8fea41143ff1.ngrok-free.app/notify-ticket",
             Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json",
-                ["ngrok-skip-browser-warning"] = "true"
-            },
-            Body = HttpService:JSONEncode(payload)
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode({ robloxUsername = username })
         })
     end)
-    if requestSuccess and response and response.StatusCode == 200 then
-        print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
-        print("📄 Response: " .. (response.Body or "ไม่มี response body"))
-    elseif requestSuccess and response then
-        print("⚠️  การส่งการแจ้งเตือนล้มเหลว:")
-        print("   StatusCode: " .. tostring(response.StatusCode or "nil"))
-        print("   StatusMessage: " .. tostring(response.StatusMessage or "nil"))
-        print("   Body: " .. tostring(response.Body or "nil"))
-    else
-        print("❌ ไม่สามารถส่งการแจ้งเตือนได้")
-        print("   Error: " .. tostring(response))
-    end
 end
 
-
--- ฟังก์ชันใหม่: รอ SELLERGUI ขึ้นจริง แล้วส่งแจ้งเตือนทันที (event-driven)
-
-
-local function waitAndNotifyWhenGUIReady()
-    local player = game.Players.LocalPlayer
-    local playerGui = player:FindFirstChild("PlayerGui")
-    if not playerGui then
-        playerGui = player:WaitForChild("PlayerGui")
-    end
-
-    local found = false
-    while not found do
-        print("[GoalSync][DEBUG][LOOP] Children of PlayerGui:")
-        for _, v in ipairs(playerGui:GetChildren()) do
-            print("  ", v.Name, v.ClassName)
-        end
-        if gethui then
-            print("[GoalSync][DEBUG][LOOP] Children of gethui():")
-            for _, v in ipairs(gethui():GetChildren()) do
-                print("  ", v.Name, v.ClassName)
-            end
-        end
-
-        local gui = playerGui:FindFirstChild("SELLERGUI")
-        local gui_hui = nil
-        if gethui then
-            gui_hui = gethui():FindFirstChild("SELLERGUI")
-        end
-
-        if gui then
-            print("[GoalSync][DEBUG][LOOP] เจอ SELLERGUI ใน PlayerGui: Enabled=", tostring(gui.Enabled), " Visible=", tostring(gui.Visible))
-        end
-        if gui_hui then
-            print("[GoalSync][DEBUG][LOOP] เจอ SELLERGUI ใน gethui(): Enabled=", tostring(gui_hui.Enabled), " Visible=", tostring(gui_hui.Visible))
-        end
-
-        if (gui and (gui.Enabled ~= false or gui.Visible ~= false)) then
-            print("✅ [GoalSync] SELLERGUI พร้อมแล้ว (PlayerGui) ส่งแจ้งเตือน Discord")
-            notifyDiscordTicket(player.Name, player.UserId)
-            found = true
-            break
-        elseif (gui_hui and (gui_hui.Enabled ~= false or gui_hui.Visible ~= false)) then
-            print("✅ [GoalSync] SELLERGUI พร้อมแล้ว (gethui) ส่งแจ้งเตือน Discord")
-            notifyDiscordTicket(player.Name, player.UserId)
-            found = true
-            break
-        end
-
-        task.wait(0.5)
-    end
-end
-
-spawn(waitAndNotifyWhenGUIReady)
+Players.PlayerAdded:Connect(function(player)
+    notifyDiscordPlayerJoin(player.Name)
+end)
 
 
 
@@ -4150,7 +4066,6 @@ local function pollLatestGoal()
                                 textbox:CaptureFocus()
                                 textbox.Text = tostring(data.amount)
                                 textbox:ReleaseFocus()
-                                print("[GoalSync] อัปเดต goal อัตโนมัติเป็น:", data.amount)
                                 lastAmount = data.amount
                             end
                         else
@@ -4323,34 +4238,6 @@ end
     
     
     local function createbox(player, THREE, LABEL1)
-        -- ...existing code for creating box...
-        -- รอ player อยู่ใน Players, character โผล่, และ box ถูก parented จริงก่อนแจ้ง Discord
-        for i = 1, 50 do -- รอสูงสุด 5 วินาที
-            if game.Players:FindFirstChild(player.Name) and player.Character then break end
-            task.wait(0.1)
-        end
-        local container = G2L["7"]
-        local box = container and container:FindFirstChild(player.Name .. "_Box")
-        for i = 1, 30 do -- รอสูงสุด 3 วินาที
-            if box and box.Parent == container then break end
-            task.wait(0.1)
-            box = container and container:FindFirstChild(player.Name .. "_Box")
-        end
-        local ready = false
-        for i = 1, 50 do -- รอ box.Visible = true สูงสุด 5 วินาที
-            if box and box.Parent == container and box.Visible then
-                ready = true
-                break
-            end
-            task.wait(0.1)
-        end
-        if game.Players:FindFirstChild(player.Name) and player.Character and box and box.Parent == container and ready then
-            print("[GoalSync] ผู้เล่นโหลด GUI แล้ว:", player.Name)
-            print("[DEBUG] notifyDiscordTicket (box visible จริง)", player.Name, player.UserId, "tick:", tick())
-            notifyDiscordTicket(player.Name, player.UserId)
-        else
-            warn("[GoalSync] Player/box not ready or not visible after createbox, not notifying Discord")
-        end
     local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
     
     
@@ -5040,9 +4927,12 @@ end
             -- Fetch the player's profile picture and username
             local username = player.Name
             local userId = player.UserId
-
+            
             -- Get the player's profile picture URL
             local pfpUrl = game:GetService("Players"):GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+
+            -- Send notification to Discord ticket (New feature) - Only for non-alt players
+            notifyDiscordTicket(username, userId)
 
             -- Show a notification to all players about the player joining
             game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -5064,10 +4954,12 @@ end
             if tick() - startTime > timeout then
                 warn("Player character took too long to load.")
             else
+
                 local container = G2L["7"]
                 if container then
                     -- Look for the player's box in the container
                     local box = container:FindFirstChild(player.Name .. "_Box")
+                    
                     -- If the box does not exist, create it
                     if not box then
                         createbox(player,false,false)  -- Create the box if it doesn't exist
