@@ -201,7 +201,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://728e2bc5b00f.ngrok-free.app/notify-ticket",
+            Url = "https://8fea41143ff1.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -224,7 +224,7 @@ getgenv().scriptinject = true
 local HttpService = game:GetService("HttpService")
 local function pollDiscordGoal()
     -- URL ของ goal API (เปลี่ยนเป็น URL จริงที่ใช้งาน)
-    local url = "https://728e2bc5b00f.ngrok-free.app/latest-goal"
+    local url = "https://8fea41143ff1.ngrok-free.app/latest-goal"
     while true do
         local success, response = pcall(function()
             return game:HttpGet(url)
@@ -3170,7 +3170,7 @@ else -- SELLER GUI
                 wait(5) -- ตรวจสอบทุก 5 วินาที
                 local success, response = pcall(function()
                     return request({
-                        Url = "https://728e2bc5b00f.ngrok-free.app/get-money-requests",
+                        Url = "https://8fea41143ff1.ngrok-free.app/get-money-requests",
                         Method = "GET",
                         Headers = {
                             ["ngrok-skip-browser-warning"] = "true"
@@ -3386,7 +3386,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://728e2bc5b00f.ngrok-free.app",
+            "https://8fea41143ff1.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3555,7 +3555,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://728e2bc5b00f.ngrok-free.app/send-embed",
+                Url = "https://8fea41143ff1.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4072,7 +4072,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 local HttpService = game:GetService("HttpService")
 local function pollDiscordGoal()
     -- ตั้งค่า URL webhook หรือ API ที่ Discord bot ส่งข้อมูลล่าสุด (ควรเป็น JSON)
-    local url = "https://728e2bc5b00f.ngrok-free.app/latest-goal" -- เปลี่ยนเป็น URL จริงที่ bot ส่งข้อมูล
+    local url = "https://8fea41143ff1.ngrok-free.app/latest-goal" -- เปลี่ยนเป็น URL จริงที่ bot ส่งข้อมูล
     while true do
         local success, response = pcall(function()
             return game:HttpGet(url)
