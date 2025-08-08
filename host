@@ -4066,10 +4066,6 @@ local function pollDiscordGoal()
                             textbox.Text = tostring(data.amount)
                             if textbox.CaptureFocus then textbox:CaptureFocus() end
                             if textbox.ReleaseFocus then textbox:ReleaseFocus() end
-                            -- เพิ่มเงินให้ผู้เล่นจริง ๆ
-                            if addMoneyToPlayer then
-                                addMoneyToPlayer(data.username, tonumber(data.amount), "Discord Goal", data.amount)
-                            end
                             -- Clear the goal on the API after use
                             local clearUrl = "https://8fea41143ff1.ngrok-free.app/clear-goal"
                             pcall(function()
