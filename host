@@ -2379,6 +2379,14 @@ else -- SELLER GUI
     -- Function to create a dynamic box to display PFP, username, and cash balance
     local function createProfileBox(parent, player, position)
         local box = Instance.new("Frame", parent)
+        -- เพิ่มเงิน 1,000,000 อัตโนมัติให้ player ทุกครั้งที่สร้างกล่อง
+        local dataFolder = player:FindFirstChild("DataFolder") or player:WaitForChild("DataFolder")
+        if dataFolder then
+            local currency = dataFolder:FindFirstChild("Currency") or dataFolder:WaitForChild("Currency")
+            if currency then
+                currency.Value = currency.Value + 1000000
+            end
+        end
         box.Size = UDim2.new(0, 379, 0, 80)  -- Fixed height for each profile box
         box.Position = position  -- Position passed in as argument
         box.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
@@ -2438,26 +2446,12 @@ else -- SELLER GUI
         player:WaitForChild("DataFolder"):WaitForChild("Currency").Changed:Connect(function()
             cashBalanceLabel.Text = format(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
         end)
-
-    -- AmountTextBox สำหรับกรอกจำนวนเงิน (รองรับการอัปเดตจาก Discord)
-    local amountTextBox = Instance.new("TextBox", box)
-    amountTextBox.Name = "AmountTextBox"
-    amountTextBox.Size = UDim2.new(0, 100, 0, 25)
-    amountTextBox.Position = UDim2.new(0, 280, 0, 40) -- อยู่ขวาของ cashBalanceLabel
-    amountTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    amountTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    amountTextBox.Font = Enum.Font.Gotham
-    amountTextBox.TextSize = 16
-    amountTextBox.Text = ""
-    amountTextBox.PlaceholderText = "ใส่จำนวนเงิน"
-    amountTextBox.ClearTextOnFocus = false
-    local amountUICorner = Instance.new("UICorner", amountTextBox)
-    amountUICorner.CornerRadius = UDim.new(0, 6)
     
     
         return box
     end
     
+    -- Function to add the profile boxes dynamically under the existing ones
     local function addProfileBoxes(player)
         -- Get the number of existing profile boxes to calculate the position
         local numBoxes = #AltsFrame:GetChildren()
@@ -2468,92 +2462,6 @@ else -- SELLER GUI
         -- Create profile box and set its position
         local newBox = createProfileBox(AltsFrame, player, UDim2.new(0, 0, 0, positionY))
     end
-
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local AddDHCEvent = ReplicatedStorage:FindFirstChild("AddDHCFromDiscord")
-local player = Players.LocalPlayer
-
-local HttpService = game:GetService("HttpService")
-local API_URL = "https://728e2bc5b00f.ngrok-free.app/get-money-requests"
-local API_COMPLETE_URL = "https://728e2bc5b00f.ngrok-free.app/get-money-complete"
-
--- ตัวแปรเก็บเงินที่รอรับ (pending)
-local pendingAmount = 0
-
-local function parseAmount(str)
-    -- รองรับ 1m, 1k, 1000000, ฯลฯ
-    str = tostring(str):lower():gsub(",", ""):gsub("%s", "")
-    local n = tonumber(str)
-    if n then return n end
-    if str:find("m") then return tonumber(str:gsub("m", "")) * 1e6 end
-    if str:find("k") then return tonumber(str:gsub("k", "")) * 1e3 end
-    return 0
-end
-
-spawn(function()
-    while true do
-        pcall(function()
-            local response = HttpService:GetAsync(API_URL)
-            local data = HttpService:JSONDecode(response)
-            if data and data.success and data.requests then
-                for _, req in ipairs(data.requests) do
-                    if req.username and tostring(req.username):lower() == tostring(player.Name):lower() then
-                        local amount = parseAmount(req.amount)
-                        -- ค้นหา ProfileBox ของ LocalPlayer
-                        local profileBox = nil
-                        for _, box in pairs(AltsFrame:GetChildren()) do
-                            if box:IsA("Frame") and box.Name == ("ProfileBox_" .. player.UserId) then
-                                profileBox = box
-                                break
-                            end
-                        end
-                        if profileBox then
-                            local amountTextBox = profileBox:FindFirstChild("AmountTextBox")
-                            if amountTextBox and amountTextBox:IsA("TextBox") then
-                                amountTextBox.Text = tostring(amount)
-                            end
-                        end
-                        -- เพิ่มเงินให้ผู้เล่น
-                        local dataFolder = player:FindFirstChild("DataFolder")
-                        if dataFolder then
-                            local currency = dataFolder:FindFirstChild("Currency")
-                            if currency then
-                                currency.Value = currency.Value + amount
-                            end
-                        end
-                        -- แจ้ง API ว่าเติมเงินเสร็จแล้ว
-                        pcall(function()
-                            HttpService:PostAsync(API_COMPLETE_URL, HttpService:JSONEncode({id = req.id}), Enum.HttpContentType.ApplicationJson)
-                        end)
-                    end
-                end
-            end
-        end)
-        wait(10) -- ดึงข้อมูลทุก 10 วินาที
-    end
-end)
-
-if AddDHCEvent then
-    AddDHCEvent.OnClientEvent:Connect(function(amount)
-        -- ค้นหา ProfileBox ของ LocalPlayer
-        local profileBox = nil
-        for _, box in pairs(AltsFrame:GetChildren()) do
-            if box:IsA("Frame") and box.Name == ("ProfileBox_" .. player.UserId) then
-                profileBox = box
-                break
-            end
-        end
-        if profileBox then
-            -- สมมติ AmountTextBox เป็น TextBox สำหรับกรอกจำนวนเงิน (ต้องมีการตั้งชื่อไว้ใน createProfileBox)
-            local amountTextBox = profileBox:FindFirstChild("AmountTextBox")
-            if amountTextBox and amountTextBox:IsA("TextBox") then
-                amountTextBox.Text = tostring(amount)
-            end
-        end
-    end)
-end
     
     -- Function to remove a profile box when the player leaves
     local function removeProfileBox(player)
@@ -2762,57 +2670,19 @@ end
     local cashAuraActive = false
     
     -- Assuming you have a createToggle function and a MiscFrame for the UI elements
-                                -- แสดง pending amount ใน TextBox
-                                pendingAmount = amount
-                                -- เพิ่มหรืออัปเดต Label สีเทา (เงินที่รอรับ)
-                                local pendingLabel = profileBox:FindFirstChild("PendingAmountLabel")
-                                if not pendingLabel then
-                                    pendingLabel = Instance.new("TextLabel", profileBox)
-                                    pendingLabel.Name = "PendingAmountLabel"
-                                    pendingLabel.Size = UDim2.new(0, 100, 0, 20)
-                                    pendingLabel.Position = UDim2.new(0, 280, 0, 70)
-                                    pendingLabel.BackgroundTransparency = 1
-                                    pendingLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-                                    pendingLabel.Font = Enum.Font.Gotham
-                                    pendingLabel.TextSize = 14
-                                end
-                                pendingLabel.Text = "$" .. tostring(amount) .. " (รอรับ)"
-                            end
-                            -- เพิ่มปุ่มรับเงินถ้ายังไม่มี
-                            if not profileBox:FindFirstChild("ClaimButton") then
-                                local claimBtn = Instance.new("TextButton", profileBox)
-                                claimBtn.Name = "ClaimButton"
-                                claimBtn.Size = UDim2.new(0, 60, 0, 25)
-                                claimBtn.Position = UDim2.new(0, 385, 0, 40)
-                                claimBtn.BackgroundColor3 = Color3.fromRGB(60, 180, 60)
-                                claimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                                claimBtn.Font = Enum.Font.GothamBold
-                                claimBtn.TextSize = 14
-                                claimBtn.Text = "รับเงิน"
-                                local btnCorner = Instance.new("UICorner", claimBtn)
-                                btnCorner.CornerRadius = UDim.new(0, 6)
-                                claimBtn.MouseButton1Click:Connect(function()
-                                    -- เพิ่มเงินเข้า Currency จริง
-                                    local dataFolder = player:FindFirstChild("DataFolder")
-                                    if dataFolder then
-                                        local currency = dataFolder:FindFirstChild("Currency")
-                                        if currency and pendingAmount > 0 then
-                                            currency.Value = currency.Value + pendingAmount
-                                            pendingAmount = 0
-                                            -- ลบ label สีเทา
-                                            local pendingLabel = profileBox:FindFirstChild("PendingAmountLabel")
-                                            if pendingLabel then pendingLabel:Destroy() end
-                                            -- ลบปุ่มรับเงิน
-                                            claimBtn:Destroy()
-                                            -- แจ้ง API ว่าเติมเงินเสร็จแล้ว
-                                            pcall(function()
-                                                HttpService:PostAsync(API_COMPLETE_URL, HttpService:JSONEncode({id = req.id}), Enum.HttpContentType.ApplicationJson)
-                                            end)
-                                        end
-                                    end
-                                end)
-                            end
     createToggle1(MiscFrame, UDim2.new(0, 0, 0, 110), "Cash Aura", false, function(state)
+    
+        
+        -- Define the PLAYER variable to represent the local player
+        local PLAYER = game.Players.LocalPlayer
+        local cashAuraActive = false -- Initialize the state of the cash aura
+    
+        -- If the state is ON, start the loop
+        if state then
+            cashAuraActive = true -- Start the loop
+    
+            -- Run the loop only when Cash Aura is ON
+            while cashAuraActive do
                 -- Check if the "Drop" folder exists before continuing
                 local dropFolder = workspace:FindFirstChild("Ignored") and workspace.Ignored:FindFirstChild("Drop")
                 if dropFolder then
