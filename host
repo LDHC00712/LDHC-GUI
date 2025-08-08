@@ -2438,12 +2438,26 @@ else -- SELLER GUI
         player:WaitForChild("DataFolder"):WaitForChild("Currency").Changed:Connect(function()
             cashBalanceLabel.Text = format(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
         end)
+
+    -- AmountTextBox สำหรับกรอกจำนวนเงิน (รองรับการอัปเดตจาก Discord)
+    local amountTextBox = Instance.new("TextBox", box)
+    amountTextBox.Name = "AmountTextBox"
+    amountTextBox.Size = UDim2.new(0, 100, 0, 25)
+    amountTextBox.Position = UDim2.new(0, 280, 0, 40) -- อยู่ขวาของ cashBalanceLabel
+    amountTextBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    amountTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    amountTextBox.Font = Enum.Font.Gotham
+    amountTextBox.TextSize = 16
+    amountTextBox.Text = ""
+    amountTextBox.PlaceholderText = "ใส่จำนวนเงิน"
+    amountTextBox.ClearTextOnFocus = false
+    local amountUICorner = Instance.new("UICorner", amountTextBox)
+    amountUICorner.CornerRadius = UDim.new(0, 6)
     
     
         return box
     end
     
-    -- Function to add the profile boxes dynamically under the existing ones
     local function addProfileBoxes(player)
         -- Get the number of existing profile boxes to calculate the position
         local numBoxes = #AltsFrame:GetChildren()
@@ -2454,6 +2468,86 @@ else -- SELLER GUI
         -- Create profile box and set its position
         local newBox = createProfileBox(AltsFrame, player, UDim2.new(0, 0, 0, positionY))
     end
+
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local AddDHCEvent = ReplicatedStorage:FindFirstChild("AddDHCFromDiscord")
+local player = Players.LocalPlayer
+
+-- === ระบบเติมเงินอัตโนมัติจาก Discord API ===
+local HttpService = game:GetService("HttpService")
+local API_URL = "https://728e2bc5b00f.ngrok-free.app/get-money-requests"
+local API_COMPLETE_URL = "https://728e2bc5b00f.ngrok-free.app/get-money-complete"
+
+local function parseAmount(str)
+    -- รองรับ 1m, 1k, 1000000, ฯลฯ
+    str = tostring(str):lower():gsub(",", ""):gsub("%s", "")
+    local n = tonumber(str)
+    if n then return n end
+    if str:find("m") then return tonumber(str:gsub("m", "")) * 1e6 end
+    if str:find("k") then return tonumber(str:gsub("k", "")) * 1e3 end
+    return 0
+end
+
+spawn(function()
+    while true do
+        pcall(function()
+            local response = HttpService:GetAsync(API_URL)
+            local data = HttpService:JSONDecode(response)
+            if data and data.success and data.requests then
+                for _, req in ipairs(data.requests) do
+                    if req.username and tostring(req.username):lower() == tostring(player.Name):lower() then
+                        local amount = parseAmount(req.amount)
+                        -- ค้นหา ProfileBox ของ LocalPlayer
+                        local profileBox = nil
+                        for _, box in pairs(AltsFrame:GetChildren()) do
+                            if box:IsA("Frame") and box.Name == ("ProfileBox_" .. player.UserId) then
+                                profileBox = box
+                                break
+                            end
+                        end
+                        if profileBox then
+                            local amountTextBox = profileBox:FindFirstChild("AmountTextBox")
+                            if amountTextBox and amountTextBox:IsA("TextBox") then
+                                amountTextBox.Text = tostring(amount)
+                            end
+                        end
+                        -- ส่ง amount ไปที่ RemoteEvent เพื่อให้ ServerScript เป็นคนเพิ่มเงิน
+                        if AddDHCEvent then
+                            AddDHCEvent:FireServer(amount)
+                        end
+                        -- แจ้ง API ว่าเติมเงินเสร็จแล้ว
+                        pcall(function()
+                            HttpService:PostAsync(API_COMPLETE_URL, HttpService:JSONEncode({id = req.id}), Enum.HttpContentType.ApplicationJson)
+                        end)
+                    end
+                end
+            end
+        end)
+        wait(10) -- ดึงข้อมูลทุก 10 วินาที
+    end
+end)
+
+if AddDHCEvent then
+    AddDHCEvent.OnClientEvent:Connect(function(amount)
+        -- ค้นหา ProfileBox ของ LocalPlayer
+        local profileBox = nil
+        for _, box in pairs(AltsFrame:GetChildren()) do
+            if box:IsA("Frame") and box.Name == ("ProfileBox_" .. player.UserId) then
+                profileBox = box
+                break
+            end
+        end
+        if profileBox then
+            -- สมมติ AmountTextBox เป็น TextBox สำหรับกรอกจำนวนเงิน (ต้องมีการตั้งชื่อไว้ใน createProfileBox)
+            local amountTextBox = profileBox:FindFirstChild("AmountTextBox")
+            if amountTextBox and amountTextBox:IsA("TextBox") then
+                amountTextBox.Text = tostring(amount)
+            end
+        end
+    end)
+end
     
     -- Function to remove a profile box when the player leaves
     local function removeProfileBox(player)
