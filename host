@@ -4040,6 +4040,7 @@ local function pollDiscordGoal()
                 ["ngrok-skip-browser-warning"] = "true"
             })
         end)
+        print("[pollDiscordGoal] API response:", response)
         if not success then
             warn("[pollDiscordGoal] Request failed:", response)
         elseif not response or #response == 0 then
