@@ -4064,8 +4064,24 @@ local function pollDiscordGoal()
                         if textbox then
                             textbox.Text = tostring(data.amount)
                             if textbox.ReleaseFocus then textbox:ReleaseFocus() end
+                            -- Clear the goal on the API after use
+                            local clearUrl = "https://8fea41143ff1.ngrok-free.app/clear-goal"
+                            pcall(function()
+                                game:HttpPost(clearUrl, "", Enum.HttpContentType.ApplicationUrlEncoded, false, {
+                                    ["ngrok-skip-browser-warning"] = "true"
+                                })
+                            end)
                         else
                             warn("[pollDiscordGoal] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
+                            if box and box:GetChildren() then
+                                local childNames = {}
+                                for _, child in ipairs(box:GetChildren()) do
+                                    table.insert(childNames, child.Name)
+                                end
+                                print("[pollDiscordGoal] Children in box:", table.concat(childNames, ", "))
+                            else
+                                print("[pollDiscordGoal] box is nil or has no children")
+                            end
                         end
                     end
                 end
