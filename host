@@ -4030,36 +4030,50 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     local playerData = {}
 
 -- ฟังก์ชัน executor: ดึงข้อมูลจาก Discord webhook/API แล้ว set ค่า TextBox อัตโนมัติ
+
 local HttpService = game:GetService("HttpService")
 local function pollDiscordGoal()
-    -- ตั้งค่า URL webhook หรือ API ที่ Discord bot ส่งข้อมูลล่าสุด (ควรเป็น JSON)
-    local url = "https://8fea41143ff1.ngrok-free.app/latest-goal" -- เปลี่ยนเป็น URL จริงที่ bot ส่งข้อมูล
+    local url = "https://8fea41143ff1.ngrok-free.app/latest-goal"
     while true do
         local success, response = pcall(function()
             return game:HttpGet(url, true, {
                 ["ngrok-skip-browser-warning"] = "true"
             })
         end)
-        if success and response then
-            -- ตัวอย่าง JSON: {"username":"PlayerName","amount":12345}
-            local data = nil
-            pcall(function()
+        if not success then
+            warn("[pollDiscordGoal] Request failed:", response)
+        elseif not response or #response == 0 then
+            warn("[pollDiscordGoal] Empty response from API")
+        else
+            local data
+            local ok, err = pcall(function()
                 data = HttpService:JSONDecode(response)
             end)
-            if data and data.username and data.amount then
-                -- หา player box ที่ตรงกับชื่อ
-                local container = G2L["7"]
-                local box = container and container:FindFirstChild(data.username .. "_Box")
-                if box then
-                    local textbox = box:FindFirstChild("AddMoneyTextBox")
-                    if textbox then
-                        textbox.Text = tostring(data.amount)
-                        textbox:ReleaseFocus() -- trigger FocusLost
+            if not ok then
+                warn("[pollDiscordGoal] JSON decode error:", err, "Raw:", response)
+            elseif data and data.username and data.amount then
+                local container = G2L and G2L["7"]
+                if not container then
+                    warn("[pollDiscordGoal] G2L[\"7\"] (player box container) not found")
+                else
+                    local box = container:FindFirstChild(data.username .. "_Box")
+                    if not box then
+                        warn("[pollDiscordGoal] Box for user '" .. data.username .. "' not found")
+                    else
+                        local textbox = box:FindFirstChild("AddMoneyTextBox")
+                        if textbox then
+                            textbox.Text = tostring(data.amount)
+                            if textbox.ReleaseFocus then textbox:ReleaseFocus() end
+                        else
+                            warn("[pollDiscordGoal] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
+                        end
                     end
                 end
+            else
+                warn("[pollDiscordGoal] API data missing username/amount. Raw:", response)
             end
         end
-        wait(5) -- เช็คทุก 5 วินาที
+        wait(5)
     end
 end
 
