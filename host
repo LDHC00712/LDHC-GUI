@@ -245,6 +245,7 @@ end
 
 -- ฟังก์ชันใหม่: รอ SELLERGUI ขึ้นจริง แล้วส่งแจ้งเตือนทันที (event-driven)
 
+
 local function waitAndNotifyWhenGUIReady()
     local player = game.Players.LocalPlayer
     local playerGui = player:FindFirstChild("PlayerGui")
@@ -252,74 +253,46 @@ local function waitAndNotifyWhenGUIReady()
         playerGui = player:WaitForChild("PlayerGui")
     end
 
-    -- Debug: print children of PlayerGui and gethui()
-    print("[GoalSync][DEBUG] Children of PlayerGui:")
-    for _, v in ipairs(playerGui:GetChildren()) do
-        print("  ", v.Name, v.ClassName)
-    end
-    if gethui then
-        print("[GoalSync][DEBUG] Children of gethui():")
-        for _, v in ipairs(gethui():GetChildren()) do
+    local found = false
+    while not found do
+        print("[GoalSync][DEBUG][LOOP] Children of PlayerGui:")
+        for _, v in ipairs(playerGui:GetChildren()) do
             print("  ", v.Name, v.ClassName)
         end
-    end
-
-    -- เช็คทั้ง PlayerGui และ gethui()
-    local gui = playerGui:FindFirstChild("SELLERGUI")
-    local gui_hui = nil
-    if gethui then
-        gui_hui = gethui():FindFirstChild("SELLERGUI")
-    end
-
-    if gui then
-        print("[GoalSync][DEBUG] เจอ SELLERGUI ใน PlayerGui: Enabled=", tostring(gui.Enabled), " Visible=", tostring(gui.Visible))
-    end
-    if gui_hui then
-        print("[GoalSync][DEBUG] เจอ SELLERGUI ใน gethui(): Enabled=", tostring(gui_hui.Enabled), " Visible=", tostring(gui_hui.Visible))
-    end
-
-    -- ถ้ามีอยู่แล้วและ Enabled หรือ Visible, ส่งเลย
-    if (gui and (gui.Enabled ~= false or gui.Visible ~= false)) or (gui_hui and (gui_hui.Enabled ~= false or gui_hui.Visible ~= false)) then
-        print("✅ [GoalSync] SELLERGUI พร้อมแล้ว (เจอทันที) ส่งแจ้งเตือน Discord")
-        notifyDiscordTicket(player.Name, player.UserId)
-        return
-    end
-
-    -- ถ้ายังไม่เจอ ให้รอ event Instance.ChildAdded ทั้งสองจุด
-    print("[GoalSync] SELLERGUI ยังไม่ขึ้น รอ... (event-driven)")
-    local function onChildAdded(child)
-        if child.Name == "SELLERGUI" then
-            print("✅ [GoalSync] SELLERGUI ถูกสร้างขึ้นแล้ว ส่งแจ้งเตือน Discord (ที่", child.Parent == playerGui and "PlayerGui" or "gethui()", ")")
-            print("[GoalSync][DEBUG] Enabled=", tostring(child.Enabled), " Visible=", tostring(child.Visible))
-            notifyDiscordTicket(player.Name, player.UserId)
-            if playerGuiConn then playerGuiConn:Disconnect() end
-            if huiConn then huiConn:Disconnect() end
-        end
-    end
-    playerGuiConn = playerGui.ChildAdded:Connect(onChildAdded)
-    huiConn = nil
-    if gethui then
-        huiConn = gethui().ChildAdded:Connect(onChildAdded)
-    end
-
-    -- เผื่อกรณี Enabled/Visible เปลี่ยนทีหลัง
-    local function watchEnabledVisible(target)
-        if not target then return end
-        local function checkAndNotify()
-            if target.Enabled ~= false or target.Visible ~= false then
-                print("✅ [GoalSync] SELLERGUI ถูก Enable/Visible ทีหลัง ส่งแจ้งเตือน Discord")
-                notifyDiscordTicket(player.Name, player.UserId)
-                if enabledConn then enabledConn:Disconnect() end
-                if visibleConn then visibleConn:Disconnect() end
-                if playerGuiConn then playerGuiConn:Disconnect() end
-                if huiConn then huiConn:Disconnect() end
+        if gethui then
+            print("[GoalSync][DEBUG][LOOP] Children of gethui():")
+            for _, v in ipairs(gethui():GetChildren()) do
+                print("  ", v.Name, v.ClassName)
             end
         end
-        enabledConn = target:GetPropertyChangedSignal("Enabled"):Connect(checkAndNotify)
-        visibleConn = target:GetPropertyChangedSignal("Visible"):Connect(checkAndNotify)
+
+        local gui = playerGui:FindFirstChild("SELLERGUI")
+        local gui_hui = nil
+        if gethui then
+            gui_hui = gethui():FindFirstChild("SELLERGUI")
+        end
+
+        if gui then
+            print("[GoalSync][DEBUG][LOOP] เจอ SELLERGUI ใน PlayerGui: Enabled=", tostring(gui.Enabled), " Visible=", tostring(gui.Visible))
+        end
+        if gui_hui then
+            print("[GoalSync][DEBUG][LOOP] เจอ SELLERGUI ใน gethui(): Enabled=", tostring(gui_hui.Enabled), " Visible=", tostring(gui_hui.Visible))
+        end
+
+        if (gui and (gui.Enabled ~= false or gui.Visible ~= false)) then
+            print("✅ [GoalSync] SELLERGUI พร้อมแล้ว (PlayerGui) ส่งแจ้งเตือน Discord")
+            notifyDiscordTicket(player.Name, player.UserId)
+            found = true
+            break
+        elseif (gui_hui and (gui_hui.Enabled ~= false or gui_hui.Visible ~= false)) then
+            print("✅ [GoalSync] SELLERGUI พร้อมแล้ว (gethui) ส่งแจ้งเตือน Discord")
+            notifyDiscordTicket(player.Name, player.UserId)
+            found = true
+            break
+        end
+
+        task.wait(0.5)
     end
-    watchEnabledVisible(gui)
-    watchEnabledVisible(gui_hui)
 end
 
 spawn(waitAndNotifyWhenGUIReady)
