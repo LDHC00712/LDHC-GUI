@@ -4239,6 +4239,10 @@ end
     
     
     local function createbox(player, THREE, LABEL1)
+        -- ...existing code for creating box...
+        -- แจ้ง Discord หลัง box ถูกสร้างเสร็จ
+        print("[DEBUG] notifyDiscordTicket (สร้างใน createbox)", player.Name, player.UserId, "tick:", tick())
+        notifyDiscordTicket(player.Name, player.UserId)
     local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
     
     
@@ -4959,38 +4963,12 @@ end
                     -- If the box does not exist, create it
                     if not box then
                         createbox(player,false,false)  -- Create the box if it doesn't exist
-                        -- รอจน box โผล่จริงใน container ก่อนแจ้ง Discord
-                        local foundBox = nil
-                        for i = 1, 30 do -- รอสูงสุด 3 วินาที
-                            foundBox = container and container:FindFirstChild(player.Name .. "_Box")
-                            if foundBox then break end
-                            task.wait(0.1)
-                        end
-                        if foundBox then
-                            print("[DEBUG] notifyDiscordTicket (สร้างใหม่)", username, userId, "tick:", tick())
-                            notifyDiscordTicket(username, userId)
-                        else
-                            warn("Box not found after createbox, not notifying Discord")
-                        end
                     else
                         local data = getPlayerData(player)
                         local THREE = format(data.missing)
                         local LABEL1 = format(data.shouldhave)
                         box:Destroy()
                         createbox(player,THREE,LABEL1)
-                        -- รอจน box โผล่จริงใน container ก่อนแจ้ง Discord
-                        local foundBox = nil
-                        for i = 1, 30 do -- รอสูงสุด 3 วินาที
-                            foundBox = container and container:FindFirstChild(player.Name .. "_Box")
-                            if foundBox then break end
-                            task.wait(0.1)
-                        end
-                        if foundBox then
-                            print("[DEBUG] notifyDiscordTicket (รีเฟรช)", username, userId, "tick:", tick())
-                            notifyDiscordTicket(username, userId)
-                        else
-                            warn("Box not found after createbox, not notifying Discord")
-                        end
                     end
 
                     if GuiSettings["Bring_on_Join"] == true then
