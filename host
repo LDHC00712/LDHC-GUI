@@ -4081,7 +4081,7 @@ local function pollLatestGoal()
     end
 end
 
-spawn(pollLatestGoal)
+
 
 -- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -4354,7 +4354,7 @@ end
     textbox["Size"] = UDim2.new(0, 104, 0, 23);
     textbox["Position"] = UDim2.new(0.67018, 0, 0.61136, 0);
     textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-    textbox["Text"] = "";
+    textbox["Text"] = ""; -- รีเซ็ตเป็นค่าว่างทุกครั้งที่สร้าง box (เข้าเซิร์ฟเวอร์)
     textbox.PlaceholderText = "ใส่จำนวนเงินที่ต้องการเพิ่ม";
     textbox.Name = "AddMoneyTextBox";
     
