@@ -280,6 +280,16 @@ PLAYER_CASH.Changed:Connect(function(newValue)
         wait(0.1) -- รอให้ระบบอัปเดตเสร็จ
         updatePlayerCashDisplay()
     end)
+
+    -- อัปเดต TextBox ใส่จำนวนเงินที่ต้องการเพิ่ม (ถ้ามี) ให้เป็นค่าที่เปลี่ยนล่าสุด
+    local playerGui = PLAYER:FindFirstChild("PlayerGui")
+    if playerGui then
+        for _, gui in pairs(playerGui:GetDescendants()) do
+            if gui:IsA("TextBox") and (gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" or gui.Text == "ใส่จำนวนเงินที่ต้องการเพิ่ม") then
+                gui.Text = tostring(newValue)
+            end
+        end
+    end
 end)
 
 -- Function to update player cash display in GUI
