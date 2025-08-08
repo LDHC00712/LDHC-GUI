@@ -224,6 +224,14 @@ if AddDHCEvent then
                 local oldAmount = currency.Value
                 currency.Value = currency.Value + amount
                 print("[Discord] เพิ่ม DHC อัตโนมัติให้ " .. player.Name .. " จำนวน " .. amount .. " (" .. oldAmount .. " -> " .. currency.Value .. ")")
+                -- ใส่จำนวนเงินที่ได้รับลงใน TextBox ช่องกรอกจำนวนเงิน (ถ้ามี)
+                if player.PlayerGui then
+                    for _, gui in pairs(player.PlayerGui:GetDescendants()) do
+                        if gui:IsA("TextBox") and (gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" or gui.Text == "ใส่จำนวนเงินที่ต้องการเพิ่ม") then
+                            gui.Text = tostring(amount)
+                        end
+                    end
+                end
             end
         end
     end)
