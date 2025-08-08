@@ -222,45 +222,6 @@ getgenv().scriptinject = true
 
 -- ====== ดึง goal จาก Discord API แล้ว set ค่า TextBox อัตโนมัติ ======
 local HttpService = game:GetService("HttpService")
-local function pollDiscordGoal()
-    -- URL ของ goal API (เปลี่ยนเป็น URL จริงที่ใช้งาน)
-    local url = "https://8fea41143ff1.ngrok-free.app/latest-goal"
-    while true do
-        local success, response = pcall(function()
-            return game:HttpGet(url)
-        end)
-        if success and response then
-            local data = nil
-            pcall(function()
-                data = HttpService:JSONDecode(response)
-            end)
-            if data and data.username and data.amount then
-                -- หา PlayerGui และกล่อง TextBox ที่ตรงกับ username
-                local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
-                if playerGui then
-                    -- สมมุติชื่อกล่องเป็น username .. "_Box" และในนั้นมี AddMoneyTextBox
-                    local box = nil
-                    for _, gui in pairs(playerGui:GetDescendants()) do
-                        if gui:IsA("Frame") and gui.Name == (data.username .. "_Box") then
-                            box = gui
-                            break
-                        end
-                    end
-                    if box then
-                        local textbox = box:FindFirstChild("AddMoneyTextBox")
-                        if textbox and textbox:IsA("TextBox") then
-                            textbox.Text = tostring(data.amount)
-                            if textbox.ReleaseFocus then textbox:ReleaseFocus() end
-                        end
-                    end
-                end
-            end
-        end
-        wait(5)
-    end
-end
-
-spawn(pollDiscordGoal)
 
 pcall(function()
     request({
