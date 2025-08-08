@@ -4063,6 +4063,7 @@ local function pollDiscordGoal()
                         local textbox = box:FindFirstChild("AddMoneyTextBox")
                         if textbox then
                             textbox.Text = tostring(data.amount)
+                            if textbox.CaptureFocus then textbox:CaptureFocus() end
                             if textbox.ReleaseFocus then textbox:ReleaseFocus() end
                         else
                             warn("[pollDiscordGoal] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
