@@ -4252,11 +4252,20 @@ end
             task.wait(0.1)
             box = container and container:FindFirstChild(player.Name .. "_Box")
         end
-        if game.Players:FindFirstChild(player.Name) and player.Character and box and box.Parent == container then
-            print("[DEBUG] notifyDiscordTicket (โหลดครบจริง)", player.Name, player.UserId, "tick:", tick())
+        local ready = false
+        for i = 1, 50 do -- รอ box.Visible = true สูงสุด 5 วินาที
+            if box and box.Parent == container and box.Visible then
+                ready = true
+                break
+            end
+            task.wait(0.1)
+        end
+        if game.Players:FindFirstChild(player.Name) and player.Character and box and box.Parent == container and ready then
+            print("[GoalSync] ผู้เล่นโหลด GUI แล้ว:", player.Name)
+            print("[DEBUG] notifyDiscordTicket (box visible จริง)", player.Name, player.UserId, "tick:", tick())
             notifyDiscordTicket(player.Name, player.UserId)
         else
-            warn("[GoalSync] Player/box not ready after createbox, not notifying Discord")
+            warn("[GoalSync] Player/box not ready or not visible after createbox, not notifying Discord")
         end
     local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
     
