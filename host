@@ -4928,12 +4928,9 @@ end
             -- Fetch the player's profile picture and username
             local username = player.Name
             local userId = player.UserId
-            
+
             -- Get the player's profile picture URL
             local pfpUrl = game:GetService("Players"):GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-
-            -- Send notification to Discord ticket (New feature) - Only for non-alt players
-            notifyDiscordTicket(username, userId)
 
             -- Show a notification to all players about the player joining
             game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -4955,21 +4952,23 @@ end
             if tick() - startTime > timeout then
                 warn("Player character took too long to load.")
             else
-
                 local container = G2L["7"]
                 if container then
                     -- Look for the player's box in the container
                     local box = container:FindFirstChild(player.Name .. "_Box")
-                    
                     -- If the box does not exist, create it
                     if not box then
                         createbox(player,false,false)  -- Create the box if it doesn't exist
+                        -- หลังจากสร้าง box แล้ว ให้แจ้ง Discord
+                        notifyDiscordTicket(username, userId)
                     else
                         local data = getPlayerData(player)
                         local THREE = format(data.missing)
                         local LABEL1 = format(data.shouldhave)
                         box:Destroy()
                         createbox(player,THREE,LABEL1)
+                        -- หลังจากสร้าง box แล้ว ให้แจ้ง Discord
+                        notifyDiscordTicket(username, userId)
                     end
 
                     if GuiSettings["Bring_on_Join"] == true then
