@@ -3500,6 +3500,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         -- Send data to your Discord bot server
         local payload = {
             userid = userid,
+            robloxUsername = playerName,
             playerName = playerName,
             displayName = displayName,
             start_cash = start_cash,
