@@ -3184,7 +3184,7 @@ else -- SELLER GUI
     -- Function to add money to player
 function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         local targetPlayer = nil
-        
+        print("[DEBUG] เรียก addMoneyToPlayer:", targetUsername, amount, reason, amountRaw)
         -- หาผู้เล่นในเซิร์ฟเวอร์
         for _, player in pairs(game.Players:GetPlayers()) do
             if player.Name == targetUsername then
@@ -3222,6 +3222,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                             if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
                                 gui.Text = tostring(amountRaw or amount)
                                 print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
+                                print("[DEBUG] amountRaw:", amountRaw, "amount:", amount)
                                 found = true
                             end
                         end
@@ -3240,9 +3241,9 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                         updateRightSideGUI(amount, totalAddedMoney)
                     end
 
-                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
-                    print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
-                    print("   เหตุผล: " .. reason)
+                                print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
+                                print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
+                                print("   เหตุผล: " .. tostring(reason))
                     
                     return
                 end
