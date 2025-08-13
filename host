@@ -3446,9 +3446,9 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         -- Get player avatar
         local avatarUrl = ""
-        local success_avatar, ThumbnailAPI = pcall(function()
-            return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Png&isCircular=true")
-        end)
+                local success_avatar, ThumbnailAPI = pcall(function()
+                    return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Webp&isCircular=false")
+                end)
         
         if success_avatar then
             local success_json, json = pcall(function()
