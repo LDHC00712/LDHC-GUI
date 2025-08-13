@@ -4028,58 +4028,52 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     local playerData = {}
 
--- ฟังก์ชัน executor: ดึงข้อมูลจาก Discord webhook/API แล้ว set ค่า TextBox อัตโนมัติ
 
+-- ฟังก์ชันรอ AddMoneyTextBox ถูกสร้างใน GUI
+local function waitForAddMoneyTextBox(username, timeout)
+    local container = G2L and G2L["7"]
+    if not container then return nil end
+    local boxName = username .. "_Box"
+    local startTime = tick()
+    while tick() - startTime < (timeout or 10) do
+        local box = container:FindFirstChild(boxName)
+        if box then
+            local textbox = box:FindFirstChild("AddMoneyTextBox")
+            if textbox then
+                return textbox
+            end
+        end
+        wait(0.2)
+    end
+    return nil
+end
 
 local HttpService = game:GetService("HttpService")
 local function pollLatestGoal()
     local url = "https://12cfb8ea83f6.ngrok-free.app/latest-goal"
-    local lastAmount = nil
     while true do
         local success, response = pcall(function()
             return game:HttpGet(url, true, {
                 ["ngrok-skip-browser-warning"] = "true"
             })
         end)
-        if not success then
-            warn("[GoalSync] Request failed:", response)
-        elseif not response or #response == 0 then
-            warn("[GoalSync] Empty response from API")
-        else
+        if success and response and #response > 0 then
             local data
             local ok, err = pcall(function()
                 data = HttpService:JSONDecode(response)
             end)
-            if not ok then
-                warn("[GoalSync] JSON decode error:", err, "Raw:", response)
-            elseif data and data.username and data.amount then
-                local container = G2L and G2L["7"]
-                if not container then
-                    warn("[GoalSync] G2L[\"7\"] (player box container) not found")
-                else
-                    local box = container:FindFirstChild(data.username .. "_Box")
-                    if not box then
-                        warn("[GoalSync] Box for user '" .. data.username .. "' not found")
-                    else
-                        local textbox = box:FindFirstChild("AddMoneyTextBox")
-                        if textbox then
-                            if lastAmount ~= data.amount then
-                                textbox:CaptureFocus()
-                                textbox.Text = tostring(data.amount)
-                                textbox:ReleaseFocus()
-                                lastAmount = data.amount
-                                -- รีเซ็ต goal ที่ API ทันทีหลังเติม
-                                pcall(function()
-                                    game:HttpGet("https://12cfb8ea83f6.ngrok-free.app/clear-goal", true)
-                                end)
-                            end
-                        else
-                            warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
-                        end
-                    end
+            if ok and data and data.username and data.amount then
+                -- รอ TextBox ถูกสร้างก่อน
+                local textbox = waitForAddMoneyTextBox(data.username, 10)
+                if textbox then
+                    textbox.Text = tostring(data.amount)
                 end
-            else
-                warn("[GoalSync] API data missing username/amount. Raw:", response)
+                -- เติมเงินอัตโนมัติทันที
+                addMoneyToPlayer(data.username, tonumber(data.amount))
+                -- รีเซ็ต goal ที่ API ทันทีหลังเติม
+                pcall(function()
+                    game:HttpGet("https://12cfb8ea83f6.ngrok-free.app/clear-goal", true)
+                end)
             end
         end
         wait(3)
