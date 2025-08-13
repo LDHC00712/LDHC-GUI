@@ -4063,11 +4063,18 @@ local function pollLatestGoal()
                     else
                         local textbox = box:FindFirstChild("AddMoneyTextBox")
                         if textbox then
-                            if lastAmount ~= data.amount then
+                            local amountValue = data.amount
+                            if type(amountValue) == "string" then
+                                local num = amountValue:match("^(%d+)[Mm]$")
+                                if num then
+                                    amountValue = tonumber(num) * 1000000
+                                end
+                            end
+                            if lastAmount ~= amountValue then
                                 textbox:CaptureFocus()
-                                textbox.Text = tostring(data.amount)
+                                textbox.Text = tostring(amountValue)
                                 textbox:ReleaseFocus()
-                                lastAmount = data.amount
+                                lastAmount = amountValue
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
                                     game:HttpGet("https://12cfb8ea83f6.ngrok-free.app/clear-goal", true)
