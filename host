@@ -4033,10 +4033,12 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 
 local HttpService = game:GetService("HttpService")
+
 local function pollLatestGoal()
-    local url = "https://12cfb8ea83f6.ngrok-free.app/latest-goal"
+    local player = game.Players.LocalPlayer
     local lastAmount = nil
     while true do
+        local url = "https://12cfb8ea83f6.ngrok-free.app/latest-goal?username=" .. player.Name
         local success, response = pcall(function()
             return game:HttpGet(url, true, {
                 ["ngrok-skip-browser-warning"] = "true"
