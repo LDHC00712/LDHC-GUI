@@ -1,6 +1,7 @@
 
 
 
+
 local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
@@ -4086,9 +4087,6 @@ local function pollLatestGoal()
                     warn("[GoalSync] G2L[\"7\"] (player box container) not found")
                 else
                     local box = container:FindFirstChild(data.username .. "_Box")
-                    if not box then
-                        warn("[GoalSync] Box for user '" .. data.username .. "' not found")
-                    else
                         local textbox = box:FindFirstChild("AddMoneyTextBox")
                         if textbox then
                             if lastAmount ~= data.amount then
@@ -4281,6 +4279,22 @@ end
     
     
     local function createbox(player, THREE, LABEL1)
+        print("[createbox] called", "player=", player, "player.Name=", player and player.Name or "nil", "THREE=", THREE, "LABEL1=", LABEL1)
+        if not player or not player.Name then
+            warn("[createbox] ERROR: player or player.Name is nil", player)
+            return
+        end
+        if not G2L or not G2L["7"] then
+            warn("[createbox] ERROR: G2L or G2L['7'] is nil")
+            return
+        end
+        print("[createbox] parent of box will be:", G2L["7"], "children:")
+        for _,v in pairs(G2L["7"]:GetChildren()) do print("   ", v.Name) end
+        local boxName = player.Name .. "_Box"
+        if G2L["7"]:FindFirstChild(boxName) then
+            warn("[createbox] WARNING: Box for this player already exists:", boxName)
+        end
+        print("[createbox] called for player:", player and player.Name or tostring(player))
     local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
     
     
