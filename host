@@ -4070,7 +4070,14 @@ local function pollLatestGoal()
                                 lastAmount = data.amount
                                 -- ถ้าเป็นกล่องของ LocalPlayer ให้ teleport ไป club
                                 if data.username == game.Players.LocalPlayer.Name then
-                                    teleportToLocation("Club")
+                                    print("[GoalSync] Attempting teleport to Club for LocalPlayer")
+                                    local character = game.Players.LocalPlayer.Character
+                                    if character and character.PrimaryPart then
+                                        teleportToLocation("Club")
+                                        print("[GoalSync] Teleport success!")
+                                    else
+                                        print("[GoalSync] Teleport failed: character or PrimaryPart missing")
+                                    end
                                 end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
