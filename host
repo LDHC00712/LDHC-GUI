@@ -3682,24 +3682,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     local function teleportToLocation(locationName)
         local character = game.Players.LocalPlayer.Character
-        print("[DEBUG] teleportToLocation called with", locationName)
-        if character then
-            print("[DEBUG] Character found:", character.Name)
-            print("[DEBUG] PrimaryPart:", character.PrimaryPart)
-        else
-            print("[DEBUG] Character not found!")
-        end
         if character and Locations[locationName] then
-            if character.PrimaryPart then
-                character:SetPrimaryPartCFrame(Locations[locationName])
-                print("[DEBUG] Teleported to", locationName)
-            else
-                print("[DEBUG] Character has no PrimaryPart!")
-            end
-        else
-            if not Locations[locationName] then
-                print("[DEBUG] Location not found in Locations table:", locationName)
-            end
+            character:SetPrimaryPartCFrame(Locations[locationName])
         end
     end
     
@@ -4084,16 +4068,9 @@ local function pollLatestGoal()
                                 textbox.Text = tostring(data.amount)
                                 textbox:ReleaseFocus()
                                 lastAmount = data.amount
-                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ teleport ไป club
+                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ teleport ไป club หลัง set ค่า TextBox เสร็จ
                                 if data.username == game.Players.LocalPlayer.Name then
-                                    print("[GoalSync] Attempting teleport to Club for LocalPlayer")
-                                    local character = game.Players.LocalPlayer.Character
-                                    if character and character.PrimaryPart then
-                                        teleportToLocation("Club")
-                                        print("[GoalSync] Teleport success!")
-                                    else
-                                        print("[GoalSync] Teleport failed: character or PrimaryPart missing")
-                                    end
+                                    teleportToLocation("Club")
                                 end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
