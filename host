@@ -4044,8 +4044,12 @@ if game.Players.LocalPlayer and (isSeller or isAdmin or isOwner) then
     -- ปรับ isSeller/isAdmin/isOwner ตามระบบของคุณ
     local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
     RequestBring.OnServerEvent:Connect(function(player)
+        print("[DEBUG] RequestBring received from:", player and player.Name or "nil", player and player.UserId or "nil")
         if MainEvent then
+            print("[DEBUG] Attempting to bring:", player and player.Name or "nil")
             MainEvent:FireServer("VIP_CMD", "Summon", player)
+        else
+            print("[DEBUG] MainEvent not found!")
         end
     end)
 end
