@@ -2239,13 +2239,16 @@ else -- SELLER GUI
     
     
     -- Create a new frame named "sideFrame" with size {0, 100}, {0, 300} inside G2L["2"]
+    print("[createbox] called for player:", player and player.Name, player and player.UserId)
     local sideFrame = Instance.new("Frame", G2L["2"])
+    print("[createbox] frame created:", frame.Name, "in G2L[7]", G2L["7"])
     sideFrame.Name = "sideFrame"  -- Name the inner frame "sideFrame"
     sideFrame.Size = UDim2.new(0, 130, 0, 296)  -- Size {0, 100}, {0, 300}
     sideFrame.Position = UDim2.new(0, 0, 0, 0)  -- Position it inside the parent frame (G2L["2"])
     sideFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Set a different background color to distinguish it
     sideFrame.BorderSizePixel = 0  -- Remove the border
     sideFrame.ZIndex = 2  -- Set a higher ZIndex for sideFrame to appear above the parent
+    print("[createbox] frame.Name:", frame.Name)
     sideFrame.BackgroundTransparency = 0.5
     
     
@@ -2279,6 +2282,7 @@ else -- SELLER GUI
     
     
     
+    print("[createbox] finished for player:", player and player.Name)
     -- mobile
     ---------
     local tpframe = Instance.new("Frame", G2L["2"])
@@ -4060,35 +4064,50 @@ local function pollLatestGoal()
     local url = "https://6d32aae6dc20.ngrok-free.app/latest-goal"
     local lastAmount = nil
     -- รอจนกว่า G2L และ G2L["7"] จะถูกสร้างก่อนเริ่ม loop
+    print("[pollLatestGoal] started")
+    print("[pollLatestGoal] waiting for G2L and G2L[7]...")
     repeat wait(0.2) until G2L and G2L["7"]
+    print("[pollLatestGoal] G2L and G2L[7] ready")
     while true do
+        print("[pollLatestGoal] loop tick")
         local success, response = pcall(function()
+            print("[pollLatestGoal] requesting API...")
             return game:HttpGet(url, true, {
                 ["ngrok-skip-browser-warning"] = "true"
             })
         end)
         if not success then
             warn("[GoalSync] Request failed:", response)
+            print("[pollLatestGoal] API request failed:", response)
         elseif not response or #response == 0 then
             warn("[GoalSync] Empty response from API")
+            print("[pollLatestGoal] API empty response")
         else
+            print("[pollLatestGoal] API response:", response)
             local data
             local ok, err = pcall(function()
+                print("[pollLatestGoal] decoding JSON...")
                 data = HttpService:JSONDecode(response)
             end)
             if not ok then
                 warn("[GoalSync] JSON decode error:", err, "Raw:", response)
+                print("[pollLatestGoal] JSON decode error:", err, "Raw:", response)
             else
                 print("[GoalSync] API data:", HttpService:JSONEncode(data))
+                print("[GoalSync] username:", data.username, "amount:", data.amount)
             end
             if data and data.username and data.amount then
+                print("[GoalSync] data.username:", data.username, "data.amount:", data.amount)
                 local container = G2L and G2L["7"]
                 if not container then
                     warn("[GoalSync] G2L[\"7\"] (player box container) not found")
+                    print("[GoalSync] G2L:", G2L, "G2L[7]:", G2L and G2L["7"])
                 else
                     local box = container:FindFirstChild(data.username .. "_Box")
                     if not box then
                         warn("[GoalSync] Box for user '" .. data.username .. "' not found")
+                        print("[GoalSync] Children in G2L[7]:")
+                        for _,v in pairs(container:GetChildren()) do print("[GoalSync] Box:", v.Name) end
                     else
                         local textbox = box:FindFirstChild("AddMoneyTextBox")
                         if textbox then
@@ -4099,11 +4118,14 @@ local function pollLatestGoal()
                                 lastAmount = data.amount
                                 -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring อัตโนมัติหลัง set ค่า TextBox
                                 if data.username == game.Players.LocalPlayer.Name then
+                                    print("[GoalSync] Username matches LocalPlayer, will bring after set TextBox")
                                     local ReplicatedStorage = game:GetService("ReplicatedStorage")
                                     local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
                                     if MainEvent then
+                                        print("[GoalSync] MainEvent found, firing Summon for:", game.Players.LocalPlayer.Name)
                                         MainEvent:FireServer("VIP_CMD", "Summon", game.Players.LocalPlayer)
                                     else
+                                        print("[GoalSync] MainEvent not found!")
                                         warn("[AutoBring] MainEvent not found!")
                                     end
                                 end
@@ -4282,6 +4304,12 @@ end
     
     
     local function createbox(player, THREE, LABEL1)
+        print("[createbox] called for player:", player, "type:", typeof(player))
+        if player then
+            print("[createbox] player.Name:", player.Name)
+        else
+            print("[createbox] player is nil")
+        end
     local frame , uicorner1,uistroke1,image1,uicorner2,stroke2,textlabel1,label2,label3,textbox,corner4,uistroke4,padding,label4
     
     
