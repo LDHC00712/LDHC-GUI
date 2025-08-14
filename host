@@ -3682,8 +3682,24 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     local function teleportToLocation(locationName)
         local character = game.Players.LocalPlayer.Character
+        print("[DEBUG] teleportToLocation called with", locationName)
+        if character then
+            print("[DEBUG] Character found:", character.Name)
+            print("[DEBUG] PrimaryPart:", character.PrimaryPart)
+        else
+            print("[DEBUG] Character not found!")
+        end
         if character and Locations[locationName] then
-            character:SetPrimaryPartCFrame(Locations[locationName])
+            if character.PrimaryPart then
+                character:SetPrimaryPartCFrame(Locations[locationName])
+                print("[DEBUG] Teleported to", locationName)
+            else
+                print("[DEBUG] Character has no PrimaryPart!")
+            end
+        else
+            if not Locations[locationName] then
+                print("[DEBUG] Location not found in Locations table:", locationName)
+            end
         end
     end
     
