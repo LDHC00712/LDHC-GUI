@@ -4059,6 +4059,8 @@ local HttpService = game:GetService("HttpService")
 local function pollLatestGoal()
     local url = "https://6d32aae6dc20.ngrok-free.app/latest-goal"
     local lastAmount = nil
+    -- รอจนกว่า G2L และ G2L["7"] จะถูกสร้างก่อนเริ่ม loop
+    repeat wait(0.2) until G2L and G2L["7"]
     while true do
         local success, response = pcall(function()
             return game:HttpGet(url, true, {
