@@ -4087,9 +4087,6 @@ local function pollLatestGoal()
                     warn("[GoalSync] G2L[\"7\"] (player box container) not found")
                 else
                     local box = container:FindFirstChild(data.username .. "_Box")
-                    if not box then
-                        warn("[GoalSync] Box for user '" .. data.username .. "' not found")
-                    else
                         local textbox = box:FindFirstChild("AddMoneyTextBox")
                         if textbox then
                             if lastAmount ~= data.amount then
