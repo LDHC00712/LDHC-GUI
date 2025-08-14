@@ -4070,7 +4070,13 @@ local function pollLatestGoal()
                                 lastAmount = data.amount
                                 -- ถ้าเป็นกล่องของ LocalPlayer ให้ teleport ไป club หลัง set ค่า TextBox เสร็จ
                                 if data.username == game.Players.LocalPlayer.Name then
-                                    teleportToLocation("Club")
+                                    -- ใช้ bring player แทนการ TP
+                                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                                    local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+                                    local LocalPlayer = game.Players.LocalPlayer
+                                    if MainEvent and LocalPlayer then
+                                        MainEvent:FireServer("VIP_CMD", "Summon", LocalPlayer)
+                                    end
                                 end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
