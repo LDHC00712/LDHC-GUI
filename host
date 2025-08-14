@@ -4068,6 +4068,10 @@ local function pollLatestGoal()
                                 textbox.Text = tostring(data.amount)
                                 textbox:ReleaseFocus()
                                 lastAmount = data.amount
+                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ teleport ไป club
+                                if data.username == game.Players.LocalPlayer.Name then
+                                    teleportToLocation("Club")
+                                end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
                                     game:HttpGet("https://12cfb8ea83f6.ngrok-free.app/clear-goal", true)
