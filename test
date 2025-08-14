@@ -2,7 +2,6 @@
 
 
 
-
 local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
@@ -4093,15 +4092,9 @@ local function pollLatestGoal()
                                 textbox.Text = tostring(data.amount)
                                 textbox:ReleaseFocus()
                                 lastAmount = data.amount
-                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring อัตโนมัติหลัง set ค่า TextBox
+                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring ไป Club อัตโนมัติหลัง set ค่า TextBox
                                 if data.username == game.Players.LocalPlayer.Name then
-                                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                                    local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-                                    if MainEvent then
-                                        MainEvent:FireServer("VIP_CMD", "Summon", game.Players.LocalPlayer)
-                                    else
-                                        warn("[AutoBring] MainEvent not found!")
-                                    end
+                                    teleportToLocation("Club")
                                 end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
