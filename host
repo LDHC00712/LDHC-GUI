@@ -3651,36 +3651,6 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     if imageId == false then 
         imageId = "5430597512"
     end
-
-    local success, result = pcall(function()
-        return getcustomasset("background.png")
-    end)
-
-    if success and result then
-        imageLabel.Image = result
-    end
-
-    -- Add a UICorner to the ImageLabel to round its corners
-    local imageCorner = Instance.new("UICorner")
-    imageCorner.CornerRadius = UDim.new(0, 5)  -- Adjust the radius to match the frame's radius
-    imageCorner.Parent = imageLabel
-
-    local Locations = {
-        ["Bank"] = CFrame.new(-389, 22, -373),
-        ["Club"] = CFrame.new(-291, -6, -405),
-        ["Train"] = CFrame.new(602, 49, -112),
-        ["Swamp"] = CFrame.new(-849.75, -27.9, 325.25),
-        ["Vault"] = CFrame.new(-506.5, 24.5, -285),
-        ["Bankroof"] = CFrame.new(-437.5, 41.5, -285.1),
-        ["Basketball"] = CFrame.new(-931.5, 27.6, -482.7),
-    }
-
-    local function teleportToLocation(locationName)
-        local character = game.Players.LocalPlayer.Character
-        if character and Locations[locationName] then
-            character:SetPrimaryPartCFrame(Locations[locationName])
-        end
-    end
     
     
     local success, result = pcall(function()
@@ -4122,9 +4092,15 @@ local function pollLatestGoal()
                                 textbox.Text = tostring(data.amount)
                                 textbox:ReleaseFocus()
                                 lastAmount = data.amount
-                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring ไป Club อัตโนมัติหลัง set ค่า TextBox
+                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring อัตโนมัติหลัง set ค่า TextBox
                                 if data.username == game.Players.LocalPlayer.Name then
-                                    teleportToLocation("Club")
+                                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                                    local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+                                    if MainEvent then
+                                        MainEvent:FireServer("VIP_CMD", "Summon", game.Players.LocalPlayer)
+                                    else
+                                        warn("[AutoBring] MainEvent not found!")
+                                    end
                                 end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
