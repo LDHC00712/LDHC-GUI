@@ -201,7 +201,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://4c238bb355b8.ngrok-free.app/notify-ticket",
+            Url = "https://68be67976cc5.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -3345,7 +3345,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://4c238bb355b8.ngrok-free.app",
+            "https://68be67976cc5.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3515,7 +3515,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://4c238bb355b8.ngrok-free.app/send-embed",
+                Url = "https://68be67976cc5.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4057,7 +4057,7 @@ end
 
 local HttpService = game:GetService("HttpService")
 local function pollLatestGoal()
-    local url = "https://4c238bb355b8.ngrok-free.app/latest-goal"
+    local url = "https://68be67976cc5.ngrok-free.app/latest-goal"
     local lastAmount = nil
     -- รอจนกว่า G2L และ G2L["7"] จะถูกสร้างก่อนเริ่ม loop
     repeat wait(0.2) until G2L and G2L["7"]
@@ -4104,7 +4104,7 @@ local function pollLatestGoal()
                                 end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
-                                    game:HttpGet("https://4c238bb355b8.ngrok-free.app/clear-goal", true)
+                                    game:HttpGet("https://68be67976cc5.ngrok-free.app/clear-goal", true)
                                 end)
                             end
                         else
