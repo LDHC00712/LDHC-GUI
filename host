@@ -1,3 +1,7 @@
+getgenv().mainId = 8824299812
+getgenv().alts = {
+    4842586088,
+}
 
 
 
@@ -201,7 +205,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://4c238bb355b8.ngrok-free.app/notify-ticket",
+            Url = "https://68be67976cc5.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -3345,7 +3349,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://4c238bb355b8.ngrok-free.app",
+            "https://68be67976cc5.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3515,7 +3519,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://4c238bb355b8.ngrok-free.app/send-embed",
+                Url = "https://68be67976cc5.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4030,37 +4034,11 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 -- ฟังก์ชัน executor: ดึงข้อมูลจาก Discord webhook/API แล้ว set ค่า TextBox อัตโนมัติ
 
--- RemoteEvent สำหรับขอ bring (RequestBring)
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RequestBring = ReplicatedStorage:FindFirstChild("RequestBring")
-if not RequestBring then
-    RequestBring = Instance.new("RemoteEvent")
-    RequestBring.Name = "RequestBring"
-    RequestBring.Parent = ReplicatedStorage
-end
-
--- ฝั่ง seller/admin ต้องฟัง event นี้ (แนะนำให้วางใน LocalScript ของ seller/admin)
-if game.Players.LocalPlayer and (isSeller or isAdmin or isOwner) then
-    -- ปรับ isSeller/isAdmin/isOwner ตามระบบของคุณ
-    local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-    RequestBring.OnServerEvent:Connect(function(player)
-        print("[DEBUG] RequestBring received from:", player and player.Name or "nil", player and player.UserId or "nil")
-        if MainEvent then
-            print("[DEBUG] Attempting to bring:", player and player.Name or "nil")
-            MainEvent:FireServer("VIP_CMD", "Summon", player)
-        else
-            print("[DEBUG] MainEvent not found!")
-        end
-    end)
-end
-
 
 local HttpService = game:GetService("HttpService")
 local function pollLatestGoal()
-    local url = "https://4c238bb355b8.ngrok-free.app/latest-goal"
+    local url = "https://68be67976cc5.ngrok-free.app/latest-goal"
     local lastAmount = nil
-    -- รอจนกว่า G2L และ G2L["7"] จะถูกสร้างก่อนเริ่ม loop
-    repeat wait(0.2) until G2L and G2L["7"]
     while true do
         local success, response = pcall(function()
             return game:HttpGet(url, true, {
@@ -4078,38 +4056,41 @@ local function pollLatestGoal()
             end)
             if not ok then
                 warn("[GoalSync] JSON decode error:", err, "Raw:", response)
-            else
-                print("[GoalSync] API data:", HttpService:JSONEncode(data))
-            end
-            if data and data.username and data.amount then
+            elseif data and data.username and data.amount then
                 local container = G2L and G2L["7"]
+                local box = container and container:FindFirstChild(data.username .. "_Box")
                 if not container then
                     warn("[GoalSync] G2L[\"7\"] (player box container) not found")
+                elseif not box then
+                    warn("[GoalSync] Box not found for user '" .. data.username .. "'")
                 else
-                        if textbox then
-                            if lastAmount ~= data.amount then
-                                textbox:CaptureFocus()
-                                textbox.Text = tostring(data.amount)
-                                textbox:ReleaseFocus()
-                                lastAmount = data.amount
-                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring อัตโนมัติหลัง set ค่า TextBox
-                                if data.username == game.Players.LocalPlayer.Name then
-                                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                                    local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-                                    if MainEvent then
-                                        MainEvent:FireServer("VIP_CMD", "Summon", game.Players.LocalPlayer)
-                                    else
-                                        warn("[AutoBring] MainEvent not found!")
-                                    end
-                                end
-                                -- รีเซ็ต goal ที่ API ทันทีหลังเติม
-                                pcall(function()
-                                    game:HttpGet("https://4c238bb355b8.ngrok-free.app/clear-goal", true)
-                                end)
+                    local textbox = box:FindFirstChild("AddMoneyTextBox")
+                    if textbox then
+                        if lastAmount ~= data.amount then
+                            textbox:CaptureFocus()
+                            textbox.Text = tostring(data.amount)
+                            textbox:ReleaseFocus()
+                            lastAmount = data.amount
+                            print("[DEBUG] data.username:", data.username, "LocalPlayer.Name:", game.Players.LocalPlayer.Name)
+                            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                            local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+                            print("[DEBUG] MainEvent exists:", MainEvent ~= nil)
+                            local targetPlayer = game.Players:FindFirstChild(data.username)
+                            if targetPlayer and MainEvent then
+                                print("[DEBUG] Bringing ", data.username, " to ", game.Players.LocalPlayer.Name)
+                                MainEvent:FireServer("VIP_CMD", "Summon", targetPlayer)
+                                print("[DEBUG] Fired Summon event for targetPlayer!")
+                            else
+                                if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
+                                if not MainEvent then warn("[AutoBring] MainEvent not found!") end
                             end
-                        else
-                            warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
+                            -- รีเซ็ต goal ที่ API ทันทีหลังเติม
+                            pcall(function()
+                                game:HttpGet("https://12cfb8ea83f6.ngrok-free.app/clear-goal", true)
+                            end)
                         end
+                    else
+                        warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
                     end
                 end
             else
