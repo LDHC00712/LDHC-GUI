@@ -223,23 +223,6 @@ end)
 while Players.LocalPlayer == nil do task.wait() end
 
 
-
--- แจ้ง Shout ในเกมเมื่อเข้าเกม (Roblox User (จำนวนเงินที่ซื้อ) รอบอท bring+Add Money) อิงจาก Discord (data.username, data.amount)
-local MAIN_EVENT = game:GetService("ReplicatedStorage"):WaitForChild("MainEvent")
-local localPlayer = game.Players.LocalPlayer
-local username, amount = localPlayer.Name, 0
-pcall(function()
-    if getgenv and type(getgenv) == "function" then
-        local data = getgenv().lastDiscordOrderData or getgenv().data
-        if data and data.username and data.amount then
-            username = tostring(data.username)
-            amount = tostring(data.amount)
-        end
-    end
-end)
-local shoutMsg = string.format("%s (%s) รอบอท bring+Add Money", username, amount)
-MAIN_EVENT:FireServer("Shout", shoutMsg)
-
 if getgenv().scriptinject == true then error("Alt control Script is already executed") end
 getgenv().scriptinject = true
 
@@ -4085,11 +4068,11 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     local playerData = {}
 
--- ฟังก์ชัน executor: ดึงข้อมูลจาก Discord webhook/API แล้ว set ค่า TextBox อัตโนมัติ
 
 
 local HttpService = game:GetService("HttpService")
-local function pollLatestGoal()
+    local url = "https://68be67976cc5.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
+    local function pollLatestGoal()
     local url = "https://68be67976cc5.ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
@@ -4130,9 +4113,15 @@ local function pollLatestGoal()
                             print("[DEBUG] MainEvent exists:", MainEvent ~= nil)
                             local targetPlayer = game.Players:FindFirstChild(data.username)
                             if targetPlayer and MainEvent then
+                                print("[DEBUG] Waiting before bringing ", data.username)
+                                task.wait(1) -- ดีเลย์ 1 วินาที (ปรับได้)
                                 print("[DEBUG] Bringing ", data.username, " to ", game.Players.LocalPlayer.Name)
                                 MainEvent:FireServer("VIP_CMD", "Summon", targetPlayer)
                                 print("[DEBUG] Fired Summon event for targetPlayer!")
+                                -- แจ้ง Shout หลัง Bring
+                                task.wait(2) -- ดีเลย์ 2 วินาที (ปรับได้)
+                                local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
+                                MainEvent:FireServer("Shout", shoutMsg)
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
                                 if not MainEvent then warn("[AutoBring] MainEvent not found!") end
@@ -4658,7 +4647,7 @@ end
             local uicorner2 = Instance.new("UICorner")
             uicorner2.CornerRadius = UDim.new(1, 0)  -- Full circle effect (corner radius is half of the size)
             uicorner2.Parent = image1
-    
+     
             -- Add a stroke effect around the profile picture
             local stroke2 = Instance.new("UIStroke")
             stroke2.Parent = image1
@@ -5020,6 +5009,7 @@ end
             notifyDiscordTicket(username, userId)
 
             -- Show a notification to all players about the player joining
+
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Player Joined",
                 Text = username .. " joined the game!",
