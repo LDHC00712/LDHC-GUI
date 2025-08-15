@@ -221,6 +221,25 @@ end)
 
 --Wait for player to be added
 while Players.LocalPlayer == nil do task.wait() end
+
+
+
+-- แจ้ง Shout ในเกมเมื่อเข้าเกม (Roblox User (จำนวนเงินที่ซื้อ) รอบอท bring+Add Money) อิงจาก Discord (data.username, data.amount)
+local MAIN_EVENT = game:GetService("ReplicatedStorage"):WaitForChild("MainEvent")
+local localPlayer = game.Players.LocalPlayer
+local username, amount = localPlayer.Name, 0
+pcall(function()
+    if getgenv and type(getgenv) == "function" then
+        local data = getgenv().lastDiscordOrderData or getgenv().data
+        if data and data.username and data.amount then
+            username = tostring(data.username)
+            amount = tostring(data.amount)
+        end
+    end
+end)
+local shoutMsg = string.format("%s (%s) รอบอท bring+Add Money", username, amount)
+MAIN_EVENT:FireServer("Shout", shoutMsg)
+
 if getgenv().scriptinject == true then error("Alt control Script is already executed") end
 getgenv().scriptinject = true
 
@@ -2737,26 +2756,22 @@ else -- SELLER GUI
     
     -- Create the Hide Cash toggle button
     createToggle1(MiscFrame, UDim2.new(0, 0, 0, 210), "Hide Cash", false, function(state)
-    
-        
         -- Set the hideCash flag based on the state of the toggle
         hideCash = state
-    
+
         -- Apply the hide/unhide effect based on the hideCash flag
         if hideCash == true then
             for _, v in pairs(IGNORED.Drop:GetChildren()) do
                 if v:IsA("Part") then
                     -- Hide the Decal if it exists
                     if v:FindFirstChild("Decal") then
-                        v.Decal:Destroy()  -- Removing Decal(s)
-                        v.Decal:Destroy()  -- Destroying the second Decal instance if it exists
+                        v.Decal:Destroy()
                     end
-    
                     -- Hide the BillboardGui and make the part transparent
                     if v:FindFirstChild("BillboardGui") then
                         v.BillboardGui.Enabled = false
                     end
-                    v.Transparency = 1  -- Make the part transparent
+                    v.Transparency = 1
                 end
             end
         else
@@ -2766,12 +2781,46 @@ else -- SELLER GUI
                     if v:FindFirstChild("BillboardGui") then
                         v.BillboardGui.Enabled = true
                     end
-                    v.Transparency = 0  -- Make the part visible again
+                    v.Transparency = 0
                 end
             end
         end
     end)
     
+
+    -- Noclip toggle (on/off)
+    local noclipActive = false
+    local noclipConnection = nil
+    createToggle1(MiscFrame, UDim2.new(0, 0, 0, 260), "Noclip", false, function(state)
+        noclipActive = state
+        local player = game.Players.LocalPlayer
+        local function setNoclip(enabled)
+            local char = player.Character
+            if char then
+                for _, part in ipairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = not enabled
+                    end
+                end
+            end
+        end
+        if noclipActive then
+            setNoclip(true)
+            if not noclipConnection then
+                noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+                    if noclipActive then
+                        setNoclip(true)
+                    end
+                end)
+            end
+        else
+            setNoclip(false)
+            if noclipConnection then
+                noclipConnection:Disconnect()
+                noclipConnection = nil
+            end
+        end
+    end)
     
     
     -- Monitor for new parts in the IGNORED.Drop folder (optional)
@@ -3675,13 +3724,14 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     
     local Locations = {
-        ["Bank"] = CFrame.new(-389, 22, -373),
-        ["Club"] = CFrame.new(-291, -6, -405),
-        ["Train"] = CFrame.new(602, 49, -112),
-        ["Swamp"] = CFrame.new(-849.75, -27.9, 325.25),
-        ["Vault"] = CFrame.new(-506.5, 24.5, -285),
-        ["Bankroof"] = CFrame.new(-437.5, 41.5, -285.1),
-        ["Basketball"] = CFrame.new(-931.5, 27.6, -482.7),
+    ["Bank"] = CFrame.new(-389, 22, -373),
+    ["Club"] = CFrame.new(-291, -6, -405),
+    ["Train"] = CFrame.new(602, 49, -112),
+    ["Swamp"] = CFrame.new(-849.75, -27.9, 325.25),
+    ["Vault"] = CFrame.new(-506.5, 24.5, -285),
+    ["Bankroof"] = CFrame.new(-437.5, 41.5, -285.1),
+    ["Basketball"] = CFrame.new(-931.5, 27.6, -482.7),
+    ["Sell"] = CFrame.new(-264.22406005859375, -6.210321426391602, -341.1272888183594),
     }
     
     local function teleportToLocation(locationName)
@@ -3752,13 +3802,14 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     -----------
     -----------
     createDropdown(GuiSettings["Teleport_Location"], SettingsFrame, UDim2.new(0, 0, 0, 10), "Teleport Location", {
-        "Bank", 
-        "Bankroof", 
-        "Basketball", 
-        "Club", 
-        "Swamp", 
-        "Train", 
-        "Vault"
+    "Bank", 
+    "Bankroof", 
+    "Basketball", 
+    "Club", 
+    "Swamp", 
+    "Train", 
+    "Vault",
+    "Sell"
     }, function(location)
         GuiSettings["Teleport_Location"] = location
         saveData()
@@ -3828,7 +3879,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Club", 
         "Swamp", 
         "Train", 
-        "Vault"
+        "Vault",
+        "Sell"
     }, function(location)
         game.Players:Chat("/setup " .. string.lower(location))
     end)
@@ -3937,7 +3989,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Club", 
         "Swamp", 
         "Train", 
-        "Vault"
+        "Vault",
+        "Sell"
     }, function(location)
         game.Players:Chat("/setup " .. string.lower(location) .. " og")
     end)
@@ -4809,14 +4862,18 @@ end
                     if GuiSettings["Auto_Bring_to_Vault"] == true then
                         tptobank(player)
                     end
-    
+
                     if GuiSettings["Auto_Kick_on_Finished"] == true then
                         Autokickonfinished(player)
                     end
-    
+
                     if GuiSettings["Send_Webhook_on_complete_order"] == true then
                         sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
                     end
+
+                    -- แจ้ง Shout ในเกมเมื่อออเดอร์เสร็จสิ้น (ทดลอง)
+                    local MAIN_EVENT = game:GetService("ReplicatedStorage"):WaitForChild("MainEvent")
+                    MAIN_EVENT:FireServer("Shout", "ASD")
     
                 end
             else
