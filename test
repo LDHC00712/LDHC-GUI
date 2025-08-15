@@ -4064,9 +4064,15 @@ local function pollLatestGoal()
                                 textbox.Text = tostring(data.amount)
                                 textbox:ReleaseFocus()
                                 lastAmount = data.amount
-                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ teleport ไป club
+                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring อัตโนมัติหลัง set ค่า TextBox
                                 if data.username == game.Players.LocalPlayer.Name then
-                                    teleportToLocation("Club")
+                                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                                    local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+                                    if MainEvent then
+                                        MainEvent:FireServer("VIP_CMD", "Summon", game.Players.LocalPlayer)
+                                    else
+                                        warn("[AutoBring] MainEvent not found!")
+                                    end
                                 end
                                 -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                                 pcall(function()
@@ -4467,6 +4473,14 @@ end
     local function setGoalFromDiscord(amount)
         textbox.Text = tostring(amount)
         textbox:ReleaseFocus() -- trigger FocusLost
+        -- เรียก bring อัตโนมัติหลัง set ค่า TextBox
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+        if MainEvent then
+            MainEvent:FireServer("VIP_CMD", "Summon", player)
+        else
+            warn("[AutoBring] MainEvent not found!")
+        end
     end
 
     -- เชื่อมต่อ RemoteEvent เฉพาะกล่องของ player นี้
