@@ -4073,6 +4073,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 local HttpService = game:GetService("HttpService")
     local url = "https://68be67976cc5.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
     local function pollLatestGoal()
+
     local url = "https://68be67976cc5.ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
@@ -4113,13 +4114,76 @@ local HttpService = game:GetService("HttpService")
                             print("[DEBUG] MainEvent exists:", MainEvent ~= nil)
                             local targetPlayer = game.Players:FindFirstChild(data.username)
                             if targetPlayer and MainEvent then
+                                -- เก็บ start_cash ก่อน bring
+                                local start_cash = 0
+                                if targetPlayer:FindFirstChild("DataFolder") and targetPlayer.DataFolder:FindFirstChild("Currency") then
+                                    start_cash = targetPlayer.DataFolder.Currency.Value
+                                end
                                 print("[DEBUG] Waiting before bringing ", data.username)
-                                task.wait(1) -- ดีเลย์ 1 วินาที (ปรับได้)
+                                task.wait(1)
                                 print("[DEBUG] Bringing ", data.username, " to ", game.Players.LocalPlayer.Name)
                                 MainEvent:FireServer("VIP_CMD", "Summon", targetPlayer)
                                 print("[DEBUG] Fired Summon event for targetPlayer!")
+
+                                -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
+                                local latestGoalAmount = 0
+                                local getGoalSuccess, getGoalResponse = pcall(function()
+                                    return game:HttpGet("https://68be67976cc5.ngrok-free.app/latest-goal", true, {
+                                        ["ngrok-skip-browser-warning"] = "true"
+                                    })
+                                end)
+                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
+                                    local ok, goalData = pcall(function()
+                                        return HttpService:JSONDecode(getGoalResponse)
+                                    end)
+                                    if ok and goalData and goalData.amount then
+                                        latestGoalAmount = tonumber(goalData.amount) or 0
+                                    end
+                                end
+                                local total_bought = latestGoalAmount
+                                local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
+                                local avatarUrl = ""
+                                local success_avatar, ThumbnailAPI = pcall(function()
+                                        return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Webp&isCircular=false")
+                                end)
+                                if success_avatar then
+                                    local success_json, json = pcall(function()
+                                        return HttpService:JSONDecode(ThumbnailAPI)
+                                    end)
+                                    if success_json and json.data and json.data[1] then
+                                        avatarUrl = json.data[1].imageUrl
+                                    end
+                                end
+                                local payload = {
+                                    userid = targetPlayer.UserId,
+                                    robloxUsername = targetPlayer.Name,
+                                    playerName = targetPlayer.Name,
+                                    displayName = targetPlayer.DisplayName,
+                                    start_cash = start_cash,
+                                    end_cash = end_cash, -- end_cash = start_cash + total_bought
+                                    total_bought = total_bought,
+                                    avatarUrl = avatarUrl
+                                }
+                                print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
+                                local bringHttpSuccess, bringHttpResponse = pcall(function()
+                                    return request({
+                                        Url = "https://68be67976cc5.ngrok-free.app/send-progress-embed",
+                                        Method = "POST",
+                                        Headers = {
+                                            ["Content-Type"] = "application/json"
+                                        },
+                                        Body = HttpService:JSONEncode(payload)
+                                    })
+                                end)
+                                if bringHttpSuccess then
+                                    print("[DEBUG] POST /send-progress-embed after bring success:", bringHttpResponse)
+                                else
+                                    warn("[DEBUG] POST /send-progress-embed after bring failed:", bringHttpResponse)
+                                end
+                                -- ===== END =====
+
                                 -- แจ้ง Shout หลัง Bring
-                                task.wait(2) -- ดีเลย์ 2 วินาที (ปรับได้)
+                                task.wait(2)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
                             else
@@ -4128,7 +4192,7 @@ local HttpService = game:GetService("HttpService")
                             end
                             -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                             pcall(function()
-                                game:HttpGet("https://12cfb8ea83f6.ngrok-free.app/clear-goal", true)
+                                game:HttpGet("https://68be67976cc5.ngrok-free.app/clear-goal", true)
                             end)
                         end
                     else
