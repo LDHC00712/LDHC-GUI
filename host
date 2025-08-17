@@ -205,7 +205,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://1e5ebb4bc158.ngrok-free.app/notify-ticket",
+            Url = "https://0681ae98386d.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -3381,7 +3381,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://1e5ebb4bc158.ngrok-free.app",
+            "https://0681ae98386d.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3565,7 +3565,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://1e5ebb4bc158.ngrok-free.app/send-embed",
+                Url = "https://0681ae98386d.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -3590,8 +3590,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end
 
-    -- ฟังก์ชันใหม่สำหรับ /send-embed2
-    local function sendToPHPServer2(userid, start_cash, end_cash, discord_webhook, bought, goal)
+        -- ฟังก์ชันใหม่สำหรับ /send-embed1
+    local function sendToPHPServer1(userid, start_cash, end_cash, discord_webhook, bought)
         -- Get player name from userid
         -- Get player name from userid
         local playerName = "Unknown"
@@ -3631,8 +3631,81 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
             end_cash = end_cash,
             total_bought = total_bought,
             avatarUrl = avatarUrl,
-            discord_webhook = discord_webhook,
-            goal = goal -- ใช้ goal ที่รับมา
+            discord_webhook = discord_webhook
+        }
+
+        print("Sending payload to webhook server (send-embed1)...")
+        print("Payload:", HttpService:JSONEncode(payload))
+
+        local success, response = pcall(function()
+            return request({
+                Url = "https://0681ae98386d.ngrok-free.app/send-embed1",
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+
+        if success and response and response.Success then
+            print("Discord embed1 webhook with avatar and image sent successfully!")
+            print("Response body:", response.Body)
+        else
+            print("Failed to send Discord embed1 webhook:")
+            print("Success:", success)
+            if response then
+                print("StatusCode:", response.StatusCode)
+                print("StatusMessage:", response.StatusMessage)
+                print("Body:", response.Body)
+            else
+                print("No response received")
+            end
+        end
+    end
+
+    -- ฟังก์ชันใหม่สำหรับ /send-embed2
+    local function sendToPHPServer2(userid, start_cash, end_cash, discord_webhook, bought)
+        -- Get player name from userid
+        -- Get player name from userid
+        local playerName = "Unknown"
+        local displayName = "Unknown"
+        local player = Players and Players:GetPlayerByUserId(userid)
+        if player then
+            playerName = player.Name
+            displayName = player.DisplayName
+        end
+
+        -- Calculate total bought DHC
+        local total_bought = bought or 0
+
+        -- goal รับมาจาก argument (ไม่คำนวณใหม่)
+
+        -- Get player avatar
+        local avatarUrl = ""
+        local success_avatar, ThumbnailAPI = pcall(function()
+            return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Webp&isCircular=false")
+        end)
+        if success_avatar then
+            local success_json, json = pcall(function()
+                return HttpService:JSONDecode(ThumbnailAPI)
+            end)
+            if success_json and json.data and json.data[1] then
+                avatarUrl = json.data[1].imageUrl
+            end
+        end
+
+        -- Create Discord embed payload
+        local payload = {
+            userid = userid,
+            robloxUsername = playerName,
+            playerName = playerName,
+            displayName = displayName,
+            start_cash = start_cash,
+            end_cash = end_cash,
+            total_bought = total_bought,
+            avatarUrl = avatarUrl,
+            discord_webhook = discord_webhook
         }
 
         print("Sending payload to webhook server (send-embed2)...")
@@ -3640,7 +3713,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://1e5ebb4bc158.ngrok-free.app/send-embed2",
+                Url = "https://0681ae98386d.ngrok-free.app/send-embed2",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4157,10 +4230,10 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 
 local HttpService = game:GetService("HttpService")
-    local url = "https://1e5ebb4bc158.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
+    local url = "https://0681ae98386d.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
     local function pollLatestGoal()
 
-    local url = "https://1e5ebb4bc158.ngrok-free.app/latest-goal"
+    local url = "https://0681ae98386d.ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
         local success, response = pcall(function()
@@ -4210,64 +4283,8 @@ local HttpService = game:GetService("HttpService")
                                 print("[DEBUG] Bringing ", data.username, " to ", game.Players.LocalPlayer.Name)
                                 MainEvent:FireServer("VIP_CMD", "Summon", targetPlayer)
                                 print("[DEBUG] Fired Summon event for targetPlayer!")
-
-                                -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
-                                local latestGoalAmount = 0
-                                local getGoalSuccess, getGoalResponse = pcall(function()
-                                    return game:HttpGet("https://1e5ebb4bc158.ngrok-free.app/latest-goal", true, {
-                                        ["ngrok-skip-browser-warning"] = "true"
-                                    })
-                                end)
-                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
-                                    local ok, goalData = pcall(function()
-                                        return HttpService:JSONDecode(getGoalResponse)
-                                    end)
-                                    if ok and goalData and goalData.amount then
-                                        latestGoalAmount = tonumber(goalData.amount) or 0
-                                    end
-                                end
-                                local total_bought = latestGoalAmount
-                                local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
-                                local avatarUrl = ""
-                                local success_avatar, ThumbnailAPI = pcall(function()
-                                    return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..targetPlayer.UserId.."&size=420x420&format=Webp&isCircular=false")
-                                end)
-                                if success_avatar then
-                                    local success_json, json = pcall(function()
-                                        return HttpService:JSONDecode(ThumbnailAPI)
-                                    end)
-                                    if success_json and json.data and json.data[1] then
-                                        avatarUrl = json.data[1].imageUrl
-                                    end
-                                end
-                                local payload = {
-                                    userid = targetPlayer.UserId,
-                                    robloxUsername = targetPlayer.Name,
-                                    playerName = targetPlayer.Name,
-                                    displayName = targetPlayer.DisplayName,
-                                    start_cash = start_cash,
-                                    end_cash = end_cash, -- end_cash = start_cash + total_bought
-                                    total_bought = total_bought,
-                                    avatarUrl = avatarUrl
-                                }
-                                print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
-                                local bringHttpSuccess, bringHttpResponse = pcall(function()
-                                    return request({
-                                        Url = "https://1e5ebb4bc158.ngrok-free.app/send-progress-embed",
-                                        Method = "POST",
-                                        Headers = {
-                                            ["Content-Type"] = "application/json"
-                                        },
-                                        Body = HttpService:JSONEncode(payload)
-                                    })
-                                end)
-                                if bringHttpSuccess then
-                                    print("[DEBUG] POST /send-progress-embed after bring success:", bringHttpResponse)
-                                else
-                                    warn("[DEBUG] POST /send-progress-embed after bring failed:", bringHttpResponse)
-                                end
-                                -- ===== END =====
-
+                                task.wait(2)
+                                sendToPHPServer1(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought)
                                 -- แจ้ง Shout หลัง Bring
                                 task.wait(2)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
@@ -4278,7 +4295,7 @@ local HttpService = game:GetService("HttpService")
                             end
                             -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                             pcall(function()
-                                game:HttpGet("https://1e5ebb4bc158.ngrok-free.app/clear-goal", true)
+                                game:HttpGet("https://0681ae98386d.ngrok-free.app/clear-goal", true)
                             end)
                         end
                     else
@@ -5014,10 +5031,8 @@ end
                     local MAIN_EVENT = game:GetService("ReplicatedStorage"):WaitForChild("MainEvent")
                     MAIN_EVENT:FireServer("Shout", "ASD")
                     -- คำนวณ goalValue แบบเดียวกับ /send-progress-embed
-                    task.wait(20)
-                    local total_bought = data.total_bought or data.need or 0
-                    local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
-                    sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
+                    task.wait(2)
+                    sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought)
                 end
             else
                 image1.BackgroundColor3 = Color3.fromRGB(34, 34, 34)  -- Default (dark gray) when not met
