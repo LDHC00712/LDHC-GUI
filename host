@@ -4138,33 +4138,29 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 
 local HttpService = game:GetService("HttpService")
-    local ngrok_url = "https://0e6b7c2e08d6.ngrok-free.app/latest-goal"
-    local localhost_url = "http://localhost:3000/latest-goal"
+    local url = "https://0e6b7c2e08d6.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
     local function pollLatestGoal()
-        local urls = {ngrok_url, localhost_url}
-        local lastAmount = nil
-        while true do
-            local response, data, ok, err
-            local gotValid = false
-            for _, url in ipairs(urls) do
-                local success, resp = pcall(function()
-                    return game:HttpGet(url)
-                end)
-                if success and resp and #resp > 0 then
-                    ok, err = pcall(function()
-                        data = HttpService:JSONDecode(resp)
-                    end)
-                    if ok and data and data.username and data.amount then
-                        gotValid = true
-                        break
-                    elseif not ok then
-                        warn("[GoalSync] JSON decode error:", err, "Raw:", resp)
-                    end
-                else
-                    warn("[GoalSync] Request failed or empty from:", url, resp)
-                end
-            end
-            if gotValid then
+
+    local ngrok_url = "https://0e6b7c2e08d6.ngrok-free.app/latest-goal-post"
+    local localhost_url = "http://localhost:3000/latest-goal-post"
+    while true do
+        local success, response = pcall(function()
+            return game:HttpGet(url, true, {
+                ["ngrok-skip-browser-warning"] = "true"
+            })
+        end)
+        if not success then
+            warn("[GoalSync] Request failed:", response)
+        elseif not response or #response == 0 then
+            warn("[GoalSync] Empty response from API")
+        else
+            local data
+            local ok, err = pcall(function()
+                data = HttpService:JSONDecode(response)
+            end)
+            if not ok then
+                warn("[GoalSync] JSON decode error:", err, "Raw:", response)
+            elseif data and data.username and data.amount then
                 local container = G2L and G2L["7"]
                 local box = container and container:FindFirstChild(data.username .. "_Box")
                 if not container then
@@ -4196,8 +4192,21 @@ local HttpService = game:GetService("HttpService")
                                 print("[DEBUG] Fired Summon event for targetPlayer!")
 
                                 -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
-                                local latestGoalAmount = tonumber(data.amount) or 0
-                                local total_bought = latestGoalAmount
+                                local latestGoalAmount = 0
+                                local getGoalSuccess, getGoalResponse = pcall(function()
+                                    return game:HttpGet("https://0e6b7c2e08d6.ngrok-free.app/latest-goal", true, {
+                                        ["ngrok-skip-browser-warning"] = "true"
+                                    })
+                                end)
+                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
+                                    local ok, goalData = pcall(function()
+                                        return HttpService:JSONDecode(getGoalResponse)
+                                    end)
+                                    if ok and goalData and goalData.amount then
+                                        latestGoalAmount = tonumber(goalData.amount) or 0
+                                    end
+                            local latestGoalAmount = tonumber(data.amount) or 0
+                            local total_bought = latestGoalAmount
                                 local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
                                 local avatarUrl = ""
                                 local success_avatar, ThumbnailAPI = pcall(function()
@@ -4258,12 +4267,13 @@ local HttpService = game:GetService("HttpService")
                     end
                 end
             else
-                warn("[GoalSync] API data missing username/amount. Tried all endpoints.")
+                warn("[GoalSync] API data missing username/amount. Raw:", response)
             end
-            wait(3)
         end
+        wait(3)
     end
-    spawn(pollLatestGoal)
+end
+spawn(pollLatestGoal)
 
 
 -- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
