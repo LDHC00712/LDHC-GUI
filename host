@@ -4153,6 +4153,8 @@ local HttpService = game:GetService("HttpService")
             warn("[GoalSync] Request failed:", response)
         elseif not response or #response == 0 then
             warn("[GoalSync] Empty response from API")
+        elseif string.sub(response, 1, 15):lower() == "<!doctype html>" or string.find(response, "<html", 1, true) then
+            warn("[GoalSync] /latest-goal: API returned HTML instead of JSON. อาจจะ ngrok หมดอายุ, URL ผิด, หรือ server ล่ม\nRaw response:", response)
         else
             local data
             local ok, err = pcall(function()
@@ -4198,13 +4200,15 @@ local HttpService = game:GetService("HttpService")
                                         ["ngrok-skip-browser-warning"] = "true"
                                     })
                                 end)
-                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
+                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 and not (string.sub(getGoalResponse, 1, 15):lower() == "<!doctype html>" or string.find(getGoalResponse, "<html", 1, true)) then
                                     local ok, goalData = pcall(function()
                                         return HttpService:JSONDecode(getGoalResponse)
                                     end)
                                     if ok and goalData and goalData.amount then
                                         latestGoalAmount = tonumber(goalData.amount) or 0
                                     end
+                                else
+                                    warn("[GoalSync] /latest-goal (inner): API returned HTML or invalid JSON. ข้ามการ update goal amount")
                                 end
                                 local total_bought = latestGoalAmount
                                 local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
