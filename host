@@ -30,7 +30,6 @@ end
 
 check_env( getgenv() )
 check_env( getrenv() )
---
 
 local Lua_Fetch_Connections = getconnections
 local Lua_Fetch_Upvalues = getupvalues
