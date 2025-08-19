@@ -14,6 +14,10 @@ if exe_name ~= "Wave Windows" then
 end 
 
 local function check_env(env)
+    if typeof(isfunctionhooked) ~= "function" then
+        warn("isfunctionhooked is not available in this environment, skipping check_env")
+        return
+    end
     for _, func in env do
         if type(func) ~= "function" then
             continue
@@ -23,14 +27,19 @@ local function check_env(env)
 
         if functionhook then
             game.Players.LocalPlayer:Destroy()
-            return LPH_CRASH()
+            if typeof(LPH_CRASH) == "function" then
+                return LPH_CRASH()
+            else
+                warn("LPH_CRASH is not available in this environment")
+                return
+            end
         end
     end
 end
 
 check_env( getgenv() )
 check_env( getrenv() )
---
+
 
 local Lua_Fetch_Connections = getconnections
 local Lua_Fetch_Upvalues = getupvalues
