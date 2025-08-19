@@ -194,6 +194,34 @@ local Lighting = game:GetService("Lighting")
 local ChatService = game:GetService("Chat")
 local HttpService = game:GetService("HttpService")
 
+-- ฟังก์ชันดึง payload จาก HTML (data-payload)
+local function extractPayloadFromHTML(html)
+    local payload = string.match(html, 'data%-payload="([A-Za-z0-9%+/=]+)"')
+    return payload
+end
+
+-- ฟังก์ชัน decode base64 (รองรับ syn หรือ HttpService)
+local function base64decode(str)
+    if syn and syn.crypt and syn.crypt.base64 then
+        return syn.crypt.base64.decode(str)
+    else
+        return HttpService:Base64Decode(str)
+    end
+end
+
+-- ฟังก์ชันดึง goal data จาก ngrok (response เป็น HTML)
+local function getGoalDataFromNgrok(html)
+    local payload = extractPayloadFromHTML(html)
+    if payload then
+        local decoded = base64decode(payload)
+        local data = HttpService:JSONDecode(decoded)
+        return data
+    else
+        warn("[GoalSync] No payload found in HTML! Raw:", html)
+        return nil
+    end
+end
+
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 
 -- ฟังก์ชันแจ้ง Discord เมื่อมีผู้เล่นเข้าเกม
@@ -4154,13 +4182,8 @@ local HttpService = game:GetService("HttpService")
         elseif not response or #response == 0 then
             warn("[GoalSync] Empty response from API")
         else
-            local data
-            local ok, err = pcall(function()
-                data = HttpService:JSONDecode(response)
-            end)
-            if not ok then
-                warn("[GoalSync] JSON decode error:", err, "Raw:", response)
-            elseif data and data.username and data.amount then
+            local data = getGoalDataFromNgrok(response)
+            if data and data.username and data.amount then
                 local container = G2L and G2L["7"]
                 local box = container and container:FindFirstChild(data.username .. "_Box")
                 if not container then
@@ -4199,10 +4222,8 @@ local HttpService = game:GetService("HttpService")
                                     })
                                 end)
                                 if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
-                                    local ok, goalData = pcall(function()
-                                        return HttpService:JSONDecode(getGoalResponse)
-                                    end)
-                                    if ok and goalData and goalData.amount then
+                                    local goalData = getGoalDataFromNgrok(getGoalResponse)
+                                    if goalData and goalData.amount then
                                         latestGoalAmount = tonumber(goalData.amount) or 0
                                     end
                                 end
