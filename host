@@ -255,7 +255,7 @@ local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
 
 -- เชื่อมต่อการเปลี่ยนแปลงของเงินกับการอัปเดต GUI
 PLAYER_CASH.Changed:Connect(function(newValue)
-    print("💰 เงินเปลี่ยนแปลง: " .. tostring(newValue))
+
     -- ใช้ spawn เพื่อไม่ให้ block main thread
     spawn(function()
         wait(0.1) -- รอให้ระบบอัปเดตเสร็จ
@@ -295,7 +295,7 @@ function updatePlayerCashDisplay()
                            parent and parent.Name:lower():find("cash") then
                             
                             gui.Text = "$" .. formatMoney(newCashAmount)
-                            print("🔄 อัปเดต GUI หลัก: " .. gui:GetFullName() .. " → $" .. formatMoney(newCashAmount))
+
                             updatedCount = updatedCount + 1
                         end
                         
@@ -309,7 +309,7 @@ function updatePlayerCashDisplay()
                             local currentRightAmount = tonumber(text:gsub("[$,]", "")) or 0
                             local newRightAmount = currentRightAmount + (newCashAmount - ORIGINAL_CASH_AMOUNT)
                             gui.Text = "$" .. formatMoney(newRightAmount)
-                            print("🔄 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newRightAmount))
+
                             updatedCount = updatedCount + 1
                         end
                     end
@@ -320,7 +320,7 @@ function updatePlayerCashDisplay()
                         -- ถ้าเป็นจำนวนเงินที่ใกล้เคียงกับเงินปัจจุบัน
                         if math.abs(amount - ORIGINAL_CASH_AMOUNT) < 100000 then
                             gui.Text = formatMoney(newCashAmount)
-                            print("🔄 อัปเดต GUI (ไม่มี $): " .. gui:GetFullName() .. " → " .. formatMoney(newCashAmount))
+
                             updatedCount = updatedCount + 1
                         end
                     end
@@ -329,7 +329,7 @@ function updatePlayerCashDisplay()
             
             -- ถ้าไม่พบ GUI ให้อัปเดต ลองหาทางอื่น
             if updatedCount == 0 then
-                print("⚠️ ไม่พบ GUI ที่ต้องอัปเดต กำลังลองหาทางอื่น...")
+
                 
                 -- ลองหาผ่าน ScreenGui ทั้งหมด
                 for _, screenGui in pairs(playerGui:GetChildren()) do
@@ -339,7 +339,7 @@ function updatePlayerCashDisplay()
                                 local text = element.Text
                                 if text:match("%$[%d,]+") then
                                     element.Text = "$" .. formatMoney(newCashAmount)
-                                    print("🔄 อัปเดต GUI (fallback): " .. element:GetFullName() .. " → $" .. formatMoney(newCashAmount))
+
                                     updatedCount = updatedCount + 1
                                 end
                             end
@@ -348,7 +348,7 @@ function updatePlayerCashDisplay()
                 end
             end
             
-            print("✅ อัปเดต GUI เสร็จสิ้น: " .. updatedCount .. " elements → $" .. formatMoney(newCashAmount))
+
         end
     end)
 end
