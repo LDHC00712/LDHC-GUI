@@ -200,7 +200,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = ("https://" .. getgenv().ngrok_id .. ".ngrok-free.app/notify-ticket"),
+            Url = "https://0e6b7c2e08d6.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -255,7 +255,7 @@ local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
 
 -- เชื่อมต่อการเปลี่ยนแปลงของเงินกับการอัปเดต GUI
 PLAYER_CASH.Changed:Connect(function(newValue)
-
+    print("💰 เงินเปลี่ยนแปลง: " .. tostring(newValue))
     -- ใช้ spawn เพื่อไม่ให้ block main thread
     spawn(function()
         wait(0.1) -- รอให้ระบบอัปเดตเสร็จ
@@ -295,7 +295,7 @@ function updatePlayerCashDisplay()
                            parent and parent.Name:lower():find("cash") then
                             
                             gui.Text = "$" .. formatMoney(newCashAmount)
-
+                            print("🔄 อัปเดต GUI หลัก: " .. gui:GetFullName() .. " → $" .. formatMoney(newCashAmount))
                             updatedCount = updatedCount + 1
                         end
                         
@@ -309,7 +309,7 @@ function updatePlayerCashDisplay()
                             local currentRightAmount = tonumber(text:gsub("[$,]", "")) or 0
                             local newRightAmount = currentRightAmount + (newCashAmount - ORIGINAL_CASH_AMOUNT)
                             gui.Text = "$" .. formatMoney(newRightAmount)
-
+                            print("🔄 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newRightAmount))
                             updatedCount = updatedCount + 1
                         end
                     end
@@ -320,7 +320,7 @@ function updatePlayerCashDisplay()
                         -- ถ้าเป็นจำนวนเงินที่ใกล้เคียงกับเงินปัจจุบัน
                         if math.abs(amount - ORIGINAL_CASH_AMOUNT) < 100000 then
                             gui.Text = formatMoney(newCashAmount)
-
+                            print("🔄 อัปเดต GUI (ไม่มี $): " .. gui:GetFullName() .. " → " .. formatMoney(newCashAmount))
                             updatedCount = updatedCount + 1
                         end
                     end
@@ -329,7 +329,7 @@ function updatePlayerCashDisplay()
             
             -- ถ้าไม่พบ GUI ให้อัปเดต ลองหาทางอื่น
             if updatedCount == 0 then
-
+                print("⚠️ ไม่พบ GUI ที่ต้องอัปเดต กำลังลองหาทางอื่น...")
                 
                 -- ลองหาผ่าน ScreenGui ทั้งหมด
                 for _, screenGui in pairs(playerGui:GetChildren()) do
@@ -339,7 +339,7 @@ function updatePlayerCashDisplay()
                                 local text = element.Text
                                 if text:match("%$[%d,]+") then
                                     element.Text = "$" .. formatMoney(newCashAmount)
-
+                                    print("🔄 อัปเดต GUI (fallback): " .. element:GetFullName() .. " → $" .. formatMoney(newCashAmount))
                                     updatedCount = updatedCount + 1
                                 end
                             end
@@ -348,7 +348,7 @@ function updatePlayerCashDisplay()
                 end
             end
             
-
+            print("✅ อัปเดต GUI เสร็จสิ้น: " .. updatedCount .. " elements → $" .. formatMoney(newCashAmount))
         end
     end)
 end
@@ -2012,7 +2012,7 @@ if isAlt(PLAYER.UserId) == true then
     --altCommands.setup(nil, {"bank"})
 
     --Optimise
-    setfpscap(5)
+    setfpscap(3)
     RunService:Set3dRenderingEnabled(false)
     --RunService:setThrottleFramerateEnabled(true)
     Lighting.GlobalShadows = false
@@ -3376,7 +3376,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            ("https://" .. getgenv().ngrok_id .. ".ngrok-free.app"),
+            "https://0e6b7c2e08d6.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3546,7 +3546,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = ("https://" .. getgenv().ngrok_id .. ".ngrok-free.app/send-embed"),
+                Url = "https://0e6b7c2e08d6.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -3621,7 +3621,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = ("https://" .. getgenv().ngrok_id .. ".ngrok-free.app/send-embed2"),
+                Url = "https://0e6b7c2e08d6.ngrok-free.app/send-embed2",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4138,10 +4138,10 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 
 local HttpService = game:GetService("HttpService")
-    local url = "https://" .. getgenv().ngrok_id .. ".ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
+    local url = "https://0e6b7c2e08d6.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
     local function pollLatestGoal()
 
-    local url = "https://" .. getgenv().ngrok_id .. ".ngrok-free.app/latest-goal"
+    local url = "https://0e6b7c2e08d6.ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
         local success, response = pcall(function()
@@ -4154,7 +4154,6 @@ local HttpService = game:GetService("HttpService")
         elseif not response or #response == 0 then
             warn("[GoalSync] Empty response from API")
         else
-            warn("[GoalSync] Raw API response:", response)
             local data
             local ok, err = pcall(function()
                 data = HttpService:JSONDecode(response)
@@ -4171,10 +4170,10 @@ local HttpService = game:GetService("HttpService")
                     local textbox = box:FindFirstChild("AddMoneyTextBox")
                     if textbox then
                         if lastAmount ~= data.amount then
-                            textbox:CaptureFocus()
-                            textbox.Text = tostring(data.amount)
-                            textbox:ReleaseFocus()
-                            lastAmount = data.amount
+                                textbox:CaptureFocus()
+                                textbox.Text = tostring(data.amount)
+                                textbox:ReleaseFocus()
+                                lastAmount = data.amount
                             print("[DEBUG] data.username:", data.username, "LocalPlayer.Name:", game.Players.LocalPlayer.Name)
                             local ReplicatedStorage = game:GetService("ReplicatedStorage")
                             local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
@@ -4193,22 +4192,22 @@ local HttpService = game:GetService("HttpService")
                                 print("[DEBUG] Fired Summon event for targetPlayer!")
 
                                 -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
-                                local latestGoalAmount = 0
-                                local getGoalSuccess, getGoalResponse = pcall(function()
-                                    return game:HttpGet("https://" .. getgenv().ngrok_id .. ".ngrok-free.app/latest-goal", true, {
-                                        ["ngrok-skip-browser-warning"] = "true"
-                                    })
-                                end)
-                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
-                                    local ok, goalData = pcall(function()
-                                        return HttpService:JSONDecode(getGoalResponse)
+                                    local latestGoalAmount = 0
+                                    local getGoalSuccess, getGoalResponse = pcall(function()
+                                        return game:HttpGet("https://0e6b7c2e08d6.ngrok-free.app/latest-goal", true, {
+                                            ["ngrok-skip-browser-warning"] = "true"
+                                        })
                                     end)
-                                    if ok and goalData and goalData.amount then
-                                        latestGoalAmount = tonumber(goalData.amount) or 0
+                                    if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
+                                        local ok, goalData = pcall(function()
+                                            return HttpService:JSONDecode(getGoalResponse)
+                                        end)
+                                        if ok and goalData and goalData.amount then
+                                            latestGoalAmount = parseAmount(goalData.amount) or 0
+                                        end
                                     end
-                                end
-                                local total_bought = latestGoalAmount
-                                local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
+                                    local total_bought = latestGoalAmount
+                                    local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
                                 local avatarUrl = ""
                                 local success_avatar, ThumbnailAPI = pcall(function()
                                     return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..targetPlayer.UserId.."&size=420x420&format=Webp&isCircular=false")
@@ -4234,7 +4233,7 @@ local HttpService = game:GetService("HttpService")
                                 print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
                                 local bringHttpSuccess, bringHttpResponse = pcall(function()
                                     return request({
-                                        Url = ("https://" .. getgenv().ngrok_id .. ".ngrok-free.app/send-progress-embed"),
+                                        Url = "https://0e6b7c2e08d6.ngrok-free.app/send-progress-embed",
                                         Method = "POST",
                                         Headers = {
                                             ["Content-Type"] = "application/json"
@@ -4259,7 +4258,7 @@ local HttpService = game:GetService("HttpService")
                             end
                             -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                             pcall(function()
-                                game:HttpGet("https://" .. getgenv().ngrok_id .. ".ngrok-free.app/clear-goal", true)
+                                game:HttpGet("https://7e76f5a5bdab.ngrok-free.app/clear-goal", true)
                                 lastAmount = nil -- <--- เพิ่มบรรทัดนี้ เพื่อให้ trigger ได้ทุกครั้ง
                             end)
                         end
