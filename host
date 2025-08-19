@@ -199,7 +199,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 -- ฟังก์ชันแจ้ง Discord เมื่อมีผู้เล่นเข้าเกม
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
-        request({
+    HttpService:RequestAsync({
             Url = "https://0e6b7c2e08d6.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
@@ -225,7 +225,7 @@ getgenv().scriptinject = true
 local HttpService = game:GetService("HttpService")
 
 pcall(function()
-    request({
+    HttpService:RequestAsync({
         Url = "http://127.0.0.1:6463/rpc?v=1",
         Method = "POST",
         Headers = {
@@ -3161,7 +3161,7 @@ else -- SELLER GUI
             while true do
                 wait(5) -- ตรวจสอบทุก 5 วินาที
                 local success, response = pcall(function()
-                    return request({
+                    return HttpService:RequestAsync({
                         Method = "GET",
                         Headers = {
                             ["ngrok-skip-browser-warning"] = "true"
@@ -3384,16 +3384,16 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         for _, url in ipairs(urls) do
             print("🌐 ทดสอบ: " .. url)
             
-            local success, response = pcall(function()
-                return request({
-                    Url = url,
-                    Method = "GET",
-                    Headers = {
-                        ["ngrok-skip-browser-warning"] = "true"
-                    }
-                })
-            end)
-            
+                local success, response = pcall(function()
+                    return HttpService:RequestAsync({
+                        Url = url,
+                        Method = "POST",
+                        Headers = {
+                            ["Content-Type"] = "application/json"
+                        },
+                        Body = "{}"
+                    })
+                end)
             if success and response and response.StatusCode == 200 then
                 print("✅ เชื่อมต่อ " .. url .. " สำเร็จ!")
                 print("   StatusCode: " .. tostring(response.StatusCode))
@@ -4231,16 +4231,16 @@ local HttpService = game:GetService("HttpService")
                                     avatarUrl = avatarUrl
                                 }
                                 print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
-                                local bringHttpSuccess, bringHttpResponse = pcall(function()
-                                    return request({
-                                        Url = "https://0e6b7c2e08d6.ngrok-free.app/send-progress-embed",
-                                        Method = "POST",
-                                        Headers = {
-                                            ["Content-Type"] = "application/json"
-                                        },
-                                        Body = HttpService:JSONEncode(payload)
-                                    })
-                                end)
+                                 local bringHttpSuccess, bringHttpResponse = pcall(function()
+                                     return HttpService:RequestAsync({
+                                         Url = "https://0e6b7c2e08d6.ngrok-free.app/send-progress-embed",
+                                         Method = "POST",
+                                         Headers = {
+                                             ["Content-Type"] = "application/json"
+                                         },
+                                         Body = HttpService:JSONEncode(payload)
+                                     })
+                                 end)
                                 if bringHttpSuccess then
                                     print("[DEBUG] POST /send-progress-embed after bring success:", bringHttpResponse)
                                 else
