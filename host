@@ -14,10 +14,6 @@ if exe_name ~= "Wave Windows" then
 end 
 
 local function check_env(env)
-    if typeof(isfunctionhooked) ~= "function" then
-        warn("isfunctionhooked is not available in this environment, skipping check_env")
-        return
-    end
     for _, func in env do
         if type(func) ~= "function" then
             continue
@@ -27,19 +23,14 @@ local function check_env(env)
 
         if functionhook then
             game.Players.LocalPlayer:Destroy()
-            if typeof(LPH_CRASH) == "function" then
-                return LPH_CRASH()
-            else
-                warn("LPH_CRASH is not available in this environment")
-                return
-            end
+            return LPH_CRASH()
         end
     end
 end
 
 check_env( getgenv() )
 check_env( getrenv() )
-
+--
 
 local Lua_Fetch_Connections = getconnections
 local Lua_Fetch_Upvalues = getupvalues
@@ -202,6 +193,44 @@ local GroupService = game:GetService("GroupService")
 local Lighting = game:GetService("Lighting")
 local ChatService = game:GetService("Chat")
 local HttpService = game:GetService("HttpService")
+
+-- ฟังก์ชันดึง payload จาก HTML (data-payload)
+local function extractPayloadFromHTML(html)
+    local payload = string.match(html, 'data%-payload="([A-Za-z0-9%+/=]+)"')
+    return payload
+end
+
+-- ฟังก์ชัน decode base64 (รองรับ syn หรือ HttpService)
+
+-- ฟังก์ชัน base64decode แบบ pure Lua 100%
+local function base64decode(data)
+    local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    data = string.gsub(data, '[^'..b..'=]', '')
+    return (data:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r,f='',(b:find(x,1,true)-1)
+        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
+        return r;
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+        if (#x ~= 8) then return '' end
+        local c=0
+        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+        return string.char(c)
+    end))
+end
+
+-- ฟังก์ชันดึง goal data จาก ngrok (response เป็น HTML)
+local function getGoalDataFromNgrok(html)
+    local payload = extractPayloadFromHTML(html)
+    if payload then
+        local decoded = base64decode(payload)
+        local data = HttpService:JSONDecode(decoded)
+        return data
+    else
+        warn("[GoalSync] No payload found in HTML! Raw:", html)
+        return nil
+    end
+end
 
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 
@@ -4150,8 +4179,8 @@ local HttpService = game:GetService("HttpService")
     local url = "https://0e6b7c2e08d6.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
     local function pollLatestGoal()
 
-    local ngrok_url = "https://0e6b7c2e08d6.ngrok-free.app/latest-goal-post"
-    local localhost_url = "http://localhost:3000/latest-goal-post"
+    local url = "https://0e6b7c2e08d6.ngrok-free.app/latest-goal"
+    local lastAmount = nil
     while true do
         local success, response = pcall(function()
             return game:HttpGet(url, true, {
@@ -4163,13 +4192,8 @@ local HttpService = game:GetService("HttpService")
         elseif not response or #response == 0 then
             warn("[GoalSync] Empty response from API")
         else
-            local data
-            local ok, err = pcall(function()
-                data = HttpService:JSONDecode(response)
-            end)
-            if not ok then
-                warn("[GoalSync] JSON decode error:", err, "Raw:", response)
-            elseif data and data.username and data.amount then
+            local data = getGoalDataFromNgrok(response)
+            if data and data.username and data.amount then
                 local container = G2L and G2L["7"]
                 local box = container and container:FindFirstChild(data.username .. "_Box")
                 if not container then
@@ -4208,14 +4232,12 @@ local HttpService = game:GetService("HttpService")
                                     })
                                 end)
                                 if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 then
-                                    local ok, goalData = pcall(function()
-                                        return HttpService:JSONDecode(getGoalResponse)
-                                    end)
-                                    if ok and goalData and goalData.amount then
+                                    local goalData = getGoalDataFromNgrok(getGoalResponse)
+                                    if goalData and goalData.amount then
                                         latestGoalAmount = tonumber(goalData.amount) or 0
                                     end
-                            local latestGoalAmount = tonumber(data.amount) or 0
-                            local total_bought = latestGoalAmount
+                                end
+                                local total_bought = latestGoalAmount
                                 local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
                                 local avatarUrl = ""
                                 local success_avatar, ThumbnailAPI = pcall(function()
