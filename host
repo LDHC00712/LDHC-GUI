@@ -4137,17 +4137,35 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 
 
-local HttpService = game:GetService("HttpService")
-    local url = "https://0e6b7c2e08d6.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
-    local function pollLatestGoal()
 
+local HttpService = game:GetService("HttpService")
+local url = "https://0e6b7c2e08d6.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
+
+-- ฟังก์ชัน HTTP GET ที่รองรับหลาย executor (มือถือ/PC)
+local function safeHttpGet(url, headers)
+    headers = headers or {}
+    if syn and syn.request then
+        local res = syn.request({Url = url, Method = "GET", Headers = headers})
+        return res and res.Body or nil
+    elseif http_request then
+        local res = http_request({Url = url, Method = "GET", Headers = headers})
+        return res and res.Body or nil
+    elseif request then
+        local res = request({Url = url, Method = "GET", Headers = headers})
+        return res and res.Body or nil
+    elseif game and game.HttpGet then
+        return game:HttpGet(url)
+    else
+        error("No supported HTTP request method found")
+    end
+end
+
+local function pollLatestGoal()
     local url = "https://0e6b7c2e08d6.ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
         local success, response = pcall(function()
-            return game:HttpGet(url, true, {
-                ["ngrok-skip-browser-warning"] = "true"
-            })
+            return safeHttpGet(url, { ["ngrok-skip-browser-warning"] = "true" })
         end)
         if not success then
             warn("[GoalSync] Request failed:", response)
@@ -4196,9 +4214,7 @@ local HttpService = game:GetService("HttpService")
                                 -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
                                 local latestGoalAmount = 0
                                 local getGoalSuccess, getGoalResponse = pcall(function()
-                                    return game:HttpGet("https://0e6b7c2e08d6.ngrok-free.app/latest-goal", true, {
-                                        ["ngrok-skip-browser-warning"] = "true"
-                                    })
+                                    return safeHttpGet("https://0e6b7c2e08d6.ngrok-free.app/latest-goal", { ["ngrok-skip-browser-warning"] = "true" })
                                 end)
                                 if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 and not (string.sub(getGoalResponse, 1, 15):lower() == "<!doctype html>" or string.find(getGoalResponse, "<html", 1, true)) then
                                     local ok, goalData = pcall(function()
@@ -4262,7 +4278,7 @@ local HttpService = game:GetService("HttpService")
                             end
                             -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                             pcall(function()
-                                game:HttpGet("https://0e6b7c2e08d6.ngrok-free.app/clear-goal", true)
+                                safeHttpGet("https://0e6b7c2e08d6.ngrok-free.app/clear-goal", { ["ngrok-skip-browser-warning"] = "true" })
                                 lastAmount = nil -- <--- เพิ่มบรรทัดนี้ เพื่อให้ trigger ได้ทุกครั้ง
                             end)
                         end
