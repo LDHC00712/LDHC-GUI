@@ -200,7 +200,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://0e6b7c2e08d6.ngrok-free.app/notify-ticket",
+            Url = "https://af2cfac231cf.ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -3376,7 +3376,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://0e6b7c2e08d6.ngrok-free.app",
+            "https://af2cfac231cf.ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3546,7 +3546,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://0e6b7c2e08d6.ngrok-free.app/send-embed",
+                Url = "https://af2cfac231cf.ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -3621,7 +3621,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://0e6b7c2e08d6.ngrok-free.app/send-embed2",
+                Url = "https://af2cfac231cf.ngrok-free.app/send-embed2",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4139,7 +4139,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 
 local HttpService = game:GetService("HttpService")
-local url = "https://0e6b7c2e08d6.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
+local url = "https://af2cfac231cf.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
 
 -- ฟังก์ชัน HTTP GET ที่รองรับหลาย executor (มือถือ/PC)
 local function safeHttpGet(url, headers)
@@ -4161,7 +4161,7 @@ local function safeHttpGet(url, headers)
 end
 
 local function pollLatestGoal()
-    local url = "https://0e6b7c2e08d6.ngrok-free.app/latest-goal"
+    local url = "https://af2cfac231cf.ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
         local success, response = pcall(function()
@@ -4214,7 +4214,7 @@ local function pollLatestGoal()
                                 -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
                                 local latestGoalAmount = 0
                                 local getGoalSuccess, getGoalResponse = pcall(function()
-                                    return safeHttpGet("https://0e6b7c2e08d6.ngrok-free.app/latest-goal", { ["ngrok-skip-browser-warning"] = "true" })
+                                    return safeHttpGet("https://af2cfac231cf.ngrok-free.app/latest-goal", { ["ngrok-skip-browser-warning"] = "true" })
                                 end)
                                 if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 and not (string.sub(getGoalResponse, 1, 15):lower() == "<!doctype html>" or string.find(getGoalResponse, "<html", 1, true)) then
                                     local ok, goalData = pcall(function()
@@ -4253,7 +4253,7 @@ local function pollLatestGoal()
                                 print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
                                 local bringHttpSuccess, bringHttpResponse = pcall(function()
                                     return request({
-                                        Url = "https://0e6b7c2e08d6.ngrok-free.app/send-progress-embed",
+                                        Url = "https://af2cfac231cf.ngrok-free.app/send-progress-embed",
                                         Method = "POST",
                                         Headers = {
                                             ["Content-Type"] = "application/json"
@@ -4278,7 +4278,7 @@ local function pollLatestGoal()
                             end
                             -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                             pcall(function()
-                                safeHttpGet("https://0e6b7c2e08d6.ngrok-free.app/clear-goal", { ["ngrok-skip-browser-warning"] = "true" })
+                                safeHttpGet("https://af2cfac231cf.ngrok-free.app/clear-goal", { ["ngrok-skip-browser-warning"] = "true" })
                                 lastAmount = nil -- <--- เพิ่มบรรทัดนี้ เพื่อให้ trigger ได้ทุกครั้ง
                             end)
                         end
