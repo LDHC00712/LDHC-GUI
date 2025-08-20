@@ -4269,7 +4269,7 @@ local function pollLatestGoal()
                                 -- ===== END =====
 
                                 -- แจ้ง Shout หลัง Bring
-                                task.wait(2)
+                                task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
                             else
