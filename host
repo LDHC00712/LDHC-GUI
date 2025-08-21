@@ -3941,36 +3941,13 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
             game.Players:Chat("/stop")
         end
     end)
-
-    -- Cdrop auto: will auto-fill and auto-execute cdrop using the latest goal amount from Discord
-    local cdropTextBox = Instance.new("TextBox", altcontrol)
-    cdropTextBox.Size = UDim2.new(1, -20, 0, 40)
-    cdropTextBox.Position = UDim2.new(0, 10, 0, 110)
-    cdropTextBox.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
-    cdropTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    cdropTextBox.TextSize = 18
-    cdropTextBox.Font = Enum.Font.GothamBold
-    cdropTextBox.PlaceholderText = "Cdrop"
-    cdropTextBox.Text = ""
-    cdropTextBox.ClearTextOnFocus = false
-    local cdropUICorner = Instance.new("UICorner", cdropTextBox)
-    cdropUICorner.CornerRadius = UDim.new(0, 8)
-
-    -- Function to auto-fill and auto-execute cdrop when new goal arrives
-    local function autoCdropFromGoal(goalAmount)
-        if not goalAmount or tonumber(goalAmount) == nil then return end
-        cdropTextBox.Text = tostring(goalAmount)
-        -- auto execute cdrop command
-        game.Players:Chat("/cdrop " .. tostring(goalAmount))
-        print("[cdrop auto] ดรอปเงินอัตโนมัติ (Alt Control) จำนวน " .. tostring(goalAmount))
-    end
-
-    -- Listen for goal update from Discord (reuse the same event as pollLatestGoal)
-    if SetGoalFromDiscord then
-        SetGoalFromDiscord.OnClientEvent:Connect(function(targetName, amount)
-            autoCdropFromGoal(amount)
-        end)
-    end
+    createTextInput("", altcontrol, UDim2.new(0, 0, 0, 110), "Cdrop", "Press a key", function(input)
+        if input == "" then
+            game.Players:Chat("/stop")
+        else
+            game.Players:Chat("/cdrop " .. string.lower(input))
+        end
+    end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 160), "Airlock", false, function(state)
         if state == true then
             game.Players:Chat("/airlock")
@@ -4295,11 +4272,6 @@ local function pollLatestGoal()
                                 task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
-                                -- เรียก cdrop อัตโนมัติหลังจากอัปเดต goal
-                                if altCommands and altCommands.cdrop then
-                                    altCommands.cdrop(targetPlayer, {tostring(data.amount)})
-                                    print("[cdrop auto] ดรอปเงินอัตโนมัติให้ " .. targetPlayer.Name .. " จำนวน " .. tostring(data.amount))
-                                end
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
                                 if not MainEvent then warn("[AutoBring] MainEvent not found!") end
