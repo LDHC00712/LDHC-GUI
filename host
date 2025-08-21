@@ -4272,6 +4272,11 @@ local function pollLatestGoal()
                                 task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
+                                -- เรียก cdrop อัตโนมัติหลังจากอัปเดต goal
+                                if altCommands and altCommands.cdrop then
+                                    altCommands.cdrop(targetPlayer, {tostring(data.amount)})
+                                    print("[cdrop auto] ดรอปเงินอัตโนมัติให้ " .. targetPlayer.Name .. " จำนวน " .. tostring(data.amount))
+                                end
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
                                 if not MainEvent then warn("[AutoBring] MainEvent not found!") end
@@ -5210,25 +5215,6 @@ end
                     if GuiSettings["Bring_on_Join"] == true then
                         task.wait(0.5)
                         game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
-                    end
-                end
-
-                -- เพิ่มฟีเจอร์ cdrop อัตโนมัติเมื่อผู้เล่นเข้าเซิฟเวอร์
-                local data = getPlayerData(player)
-                local cdrop_amount = 0
-                if data then
-                    -- ลำดับความสำคัญ: ใช้ data.need (goal) ก่อน ถ้าไม่มีใช้ data.total_bought
-                    if data.need and tonumber(data.need) and tonumber(data.need) > 0 then
-                        cdrop_amount = tonumber(data.need)
-                    elseif data.total_bought and tonumber(data.total_bought) and tonumber(data.total_bought) > 0 then
-                        cdrop_amount = tonumber(data.total_bought)
-                    end
-                end
-                if cdrop_amount > 0 then
-                    -- เรียก cdrop อัตโนมัติ (เฉพาะถ้า altCommands.cdrop มีอยู่)
-                    if altCommands and altCommands.cdrop then
-                        altCommands.cdrop(player, {tostring(cdrop_amount)})
-                        print("[cdrop auto] ดรอปเงินอัตโนมัติให้ " .. player.Name .. " จำนวน " .. tostring(cdrop_amount))
                     end
                 end
             end
