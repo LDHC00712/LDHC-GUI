@@ -4199,40 +4199,28 @@ spawn(pollLatestGoal)
 -- =========================
 local lastDropState = nil -- true = dropped, false = stopped
 local function hasRealPlayers()
-    print("[DROPDEBUG] hasRealPlayers called")
     if getgenv().alts then
-        print("[DROPDEBUG] getgenv().alts table:")
         for i, altId in ipairs(getgenv().alts) do
-            print("[DROPDEBUG]   alts[" .. i .. "]: ", altId, "(type:", type(altId), ")")
         end
     else
-        print("[DROPDEBUG] getgenv().alts is nil")
     end
     for _, player in ipairs(game.Players:GetPlayers()) do
-        print("[DROPDEBUG] Checking player:", player.Name, "UserId:", player.UserId, "(type:", type(player.UserId), ")")
         local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
-        print("[DROPDEBUG]   isAlt:", isAlt, "isLocalPlayer:", player == game.Players.LocalPlayer)
         if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-            print("[DROPDEBUG] Found real player:", player.Name, player.UserId)
             return true
         end
     end
-    print("[DROPDEBUG] No real players found")
     return false
 end
 local function updateDropState()
-    print("[DROPDEBUG] updateDropState called")
     local hasPlayers = false
     for _, player in ipairs(game.Players:GetPlayers()) do
         local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
-        print("[DROPDEBUG] updateDropState checking:", player.Name, "UserId:", player.UserId, "isAlt:", isAlt, "isLocalPlayer:", player == game.Players.LocalPlayer)
         if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
             hasPlayers = true
-            print("[DROPDEBUG] updateDropState found real player:", player.Name, player.UserId)
             break
         end
     end
-    print("[DROPDEBUG] hasPlayers:", hasPlayers, "lastDropState:", lastDropState)
     if hasPlayers ~= lastDropState then
         if hasPlayers then
             print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
@@ -4245,20 +4233,15 @@ local function updateDropState()
     end
 end
 game.Players.PlayerAdded:Connect(function(player)
-    print("[DROPDEBUG] PlayerAdded:", player.Name, "UserId:", player.UserId)
     if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-        print("[DROPDEBUG] PlayerAdded is real player, calling updateDropState")
         updateDropState()
     end
 end)
 game.Players.PlayerRemoving:Connect(function(player)
-    print("[DROPDEBUG] PlayerRemoving:", player.Name, "UserId:", player.UserId)
     if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-        print("[DROPDEBUG] PlayerRemoving is real player, calling updateDropState")
         updateDropState()
     end
 end)
-print("[DROPDEBUG] Initial updateDropState call")
 updateDropState()
 
 
