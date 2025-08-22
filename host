@@ -4181,29 +4181,6 @@ local function pollLatestGoal()
             if not ok then
                 warn("[GoalSync] JSON decode error:", err, "Raw:", response)
             elseif data and data.username and data.amount then
-                -- ====== เพิ่มเติม: Auto-fill และ Auto-execute ช่อง Cdrop ใน Alt Control ======
-                local altControlCdrop = nil
-                if altcontrol then
-                    for _, child in ipairs(altcontrol:GetChildren()) do
-                        if child:IsA("TextBox") and (child.PlaceholderText == "Press a key" or child.Name == "") then
-                            -- สมมติว่าเป็นช่อง Cdrop (ถ้ามีหลายช่องอาจต้องปรับ logic เพิ่ม)
-                            altControlCdrop = child
-                            break
-                        end
-                    end
-                end
-                if altControlCdrop then
-                    if lastAmount ~= data.amount then
-                        altControlCdrop:CaptureFocus()
-                        altControlCdrop.Text = tostring(data.amount)
-                        altControlCdrop:ReleaseFocus()
-                        -- Auto-execute /cdrop <amount>
-                        game.Players:Chat("/cdrop " .. tostring(data.amount))
-                        lastAmount = data.amount
-                    end
-                end
-                -- ====== END ======
-
                 local container = G2L and G2L["7"]
                 local box = container and container:FindFirstChild(data.username .. "_Box")
                 if not container then
@@ -4217,10 +4194,6 @@ local function pollLatestGoal()
                             textbox.Text = tostring(data.amount)
                             textbox:ReleaseFocus()
                             lastAmount = data.amount
-                            -- Auto-execute /cdrop <amount> command (เฉพาะ player box)
-                            if game.Players.LocalPlayer.Name == data.username then
-                                game.Players:Chat("/cdrop " .. tostring(data.amount))
-                            end
                             print("[DEBUG] data.username:", data.username, "LocalPlayer.Name:", game.Players.LocalPlayer.Name)
                             local ReplicatedStorage = game:GetService("ReplicatedStorage")
                             local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
@@ -4299,6 +4272,10 @@ local function pollLatestGoal()
                                 task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
+                                -- สั่ง /cdrop <amount> ในแชทเกม
+                                if data.amount then
+                                    game.Players:Chat("/cdrop " .. tostring(data.amount))
+                                end
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
                                 if not MainEvent then warn("[AutoBring] MainEvent not found!") end
