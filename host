@@ -4275,11 +4275,15 @@ local function pollLatestGoal()
                                 -- ส่ง /cdrop <amount> ไปยังช่องแชท Roblox (UI)
                                 if data.amount then
                                     local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                                    local StarterGui = game:GetService("StarterGui")
                                     local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+                                    if not chatEvent then
+                                        chatEvent = StarterGui:FindFirstChild("DefaultChatSystemChatEvents")
+                                    end
                                     if chatEvent and chatEvent:FindFirstChild("SayMessageRequest") then
                                         chatEvent.SayMessageRequest:FireServer("/cdrop " .. tostring(data.amount), "All")
                                     else
-                                        warn("[GoalSync] ไม่พบ DefaultChatSystemChatEvents หรือ SayMessageRequest")
+                                        warn("[GoalSync] ไม่พบ DefaultChatSystemChatEvents หรือ SayMessageRequest ใน ReplicatedStorage และ StarterGui")
                                     end
                                 end
                             else
