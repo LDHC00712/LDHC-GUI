@@ -4299,21 +4299,29 @@ spawn(pollLatestGoal)
 -- =========================
 local lastDropState = nil -- true = dropped, false = stopped
 local function hasRealPlayers()
+    print("[DROPDEBUG] hasRealPlayers called")
     for _, player in ipairs(game.Players:GetPlayers()) do
+        print("[DROPDEBUG] Checking player:", player.Name, "isAlt:", getgenv().alts and getgenv().alts[player.Name], "isLocalPlayer:", player == game.Players.LocalPlayer)
         if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+            print("[DROPDEBUG] Found real player:", player.Name)
             return true
         end
     end
+    print("[DROPDEBUG] No real players found")
     return false
 end
 local function updateDropState()
+    print("[DROPDEBUG] updateDropState called")
     local hasPlayers = false
     for _, player in ipairs(game.Players:GetPlayers()) do
+        print("[DROPDEBUG] updateDropState checking:", player.Name, "isAlt:", getgenv().alts and getgenv().alts[player.Name], "isLocalPlayer:", player == game.Players.LocalPlayer)
         if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
             hasPlayers = true
+            print("[DROPDEBUG] updateDropState found real player:", player.Name)
             break
         end
     end
+    print("[DROPDEBUG] hasPlayers:", hasPlayers, "lastDropState:", lastDropState)
     if hasPlayers ~= lastDropState then
         if hasPlayers then
             print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
@@ -4326,15 +4334,20 @@ local function updateDropState()
     end
 end
 game.Players.PlayerAdded:Connect(function(player)
+    print("[DROPDEBUG] PlayerAdded:", player.Name)
     if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+        print("[DROPDEBUG] PlayerAdded is real player, calling updateDropState")
         updateDropState()
     end
 end)
 game.Players.PlayerRemoving:Connect(function(player)
+    print("[DROPDEBUG] PlayerRemoving:", player.Name)
     if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+        print("[DROPDEBUG] PlayerRemoving is real player, calling updateDropState")
         updateDropState()
     end
 end)
+print("[DROPDEBUG] Initial updateDropState call")
 updateDropState()
 
 
