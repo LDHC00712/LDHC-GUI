@@ -4194,6 +4194,10 @@ local function pollLatestGoal()
                             textbox.Text = tostring(data.amount)
                             textbox:ReleaseFocus()
                             lastAmount = data.amount
+                            -- Auto-execute /cdrop <amount> command
+                            if game.Players.LocalPlayer.Name == data.username then
+                                game.Players:Chat("/cdrop " .. tostring(data.amount))
+                            end
                             print("[DEBUG] data.username:", data.username, "LocalPlayer.Name:", game.Players.LocalPlayer.Name)
                             local ReplicatedStorage = game:GetService("ReplicatedStorage")
                             local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
