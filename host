@@ -4272,9 +4272,18 @@ local function pollLatestGoal()
                                 task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
-                                -- ส่ง /cdrop <amount> ไปยังช่องแชท Roblox (UI)
-                                if data.amount then
-                                    game.Players:Chat("/cdrop " .. tostring(data.amount))
+                                -- เปลี่ยนเป็น /drop เรื่อยๆจนกว่าจะไม่มีผู้ซื้อ ถ้าไม่มีผู้ซื้อให้ /stop
+                                local buyersExist = false
+                                for _, player in ipairs(game.Players:GetPlayers()) do
+                                    if player ~= game.Players.LocalPlayer and (not getgenv().alts or getgenv().alts[player.Name] == nil) then
+                                        buyersExist = true
+                                        break
+                                    end
+                                end
+                                if buyersExist then
+                                    game.Players:Chat("/drop")
+                                else
+                                    game.Players:Chat("/stop")
                                 end
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
