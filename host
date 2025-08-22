@@ -3272,7 +3272,95 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     checkMoneyRequests()
     
     -- Function to test connection
-    -- (ลบฟังก์ชัน testConnection, notifyDiscordTicket และโค้ดที่เกี่ยวข้องกับการเชื่อมต่อ ngrok, localhost, Discord Bot ออกทั้งหมด)
+    local function testConnection()
+        print("🧪 กำลังทดสอบการเชื่อมต่อ...")
+        
+        local urls = {
+            "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+        }
+        
+        for _, url in ipairs(urls) do
+            print("🌐 ทดสอบ: " .. url)
+            
+            local success, response = pcall(function()
+                return request({
+                    Url = url,
+                    Method = "GET",
+                    Headers = {
+                        ["ngrok-skip-browser-warning"] = "true"
+                    }
+                })
+            end)
+            
+            if success and response and response.StatusCode == 200 then
+                print("✅ เชื่อมต่อ " .. url .. " สำเร็จ!")
+                print("   StatusCode: " .. tostring(response.StatusCode))
+                print("   Body: " .. tostring(response.Body):sub(1, 100) .. "...")
+                return url
+            else
+                print("❌ " .. url .. " ไม่สามารถเชื่อมต่อได้")
+                if response then
+                    print("   StatusCode: " .. tostring(response.StatusCode))
+                end
+            end
+        end
+        
+        print("❌ ไม่สามารถเชื่อมต่อได้จากทุก URL")
+        return nil
+    end
+
+    -- Function to notify Discord ticket when player joins
+    local function notifyDiscordTicket(playerName, userId)
+        -- ตรวจสอบว่าไม่ใช่ alt account
+        if getgenv().alts and getgenv().alts[playerName] then
+            print("🚫 " .. playerName .. " เป็น alt account, ไม่ส่งการแจ้งเตือน")
+            return
+        end
+        
+        print("🔔 กำลังส่งการแจ้งเตือนสำหรับ: " .. playerName)
+
+        -- ทดสอบการเชื่อมต่อก่อน
+        local baseUrl = testConnection()
+        if not baseUrl then
+            print("❌ ไม่สามารถเชื่อมต่อ Discord Bot ได้")
+            return
+        end
+
+        -- ส่งข้อมูลที่จำเป็นเท่านั้น
+        local payload = {
+            robloxUsername = playerName
+        }
+
+        local url = baseUrl .. "/notify-ticket"
+        print("🌐 ใช้ URL: " .. url)
+        
+        local requestSuccess, response = pcall(function()
+            return request({
+                Url = url,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json",
+                    ["ngrok-skip-browser-warning"] = "true"
+                },
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+
+        if requestSuccess and response and response.StatusCode == 200 then
+            print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
+            print("📄 Response: " .. (response.Body or "ไม่มี response body"))
+        elseif requestSuccess and response then
+            print("⚠️  การส่งการแจ้งเตือนล้มเหลว:")
+            print("   StatusCode: " .. tostring(response.StatusCode or "nil"))
+            print("   StatusMessage: " .. tostring(response.StatusMessage or "nil"))
+            print("   Body: " .. tostring(response.Body or "nil"))
+        else
+            print("❌ ไม่สามารถส่งการแจ้งเตือนได้")
+            print("   Error: " .. tostring(response))
+        end
+    end
 
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
         -- Get player name from userid
