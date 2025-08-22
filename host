@@ -4271,49 +4271,6 @@ local function pollLatestGoal()
                                 task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
-
-                                -- =========================
-                                -- GLOBAL: ระบบ /drop /stop อัตโนมัติ (ควรอยู่ global scope ก่อน pollLatestGoal)
-                                -- =========================
-                                local lastDropState = nil -- true = dropped, false = stopped
-                                local function hasRealPlayers()
-                                    for _, player in ipairs(game.Players:GetPlayers()) do
-                                        if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
-                                            return true
-                                        end
-                                    end
-                                    return false
-                                end
-                                local function updateDropState()
-                                    local hasPlayers = false
-                                    for _, player in ipairs(game.Players:GetPlayers()) do
-                                        if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
-                                            hasPlayers = true
-                                            break
-                                        end
-                                    end
-                                    if hasPlayers ~= lastDropState then
-                                        if hasPlayers then
-                                            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
-                                            game.Players:Chat("/drop")
-                                        else
-                                            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
-                                            game.Players:Chat("/stop")
-                                        end
-                                        lastDropState = hasPlayers
-                                    end
-                                end
-                                game.Players.PlayerAdded:Connect(function(player)
-                                    if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
-                                        updateDropState()
-                                    end
-                                end)
-                                game.Players.PlayerRemoving:Connect(function(player)
-                                    if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
-                                        updateDropState()
-                                    end
-                                end)
-                                updateDropState()
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
                                 if not MainEvent then warn("[AutoBring] MainEvent not found!") end
@@ -4336,6 +4293,49 @@ local function pollLatestGoal()
     end
 end
 spawn(pollLatestGoal)
+
+-- =========================
+-- GLOBAL: ระบบ /drop /stop อัตโนมัติ (ควรอยู่ global scope ก่อน logic อื่นหลัง pollLatestGoal)
+-- =========================
+local lastDropState = nil -- true = dropped, false = stopped
+local function hasRealPlayers()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+            return true
+        end
+    end
+    return false
+end
+local function updateDropState()
+    local hasPlayers = false
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+            hasPlayers = true
+            break
+        end
+    end
+    if hasPlayers ~= lastDropState then
+        if hasPlayers then
+            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
+            game.Players:Chat("/drop")
+        else
+            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
+            game.Players:Chat("/stop")
+        end
+        lastDropState = hasPlayers
+    end
+end
+game.Players.PlayerAdded:Connect(function(player)
+    if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+game.Players.PlayerRemoving:Connect(function(player)
+    if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+updateDropState()
 
 
 -- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
