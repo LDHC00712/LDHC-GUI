@@ -4274,9 +4274,11 @@ local function pollLatestGoal()
                                 MainEvent:FireServer("Shout", shoutMsg)
 
                                 -- ฟังก์ชันตรวจสอบว่ามีผู้ซื้อ (Players จริง) เหลืออยู่หรือไม่
-                                local function hasBuyers()
+
+                                -- ฟังก์ชันตรวจสอบว่ามี Players จริง (ไม่รวม main/alts) เหลืออยู่หรือไม่
+                                local function hasRealPlayers()
                                     for _, player in ipairs(game.Players:GetPlayers()) do
-                                        if player ~= game.Players.LocalPlayer and (not getgenv().alts or getgenv().alts[player.Name] == nil) then
+                                        if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
                                             return true
                                         end
                                     end
@@ -4284,28 +4286,43 @@ local function pollLatestGoal()
                                 end
 
                                 -- ส่ง /drop ครั้งเดียวเมื่อมี Players จริงเข้า, /stop ครั้งเดียวเมื่อไม่มีเหลือ
-                                local lastDropState = nil -- true = /drop, false = /stop
+
+                                local lastDropState = nil -- true = dropped, false = stopped
                                 local function updateDropState()
-                                    local buyers = false
+                                    -- ตรวจสอบว่ามี Players จริง (ไม่รวม main/alts) เหลือหรือไม่
+                                    local hasPlayers = false
                                     for _, player in ipairs(game.Players:GetPlayers()) do
-                                        if player ~= game.Players.LocalPlayer and (not getgenv().alts or getgenv().alts[player.Name] == nil) then
-                                            buyers = true
+                                        if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+                                            hasPlayers = true
                                             break
                                         end
                                     end
-                                    if buyers ~= lastDropState then
-                                        if buyers then
+                                    if hasPlayers ~= lastDropState then
+                                        if hasPlayers then
+                                            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
                                             game.Players:Chat("/drop")
                                         else
+                                            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
                                             game.Players:Chat("/stop")
                                         end
-                                        lastDropState = buyers
+                                        lastDropState = hasPlayers
                                     end
                                 end
 
                                 -- เช็คสถานะทุกครั้งที่ Players เข้า/ออก
-                                game.Players.PlayerAdded:Connect(updateDropState)
-                                game.Players.PlayerRemoving:Connect(updateDropState)
+
+                                game.Players.PlayerAdded:Connect(function(player)
+                                    -- เฉพาะถ้า player ที่เข้าใหม่ไม่ใช่ main/alts
+                                    if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+                                        updateDropState()
+                                    end
+                                end)
+                                game.Players.PlayerRemoving:Connect(function(player)
+                                    -- เฉพาะถ้า player ที่ออกไปไม่ใช่ main/alts
+                                    if (not getgenv().alts or getgenv().alts[player.Name] == nil) and player ~= game.Players.LocalPlayer then
+                                        updateDropState()
+                                    end
+                                end)
 
                                 -- เรียกเช็คครั้งแรกตอนโหลดสคริปต์
                                 updateDropState()
