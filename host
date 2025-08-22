@@ -1,7 +1,6 @@
 
 
 
-
 local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
@@ -68,7 +67,7 @@ table.foreach(Table, print)
 end
 
 if getgenv().DEBUG then
-
+print("[auth.injected.live] Waiting...")
 end
 
 local good_check = 0
@@ -86,7 +85,7 @@ return true , true
 end
 
 function Lua_Common_Intercept(old, ...)
-
+print(...)
 return old(...)
 end
 
@@ -182,6 +181,7 @@ end
 end)
 
 if getgenv().DEBUG then
+print("[auth.injected.live] Started Emulation Thread")
 end
 
 
@@ -255,6 +255,7 @@ local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
 
 -- เชื่อมต่อการเปลี่ยนแปลงของเงินกับการอัปเดต GUI
 PLAYER_CASH.Changed:Connect(function(newValue)
+    print("💰 เงินเปลี่ยนแปลง: " .. tostring(newValue))
     -- ใช้ spawn เพื่อไม่ให้ block main thread
     spawn(function()
         wait(0.1) -- รอให้ระบบอัปเดตเสร็จ
@@ -294,6 +295,7 @@ function updatePlayerCashDisplay()
                            parent and parent.Name:lower():find("cash") then
                             
                             gui.Text = "$" .. formatMoney(newCashAmount)
+                            print("🔄 อัปเดต GUI หลัก: " .. gui:GetFullName() .. " → $" .. formatMoney(newCashAmount))
                             updatedCount = updatedCount + 1
                         end
                         
@@ -307,6 +309,7 @@ function updatePlayerCashDisplay()
                             local currentRightAmount = tonumber(text:gsub("[$,]", "")) or 0
                             local newRightAmount = currentRightAmount + (newCashAmount - ORIGINAL_CASH_AMOUNT)
                             gui.Text = "$" .. formatMoney(newRightAmount)
+                            print("🔄 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newRightAmount))
                             updatedCount = updatedCount + 1
                         end
                     end
@@ -317,7 +320,7 @@ function updatePlayerCashDisplay()
                         -- ถ้าเป็นจำนวนเงินที่ใกล้เคียงกับเงินปัจจุบัน
                         if math.abs(amount - ORIGINAL_CASH_AMOUNT) < 100000 then
                             gui.Text = formatMoney(newCashAmount)
-
+                            print("🔄 อัปเดต GUI (ไม่มี $): " .. gui:GetFullName() .. " → " .. formatMoney(newCashAmount))
                             updatedCount = updatedCount + 1
                         end
                     end
@@ -326,7 +329,7 @@ function updatePlayerCashDisplay()
             
             -- ถ้าไม่พบ GUI ให้อัปเดต ลองหาทางอื่น
             if updatedCount == 0 then
-
+                print("⚠️ ไม่พบ GUI ที่ต้องอัปเดต กำลังลองหาทางอื่น...")
                 
                 -- ลองหาผ่าน ScreenGui ทั้งหมด
                 for _, screenGui in pairs(playerGui:GetChildren()) do
@@ -336,7 +339,7 @@ function updatePlayerCashDisplay()
                                 local text = element.Text
                                 if text:match("%$[%d,]+") then
                                     element.Text = "$" .. formatMoney(newCashAmount)
-
+                                    print("🔄 อัปเดต GUI (fallback): " .. element:GetFullName() .. " → $" .. formatMoney(newCashAmount))
                                     updatedCount = updatedCount + 1
                                 end
                             end
@@ -345,7 +348,7 @@ function updatePlayerCashDisplay()
                 end
             end
             
-
+            print("✅ อัปเดต GUI เสร็จสิ้น: " .. updatedCount .. " elements → $" .. formatMoney(newCashAmount))
         end
     end)
 end
@@ -1687,7 +1690,7 @@ if isAlt(PLAYER.UserId) == true then
     local backpack = player2.Backpack
     local character2 = player2.Character or player2.CharacterAdded:Wait() 
     altCommands.wallet = function(player, args)
-
+        print(player,args)
         for _, v in pairs(character:GetChildren()) do
             if v:IsA("Tool") and v.Name ~= "[Wallet]" then
                 v.Parent = backpack  -- Move tools to backpack
@@ -2104,7 +2107,7 @@ if isAlt(PLAYER.UserId) == true then
         
                 local cmdName = ""
                 local firstWord = splitString[1]
-
+                print(firstWord)
                 if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
                     cmdName = string.lower(firstWord:sub(2))
                 end
@@ -2135,7 +2138,7 @@ if isAlt(PLAYER.UserId) == true then
         
                 local cmdName = ""
                 local firstWord = splitString[1]
-
+                print(firstWord)
                 if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
                     cmdName = string.lower(firstWord:sub(2))
                 end
@@ -2165,7 +2168,7 @@ if isAlt(PLAYER.UserId) == true then
             end
         end
     end
-
+    print("Ran")   
 else -- SELLER GUI
     local function format(value)
         -- Check if the value is negative
@@ -3195,10 +3198,10 @@ else -- SELLER GUI
                                 local validType = type(request.amount) == "string" or type(request.amount) == "number"
                                 local amountNum = validType and parseAmount(request.amount) or nil
                                 if amountNum and amountNum > 0 then
-
+                                    print("[AUTO DHC] เพิ่มเงินให้ ", request.username, "จำนวน:", amountNum, "เหตุผล:", request.reason or "-")
                                     addMoneyToPlayer(request.username, amountNum, request.reason, request.amount)
                                 else
-
+                                    print("[AUTO DHC] amount ไม่ถูกต้อง:", tostring(request.amount))
                                 end
                             end
                         end
@@ -3222,7 +3225,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
         
         if not targetPlayer then
-
+            print("❌ ไม่พบผู้เล่น " .. targetUsername .. " ในเซิร์ฟเวอร์")
             return
         end
         
@@ -3240,33 +3243,38 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                     local playerGui = targetPlayer:FindFirstChild("PlayerGui")
                     if playerGui then
                         local found = false
-
+                        print("[DEBUG] TextBox ทั้งหมดใน PlayerGui ของ " .. targetPlayer.Name .. ":")
                         for _, gui in pairs(playerGui:GetDescendants()) do
                             if gui:IsA("TextBox") then
-
+                                print("  Name=", gui.Name, " PlaceholderText=", gui.PlaceholderText, " Text=", gui.Text)
                             end
                         end
                         for _, gui in pairs(playerGui:GetDescendants()) do
                             if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
                                 gui.Text = tostring(amountRaw or amount)
-
+                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
                                 found = true
                             end
                         end
                         if not found then
-
+                            print("❌ ไม่พบ TextBox ใน PlayerGui ของ " .. targetPlayer.Name)
                         end
                     else
-
+                        print("❌ ไม่พบ PlayerGui ของ " .. targetPlayer.Name)
                     end
 
                     -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
                     if targetPlayer == PLAYER then
                         totalAddedMoney = totalAddedMoney + amount
-
+                        print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
                         -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
                         updateRightSideGUI(amount, totalAddedMoney)
                     end
+
+                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
+                    print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
+                    print("   เหตุผล: " .. reason)
+                    
                     return
                 end
             end
@@ -3279,12 +3287,17 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                                targetPlayer.leaderstats:FindFirstChild("Currency")
                 if cashStat then
                     cashStat.Value = cashStat.Value + amount
+                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername .. " (ผ่าน leaderstats)")
+                    print("   เหตุผล: " .. reason)
                     return
                 end
             end
+            
+            print("⚠️ ไม่พบระบบเงินสำหรับ " .. targetUsername)
         end)
         
         if not success then
+            print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
         end
     end
     
@@ -3333,6 +3346,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                                 -- อัปเดตช่องขวาให้แสดงเงินรวมที่เพิ่มจาก Discord
                                 local newAmount = ORIGINAL_CASH_AMOUNT + totalAdded
                                 gui.Text = "$" .. formatMoney(newAmount)
+                                print("💎 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newAmount))
                             end
                         end
                         
@@ -3340,11 +3354,14 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                         if gui.Name:lower():find("button") or gui.Name:lower():find("add") then
                             if text:match("^[%d]+[km]?$") then -- เช่น "1m", "500k"
                                 gui.Text = formatMoney(addedAmount)
+                                print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. formatMoney(addedAmount))
                             end
                         end
                     end
                 end
             end
+            
+            print("✨ อัปเดต GUI ด้านขวาเสร็จสิ้น: +$" .. formatMoney(addedAmount) .. " (รวม: $" .. formatMoney(totalAdded) .. ")")
         end)
     end
     
@@ -3356,6 +3373,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     -- Function to test connection
     local function testConnection()
+        print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
             "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app",
@@ -3364,6 +3382,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         }
         
         for _, url in ipairs(urls) do
+            print("🌐 ทดสอบ: " .. url)
             
             local success, response = pcall(function()
                 return request({
@@ -3376,13 +3395,19 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
             end)
             
             if success and response and response.StatusCode == 200 then
+                print("✅ เชื่อมต่อ " .. url .. " สำเร็จ!")
+                print("   StatusCode: " .. tostring(response.StatusCode))
+                print("   Body: " .. tostring(response.Body):sub(1, 100) .. "...")
                 return url
             else
+                print("❌ " .. url .. " ไม่สามารถเชื่อมต่อได้")
                 if response then
+                    print("   StatusCode: " .. tostring(response.StatusCode))
                 end
             end
         end
         
+        print("❌ ไม่สามารถเชื่อมต่อได้จากทุก URL")
         return nil
     end
 
@@ -3390,12 +3415,16 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     local function notifyDiscordTicket(playerName, userId)
         -- ตรวจสอบว่าไม่ใช่ alt account
         if getgenv().alts and getgenv().alts[playerName] then
+            print("🚫 " .. playerName .. " เป็น alt account, ไม่ส่งการแจ้งเตือน")
             return
         end
+        
+        print("🔔 กำลังส่งการแจ้งเตือนสำหรับ: " .. playerName)
 
         -- ทดสอบการเชื่อมต่อก่อน
         local baseUrl = testConnection()
         if not baseUrl then
+            print("❌ ไม่สามารถเชื่อมต่อ Discord Bot ได้")
             return
         end
 
@@ -3405,6 +3434,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         }
 
         local url = baseUrl .. "/notify-ticket"
+        print("🌐 ใช้ URL: " .. url)
         
         local requestSuccess, response = pcall(function()
             return request({
@@ -3419,8 +3449,16 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end)
 
         if requestSuccess and response and response.StatusCode == 200 then
+            print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
+            print("📄 Response: " .. (response.Body or "ไม่มี response body"))
         elseif requestSuccess and response then
+            print("⚠️  การส่งการแจ้งเตือนล้มเหลว:")
+            print("   StatusCode: " .. tostring(response.StatusCode or "nil"))
+            print("   StatusMessage: " .. tostring(response.StatusMessage or "nil"))
+            print("   Body: " .. tostring(response.Body or "nil"))
         else
+            print("❌ ไม่สามารถส่งการแจ้งเตือนได้")
+            print("   Error: " .. tostring(response))
         end
     end
 
@@ -3503,6 +3541,9 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
             discord_webhook = discord_webhook
         }
 
+        print("Sending payload to webhook server...")
+        print("Payload:", HttpService:JSONEncode(payload))
+
         local success, response = pcall(function()
             return request({
                 Url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/send-embed",
@@ -3515,9 +3556,17 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end)
 
         if success and response.Success then
+            print("Discord embed webhook with avatar and image sent successfully!")
+            print("Response body:", response.Body)
         else
+            print("Failed to send Discord embed webhook:")
+            print("Success:", success)
             if response then
+                print("StatusCode:", response.StatusCode)
+                print("StatusMessage:", response.StatusMessage)
+                print("Body:", response.Body)
             else
+                print("No response received")
             end
         end
     end
@@ -3567,6 +3616,9 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
             goal = goal -- ใช้ goal ที่รับมา
         }
 
+        print("Sending payload to webhook server (send-embed2)...")
+        print("Payload:", HttpService:JSONEncode(payload))
+
         local success, response = pcall(function()
             return request({
                 Url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/send-embed2",
@@ -3579,9 +3631,17 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end)
 
         if success and response and response.Success then
+            print("Discord embed2 webhook with avatar and image sent successfully!")
+            print("Response body:", response.Body)
         else
+            print("Failed to send Discord embed2 webhook:")
+            print("Success:", success)
             if response then
+                print("StatusCode:", response.StatusCode)
+                print("StatusMessage:", response.StatusMessage)
+                print("Body:", response.Body)
             else
+                print("No response received")
             end
         end
     end
@@ -3612,9 +3672,12 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
             })
     
             if second_response.StatusCode == 200 then
+                print("Successfully unblocked player with User ID: " .. userId)
             else
+                print("Failed to unblock player. Status Code:", second_response.StatusCode)
             end
         else
+            print("CSRF token not found. Could not proceed with blocking.")
         end
     end
     
@@ -3646,9 +3709,12 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
             })
     
             if second_response.StatusCode == 200 then
+                print("Successfully blocked player with User ID: " .. userId)
             else
+                print("Failed to block player. Status Code:", second_response.StatusCode)
             end
         else
+            print("CSRF token not found. Could not proceed with blocking.")
         end
     end
     
@@ -4102,23 +4168,23 @@ local function pollLatestGoal()
             return safeHttpGet(url, { ["ngrok-skip-browser-warning"] = "true" })
         end)
         if not success then
-
+            warn("[GoalSync] Request failed:", response)
         elseif not response or #response == 0 then
-
+            warn("[GoalSync] Empty response from API")
         elseif string.sub(response, 1, 15):lower() == "<!doctype html>" or string.find(response, "<html", 1, true) then
-
+            warn("[GoalSync] /latest-goal: API returned HTML instead of JSON. อาจจะ ngrok หมดอายุ, URL ผิด, หรือ server ล่ม\nRaw response:", response)
         else
             local data
             local ok, err = pcall(function()
                 data = HttpService:JSONDecode(response)
             end)
             if not ok then
-
+                warn("[GoalSync] JSON decode error:", err, "Raw:", response)
             elseif data and data.username and data.amount then
                 local container = G2L and G2L["7"]
                 local box = container and container:FindFirstChild(data.username .. "_Box")
                 if not container then
-
+                    warn("[GoalSync] G2L[\"7\"] (player box container) not found")
                 elseif not box then
                 else
                     local textbox = box:FindFirstChild("AddMoneyTextBox")
@@ -4128,10 +4194,10 @@ local function pollLatestGoal()
                             textbox.Text = tostring(data.amount)
                             textbox:ReleaseFocus()
                             lastAmount = data.amount
-
+                            print("[DEBUG] data.username:", data.username, "LocalPlayer.Name:", game.Players.LocalPlayer.Name)
                             local ReplicatedStorage = game:GetService("ReplicatedStorage")
                             local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-
+                            print("[DEBUG] MainEvent exists:", MainEvent ~= nil)
                             local targetPlayer = game.Players:FindFirstChild(data.username)
                             if targetPlayer and MainEvent then
                                 -- เก็บ start_cash ก่อน bring
@@ -4139,11 +4205,11 @@ local function pollLatestGoal()
                                 if targetPlayer:FindFirstChild("DataFolder") and targetPlayer.DataFolder:FindFirstChild("Currency") then
                                     start_cash = targetPlayer.DataFolder.Currency.Value
                                 end
-
+                                print("[DEBUG] Waiting before bringing ", data.username)
                                 task.wait(1)
-
+                                print("[DEBUG] Bringing ", data.username, " to ", game.Players.LocalPlayer.Name)
                                 MainEvent:FireServer("VIP_CMD", "Summon", targetPlayer)
-
+                                print("[DEBUG] Fired Summon event for targetPlayer!")
 
                                 -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
                                 local latestGoalAmount = 0
@@ -4158,7 +4224,7 @@ local function pollLatestGoal()
                                         latestGoalAmount = tonumber(goalData.amount) or 0
                                     end
                                 else
-
+                                    warn("[GoalSync] /latest-goal (inner): API returned HTML or invalid JSON. ข้ามการ update goal amount")
                                 end
                                 local total_bought = latestGoalAmount
                                 local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
@@ -4184,7 +4250,7 @@ local function pollLatestGoal()
                                     total_bought = total_bought,
                                     avatarUrl = avatarUrl
                                 }
-
+                                print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
                                 local bringHttpSuccess, bringHttpResponse = pcall(function()
                                     return request({
                                         Url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/send-progress-embed",
@@ -4196,9 +4262,9 @@ local function pollLatestGoal()
                                     })
                                 end)
                                 if bringHttpSuccess then
-
+                                    print("[DEBUG] POST /send-progress-embed after bring success:", bringHttpResponse)
                                 else
-
+                                    warn("[DEBUG] POST /send-progress-embed after bring failed:", bringHttpResponse)
                                 end
                                 -- ===== END =====
 
@@ -4206,8 +4272,8 @@ local function pollLatestGoal()
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
                             else
-                                if not targetPlayer then end
-                                if not MainEvent then end
+                                if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
+                                if not MainEvent then warn("[AutoBring] MainEvent not found!") end
                             end
                             -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                             pcall(function()
@@ -4216,11 +4282,11 @@ local function pollLatestGoal()
                             end)
                         end
                     else
-
+                        warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
                     end
                 end
             else
-
+                warn("[GoalSync] API data missing username/amount. Raw:", response)
             end
         end
         wait(3)
@@ -4233,47 +4299,66 @@ spawn(pollLatestGoal)
 -- =========================
 local lastDropState = nil -- true = dropped, false = stopped
 local function hasRealPlayers()
+    print("[DROPDEBUG] hasRealPlayers called")
+    if getgenv().alts then
+        print("[DROPDEBUG] getgenv().alts table:")
+        for i, altId in ipairs(getgenv().alts) do
+            print("[DROPDEBUG]   alts[" .. i .. "]: ", altId, "(type:", type(altId), ")")
+        end
+    else
+        print("[DROPDEBUG] getgenv().alts is nil")
+    end
     for _, player in ipairs(game.Players:GetPlayers()) do
+        print("[DROPDEBUG] Checking player:", player.Name, "UserId:", player.UserId, "(type:", type(player.UserId), ")")
         local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
-        if (not getgenv().alts or not isAlt) and player ~= game.Players.LocalPlayer then
+        print("[DROPDEBUG]   isAlt:", isAlt, "isLocalPlayer:", player == game.Players.LocalPlayer)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            print("[DROPDEBUG] Found real player:", player.Name, player.UserId)
             return true
         end
     end
+    print("[DROPDEBUG] No real players found")
     return false
 end
 local function updateDropState()
+    print("[DROPDEBUG] updateDropState called")
     local hasPlayers = false
     for _, player in ipairs(game.Players:GetPlayers()) do
         local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
-        if (not getgenv().alts or not isAlt) and player ~= game.Players.LocalPlayer then
+        print("[DROPDEBUG] updateDropState checking:", player.Name, "UserId:", player.UserId, "isAlt:", isAlt, "isLocalPlayer:", player == game.Players.LocalPlayer)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
             hasPlayers = true
+            print("[DROPDEBUG] updateDropState found real player:", player.Name, player.UserId)
             break
         end
     end
+    print("[DROPDEBUG] hasPlayers:", hasPlayers, "lastDropState:", lastDropState)
     if hasPlayers ~= lastDropState then
         if hasPlayers then
+            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
             game.Players:Chat("/drop")
         else
+            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
             game.Players:Chat("/stop")
         end
         lastDropState = hasPlayers
     end
 end
 game.Players.PlayerAdded:Connect(function(player)
-
+    print("[DROPDEBUG] PlayerAdded:", player.Name, "UserId:", player.UserId)
     if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-
+        print("[DROPDEBUG] PlayerAdded is real player, calling updateDropState")
         updateDropState()
     end
 end)
 game.Players.PlayerRemoving:Connect(function(player)
-
+    print("[DROPDEBUG] PlayerRemoving:", player.Name, "UserId:", player.UserId)
     if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-
+        print("[DROPDEBUG] PlayerRemoving is real player, calling updateDropState")
         updateDropState()
     end
 end)
-
+print("[DROPDEBUG] Initial updateDropState call")
 updateDropState()
 
 
@@ -4662,7 +4747,7 @@ end
         if MainEvent then
             MainEvent:FireServer("VIP_CMD", "Summon", player)
         else
-
+            warn("[AutoBring] MainEvent not found!")
         end
     end
 
@@ -5004,6 +5089,7 @@ end
                     local box = container and container:FindFirstChild(player.Name .. "_Box")
                     if container and box then
                         box:Destroy()
+                        print("[GoalSync] Removed box for user:", data.username)
                 end
               end
             else
@@ -5132,17 +5218,21 @@ end
         end
     end
     
-    game.Players.PlayerAdded:Connect(function(player)
-        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-            updateDropState()
-        end
-    end)
-    game.Players.PlayerRemoving:Connect(function(player)
-        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-            updateDropState()
-        end
-    end)
-    updateDropState() -- Initial call
+    Players.PlayerAdded:Connect(function(player)
+        -- Check if the player's UserId is NOT in the alts list
+        if not table.find(getgenv().alts, player.UserId) then
+            -- Play the sound as soon as the player joins
+            local Join_Audio = tonumber(GuiSettings["Join_Audio_id"])
+            playSound(Join_Audio)
+
+            -- Fetch the player's profile picture and username
+            local username = player.Name
+            local userId = player.UserId
+            
+            -- Get the player's profile picture URL
+            local pfpUrl = game:GetService("Players"):GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+
+            -- Send notification to Discord ticket (New feature) - Only for non-alt players
             notifyDiscordTicket(username, userId)
 
             -- Show a notification to all players about the player joining
@@ -5164,7 +5254,7 @@ end
 
             -- Check if we exited the loop due to timeout
             if tick() - startTime > timeout then
-
+                warn("Player character took too long to load.")
             else
 
                 local container = G2L["7"]
