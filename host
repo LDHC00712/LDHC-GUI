@@ -3050,6 +3050,229 @@ else -- SELLER GUI
     
     
     local HttpService = game:GetService("HttpService")
+    
+    -- ตัวแปรสำหรับเก็บข้อมูลการเพิ่มเงิน
+    local pendingMoneyRequests = {}
+    local totalAddedMoney = 0 -- ติดตามจำนวนเงินที่เพิ่มจาก Discord
+    
+    -- Function to check for money requests from Discord
+    local function checkMoneyRequests()
+        spawn(function()
+            while true do
+                wait(5) -- ตรวจสอบทุก 5 วินาที
+                local success, response = pcall(function()
+                    return request({
+                        Method = "GET",
+                        Headers = {
+                            ["ngrok-skip-browser-warning"] = "true"
+                        }
+                    })
+                end)
+                if success and response and response.StatusCode == 200 then
+                    local data = HttpService:JSONDecode(response.Body)
+                    if data.success and data.requests then
+                        for _, request in ipairs(data.requests) do
+                            if not pendingMoneyRequests[request.id] then
+                                pendingMoneyRequests[request.id] = true
+                                -- แปลง amount เช่น 1m, 500k, 10000
+                                local function parseAmount(str)
+                                    str = tostring(str):lower():gsub(",", ""):gsub("%s", "")
+                                    if str == "" then return nil end
+                                    if str:find("m") then
+                                        local numstr = str:gsub("m", "")
+                                        if numstr == "" then return nil end
+                                        local num = tonumber(numstr)
+                                        if num then return num * 1e6 end
+                                    elseif str:find("k") then
+                                        local numstr = str:gsub("k", "")
+                                        if numstr == "" then return nil end
+                                        local num = tonumber(numstr)
+                                        if num then return num * 1e3 end
+                                    else
+                                        local num = tonumber(str)
+                                        if num then return num end
+                                    end
+                                    return nil
+                                end
+                                local amountNum = parseAmount(request.amount)
+                                local validType = type(request.amount) == "string" or type(request.amount) == "number"
+                                local amountNum = validType and parseAmount(request.amount) or nil
+                                if amountNum and amountNum > 0 then
+                                    print("[AUTO DHC] เพิ่มเงินให้ ", request.username, "จำนวน:", amountNum, "เหตุผล:", request.reason or "-")
+                                    addMoneyToPlayer(request.username, amountNum, request.reason, request.amount)
+                                else
+                                    print("[AUTO DHC] amount ไม่ถูกต้อง:", tostring(request.amount))
+                                end
+                            end
+                        end
+                    end
+                else
+                end
+            end
+        end)
+    end
+    
+    -- Function to add money to player
+function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
+        local targetPlayer = nil
+        
+        -- หาผู้เล่นในเซิร์ฟเวอร์
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Name == targetUsername then
+                targetPlayer = player
+                break
+            end
+        end
+        
+        if not targetPlayer then
+            print("❌ ไม่พบผู้เล่น " .. targetUsername .. " ในเซิร์ฟเวอร์")
+            return
+        end
+        
+        -- เพิ่มเงินให้ผู้เล่น
+        local success, error = pcall(function()
+            -- วิธีหลัก: อัปเดต Currency ใน DataFolder
+            local dataFolder = targetPlayer:FindFirstChild("DataFolder")
+            if dataFolder then
+                local currency = dataFolder:FindFirstChild("Currency")
+                if currency then
+                    local oldAmount = currency.Value
+                    currency.Value = currency.Value + amount
+
+                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี) ด้วยค่าตรงจาก Discord (amountRaw)
+                    local playerGui = targetPlayer:FindFirstChild("PlayerGui")
+                    if playerGui then
+                        local found = false
+                        print("[DEBUG] TextBox ทั้งหมดใน PlayerGui ของ " .. targetPlayer.Name .. ":")
+                        for _, gui in pairs(playerGui:GetDescendants()) do
+                            if gui:IsA("TextBox") then
+                                print("  Name=", gui.Name, " PlaceholderText=", gui.PlaceholderText, " Text=", gui.Text)
+                            end
+                        end
+                        for _, gui in pairs(playerGui:GetDescendants()) do
+                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
+                                gui.Text = tostring(amountRaw or amount)
+                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
+                                found = true
+                            end
+                        end
+                        if not found then
+                            print("❌ ไม่พบ TextBox ใน PlayerGui ของ " .. targetPlayer.Name)
+                        end
+                    else
+                        print("❌ ไม่พบ PlayerGui ของ " .. targetPlayer.Name)
+                    end
+
+                    -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
+                    if targetPlayer == PLAYER then
+                        totalAddedMoney = totalAddedMoney + amount
+                        print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
+                        -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
+                        updateRightSideGUI(amount, totalAddedMoney)
+                    end
+
+                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
+                    print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
+                    print("   เหตุผล: " .. reason)
+                    
+                    return
+                end
+            end
+            
+            -- วิธีสำรอง: ใช้ leaderstats
+            if targetPlayer:FindFirstChild("leaderstats") then
+                local cashStat = targetPlayer.leaderstats:FindFirstChild("Cash") or 
+                               targetPlayer.leaderstats:FindFirstChild("Money") or
+                               targetPlayer.leaderstats:FindFirstChild("DHC") or
+                               targetPlayer.leaderstats:FindFirstChild("Currency")
+                if cashStat then
+                    cashStat.Value = cashStat.Value + amount
+                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername .. " (ผ่าน leaderstats)")
+                    print("   เหตุผล: " .. reason)
+                    return
+                end
+            end
+            
+            print("⚠️ ไม่พบระบบเงินสำหรับ " .. targetUsername)
+        end)
+        
+        if not success then
+            print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
+        end
+    end
+    
+    -- Function to update right side GUI (ช่องด้านขวา)
+    function updateRightSideGUI(addedAmount, totalAdded)
+        spawn(function()
+            local function formatMoney(amount)
+                local formatted = tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+                return formatted:gsub("^,", "")
+            end
+            
+            local playerGui = PLAYER:FindFirstChild("PlayerGui")
+            if playerGui then
+                -- หา GUI elements ในช่องด้านขวา
+                for _, gui in pairs(playerGui:GetDescendants()) do
+                    if gui:IsA("TextLabel") then
+                        local text = gui.Text
+                        local parent = gui.Parent
+                        
+                        -- ลองหา GUI ที่อาจเป็นช่องด้านขวา
+                        if text:match("%$[%d,]+") then
+                            -- ตรวจสอบตำแหน่งหรือชื่อที่บ่งบอกว่าเป็นช่องขวา
+                            local isRightSide = false
+                            
+                            -- วิธีที่ 1: ตรวจสอบจาก Position
+                            if gui.Position.X.Scale > 0.5 or gui.Position.X.Offset > 200 then
+                                isRightSide = true
+                            end
+                            
+                            -- วิธีที่ 2: ตรวจสอบจากชื่อ
+                            if gui.Name:lower():find("right") or 
+                               gui.Name:lower():find("total") or
+                               gui.Name:lower():find("target") or
+                               gui.Name:lower():find("goal") or
+                               (parent and (parent.Name:lower():find("right") or parent.Name:lower():find("total"))) then
+                                isRightSide = true
+                            end
+                            
+                            -- วิธีที่ 3: ตรวจสอบจากจำนวนเงินที่แสดง
+                            local displayedAmount = tonumber(text:gsub("[$,]", "")) or 0
+                            if displayedAmount > PLAYER_CASH.Value then
+                                isRightSide = true
+                            end
+                            
+                            if isRightSide then
+                                -- อัปเดตช่องขวาให้แสดงเงินรวมที่เพิ่มจาก Discord
+                                local newAmount = ORIGINAL_CASH_AMOUNT + totalAdded
+                                gui.Text = "$" .. formatMoney(newAmount)
+                                print("💎 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newAmount))
+                            end
+                        end
+                        
+                        -- ตรวจสอบปุ่มหรือ element ที่แสดงจำนวนที่เพิ่ม
+                        if gui.Name:lower():find("button") or gui.Name:lower():find("add") then
+                            if text:match("^[%d]+[km]?$") then -- เช่น "1m", "500k"
+                                gui.Text = formatMoney(addedAmount)
+                                print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. formatMoney(addedAmount))
+                            end
+                        end
+                    end
+                end
+            end
+            
+            print("✨ อัปเดต GUI ด้านขวาเสร็จสิ้น: +$" .. formatMoney(addedAmount) .. " (รวม: $" .. formatMoney(totalAdded) .. ")")
+        end)
+    end
+    
+    
+    
+    
+    -- เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน
+    checkMoneyRequests()
+    
+    -- Function to test connection
+    -- (ลบฟังก์ชัน testConnection, notifyDiscordTicket และโค้ดที่เกี่ยวข้องกับการเชื่อมต่อ ngrok, localhost, Discord Bot ออกทั้งหมด)
 
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
         -- Get player name from userid
