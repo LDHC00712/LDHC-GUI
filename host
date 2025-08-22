@@ -4272,9 +4272,15 @@ local function pollLatestGoal()
                                 task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
-                                -- สั่ง /cdrop <amount> ในแชทเกม
+                                -- ส่ง /cdrop <amount> ไปยังช่องแชท Roblox (UI)
                                 if data.amount then
-                                    game.Players:Chat("/cdrop " .. tostring(data.amount))
+                                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                                    local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+                                    if chatEvent and chatEvent:FindFirstChild("SayMessageRequest") then
+                                        chatEvent.SayMessageRequest:FireServer("/cdrop " .. tostring(data.amount), "All")
+                                    else
+                                        warn("[GoalSync] ไม่พบ DefaultChatSystemChatEvents หรือ SayMessageRequest")
+                                    end
                                 end
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
