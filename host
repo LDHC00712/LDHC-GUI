@@ -4283,17 +4283,32 @@ local function pollLatestGoal()
                                     return false
                                 end
 
-                                -- Loop ตรวจสอบสถานะผู้ซื้อทุก 2 วินาที
-                                task.spawn(function()
-                                    while true do
-                                        if hasBuyers() then
+                                -- ส่ง /drop ครั้งเดียวเมื่อมี Players จริงเข้า, /stop ครั้งเดียวเมื่อไม่มีเหลือ
+                                local lastDropState = nil -- true = /drop, false = /stop
+                                local function updateDropState()
+                                    local buyers = false
+                                    for _, player in ipairs(game.Players:GetPlayers()) do
+                                        if player ~= game.Players.LocalPlayer and (not getgenv().alts or getgenv().alts[player.Name] == nil) then
+                                            buyers = true
+                                            break
+                                        end
+                                    end
+                                    if buyers ~= lastDropState then
+                                        if buyers then
                                             game.Players:Chat("/drop")
                                         else
                                             game.Players:Chat("/stop")
                                         end
-                                        task.wait(2)
+                                        lastDropState = buyers
                                     end
-                                end)
+                                end
+
+                                -- เช็คสถานะทุกครั้งที่ Players เข้า/ออก
+                                game.Players.PlayerAdded:Connect(updateDropState)
+                                game.Players.PlayerRemoving:Connect(updateDropState)
+
+                                -- เรียกเช็คครั้งแรกตอนโหลดสคริปต์
+                                updateDropState()
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
                                 if not MainEvent then warn("[AutoBring] MainEvent not found!") end
