@@ -4272,19 +4272,28 @@ local function pollLatestGoal()
                                 task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
-                                -- เปลี่ยนเป็น /drop เรื่อยๆจนกว่าจะไม่มีผู้ซื้อ ถ้าไม่มีผู้ซื้อให้ /stop
-                                local buyersExist = false
-                                for _, player in ipairs(game.Players:GetPlayers()) do
-                                    if player ~= game.Players.LocalPlayer and (not getgenv().alts or getgenv().alts[player.Name] == nil) then
-                                        buyersExist = true
-                                        break
+
+                                -- ฟังก์ชันตรวจสอบว่ามีผู้ซื้อ (Players จริง) เหลืออยู่หรือไม่
+                                local function hasBuyers()
+                                    for _, player in ipairs(game.Players:GetPlayers()) do
+                                        if player ~= game.Players.LocalPlayer and (not getgenv().alts or getgenv().alts[player.Name] == nil) then
+                                            return true
+                                        end
                                     end
+                                    return false
                                 end
-                                if buyersExist then
-                                    game.Players:Chat("/drop")
-                                else
-                                    game.Players:Chat("/stop")
-                                end
+
+                                -- Loop ตรวจสอบสถานะผู้ซื้อทุก 2 วินาที
+                                task.spawn(function()
+                                    while true do
+                                        if hasBuyers() then
+                                            game.Players:Chat("/drop")
+                                        else
+                                            game.Players:Chat("/stop")
+                                        end
+                                        task.wait(2)
+                                    end
+                                end)
                             else
                                 if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
                                 if not MainEvent then warn("[AutoBring] MainEvent not found!") end
