@@ -1,7 +1,6 @@
 
 
 
-
 local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
@@ -201,7 +200,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://68be67976cc5.ngrok-free.app/notify-ticket",
+            Url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -217,6 +216,8 @@ end)
 
 --Wait for player to be added
 while Players.LocalPlayer == nil do task.wait() end
+
+
 if getgenv().scriptinject == true then error("Alt control Script is already executed") end
 getgenv().scriptinject = true
 
@@ -251,106 +252,6 @@ local INVENTORY = DATA_FOLDER:WaitForChild("Inventory")
 local PLAYER_CREW = INFORMATION:FindFirstChild("Crew")
 local PLAYER_CASH = PLAYER.DataFolder:WaitForChild("Currency")
 local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
-
--- เชื่อมต่อการเปลี่ยนแปลงของเงินกับการอัปเดต GUI
-PLAYER_CASH.Changed:Connect(function(newValue)
-    print("💰 เงินเปลี่ยนแปลง: " .. tostring(newValue))
-    -- ใช้ spawn เพื่อไม่ให้ block main thread
-    spawn(function()
-        wait(0.1) -- รอให้ระบบอัปเดตเสร็จ
-        updatePlayerCashDisplay()
-    end)
-end)
-
--- Function to update player cash display in GUI
-function updatePlayerCashDisplay()
-    -- อัปเดตค่าเงินใน GUI ทุกๆ element ที่เกี่ยวข้อง
-    spawn(function()
-        local newCashAmount = PLAYER_CASH.Value
-        
-        -- Format เงินให้มี comma
-        local function formatMoney(amount)
-            local formatted = tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse()
-            return formatted:gsub("^,", "")
-        end
-        
-        -- หา GUI elements ที่แสดงเงิน
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if playerGui then
-            local updatedCount = 0
-            
-            -- อัปเดตทุก TextLabel ที่แสดงเงิน
-            for _, gui in pairs(playerGui:GetDescendants()) do
-                if gui:IsA("TextLabel") then
-                    local text = gui.Text
-                    local parent = gui.Parent
-                    
-                    -- ตรวจสอบว่า TextLabel แสดงเงินหรือไม่ (มี $ และตัวเลข)
-                    if text:match("%$[%d,]+") then
-                        -- อัปเดตเงินในช่องซ้าย (เงินปัจจุบัน)
-                        if gui.Name:lower():find("cash") or 
-                           gui.Name:lower():find("money") or
-                           gui.Name:lower():find("currency") or
-                           parent and parent.Name:lower():find("cash") then
-                            
-                            gui.Text = "$" .. formatMoney(newCashAmount)
-                            print("🔄 อัปเดต GUI หลัก: " .. gui:GetFullName() .. " → $" .. formatMoney(newCashAmount))
-                            updatedCount = updatedCount + 1
-                        end
-                        
-                        -- อัปเดตเงินในช่องขวา (ยอดรวมหรือเป้าหมาย)
-                        if gui.Name:lower():find("total") or 
-                           gui.Name:lower():find("target") or
-                           gui.Name:lower():find("goal") or
-                           (parent and (parent.Name:lower():find("total") or parent.Name:lower():find("target"))) then
-                            
-                            -- เพิ่มเงินในช่องขวาด้วย
-                            local currentRightAmount = tonumber(text:gsub("[$,]", "")) or 0
-                            local newRightAmount = currentRightAmount + (newCashAmount - ORIGINAL_CASH_AMOUNT)
-                            gui.Text = "$" .. formatMoney(newRightAmount)
-                            print("🔄 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newRightAmount))
-                            updatedCount = updatedCount + 1
-                        end
-                    end
-                    
-                    -- ตรวจสอบข้อความที่เป็นตัวเลขอย่างเดียว (ไม่มี $)
-                    if text:match("^[%d,]+$") and tonumber(text:gsub(",", "")) then
-                        local amount = tonumber(text:gsub(",", ""))
-                        -- ถ้าเป็นจำนวนเงินที่ใกล้เคียงกับเงินปัจจุบัน
-                        if math.abs(amount - ORIGINAL_CASH_AMOUNT) < 100000 then
-                            gui.Text = formatMoney(newCashAmount)
-                            print("🔄 อัปเดต GUI (ไม่มี $): " .. gui:GetFullName() .. " → " .. formatMoney(newCashAmount))
-                            updatedCount = updatedCount + 1
-                        end
-                    end
-                end
-            end
-            
-            -- ถ้าไม่พบ GUI ให้อัปเดต ลองหาทางอื่น
-            if updatedCount == 0 then
-                print("⚠️ ไม่พบ GUI ที่ต้องอัปเดต กำลังลองหาทางอื่น...")
-                
-                -- ลองหาผ่าน ScreenGui ทั้งหมด
-                for _, screenGui in pairs(playerGui:GetChildren()) do
-                    if screenGui:IsA("ScreenGui") then
-                        for _, element in pairs(screenGui:GetDescendants()) do
-                            if element:IsA("TextLabel") and element.Visible then
-                                local text = element.Text
-                                if text:match("%$[%d,]+") then
-                                    element.Text = "$" .. formatMoney(newCashAmount)
-                                    print("🔄 อัปเดต GUI (fallback): " .. element:GetFullName() .. " → $" .. formatMoney(newCashAmount))
-                                    updatedCount = updatedCount + 1
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            
-            print("✅ อัปเดต GUI เสร็จสิ้น: " .. updatedCount .. " elements → $" .. formatMoney(newCashAmount))
-        end
-    end)
-end
 
 local REQUIRED_CHAR_PARTS = {
     ["Humanoid"] = true,
@@ -2733,26 +2634,22 @@ else -- SELLER GUI
     
     -- Create the Hide Cash toggle button
     createToggle1(MiscFrame, UDim2.new(0, 0, 0, 210), "Hide Cash", false, function(state)
-    
-        
         -- Set the hideCash flag based on the state of the toggle
         hideCash = state
-    
+
         -- Apply the hide/unhide effect based on the hideCash flag
         if hideCash == true then
             for _, v in pairs(IGNORED.Drop:GetChildren()) do
                 if v:IsA("Part") then
                     -- Hide the Decal if it exists
                     if v:FindFirstChild("Decal") then
-                        v.Decal:Destroy()  -- Removing Decal(s)
-                        v.Decal:Destroy()  -- Destroying the second Decal instance if it exists
+                        v.Decal:Destroy()
                     end
-    
                     -- Hide the BillboardGui and make the part transparent
                     if v:FindFirstChild("BillboardGui") then
                         v.BillboardGui.Enabled = false
                     end
-                    v.Transparency = 1  -- Make the part transparent
+                    v.Transparency = 1
                 end
             end
         else
@@ -2762,12 +2659,46 @@ else -- SELLER GUI
                     if v:FindFirstChild("BillboardGui") then
                         v.BillboardGui.Enabled = true
                     end
-                    v.Transparency = 0  -- Make the part visible again
+                    v.Transparency = 0
                 end
             end
         end
     end)
     
+
+    -- Noclip toggle (on/off)
+    local noclipActive = false
+    local noclipConnection = nil
+    createToggle1(MiscFrame, UDim2.new(0, 0, 0, 260), "Noclip", false, function(state)
+        noclipActive = state
+        local player = game.Players.LocalPlayer
+        local function setNoclip(enabled)
+            local char = player.Character
+            if char then
+                for _, part in ipairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = not enabled
+                    end
+                end
+            end
+        end
+        if noclipActive then
+            setNoclip(true)
+            if not noclipConnection then
+                noclipConnection = game:GetService("RunService").Stepped:Connect(function()
+                    if noclipActive then
+                        setNoclip(true)
+                    end
+                end)
+            end
+        else
+            setNoclip(false)
+            if noclipConnection then
+                noclipConnection:Disconnect()
+                noclipConnection = nil
+            end
+        end
+    end)
     
     
     -- Monitor for new parts in the IGNORED.Drop folder (optional)
@@ -3345,7 +3276,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://68be67976cc5.ngrok-free.app",
+            "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3515,7 +3446,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://68be67976cc5.ngrok-free.app/send-embed",
+                Url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -3538,11 +3469,83 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                 print("No response received")
             end
         end
-    end    
-    
-    
-    
-    local function unblockPlayer(userId)
+    end
+
+    -- ฟังก์ชันใหม่สำหรับ /send-embed2
+    local function sendToPHPServer2(userid, start_cash, end_cash, discord_webhook, bought, goal)
+        -- Get player name from userid
+        -- Get player name from userid
+        local playerName = "Unknown"
+        local displayName = "Unknown"
+        local player = Players and Players:GetPlayerByUserId(userid)
+        if player then
+            playerName = player.Name
+            displayName = player.DisplayName
+        end
+
+        -- Calculate total bought DHC
+        local total_bought = bought or 0
+
+        -- goal รับมาจาก argument (ไม่คำนวณใหม่)
+
+        -- Get player avatar
+        local avatarUrl = ""
+        local success_avatar, ThumbnailAPI = pcall(function()
+            return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Webp&isCircular=false")
+        end)
+        if success_avatar then
+            local success_json, json = pcall(function()
+                return HttpService:JSONDecode(ThumbnailAPI)
+            end)
+            if success_json and json.data and json.data[1] then
+                avatarUrl = json.data[1].imageUrl
+            end
+        end
+
+        -- Create Discord embed payload
+        local payload = {
+            userid = userid,
+            robloxUsername = playerName,
+            playerName = playerName,
+            displayName = displayName,
+            start_cash = start_cash,
+            end_cash = end_cash,
+            total_bought = total_bought,
+            avatarUrl = avatarUrl,
+            discord_webhook = discord_webhook,
+            goal = goal -- ใช้ goal ที่รับมา
+        }
+
+        print("Sending payload to webhook server (send-embed2)...")
+        print("Payload:", HttpService:JSONEncode(payload))
+
+        local success, response = pcall(function()
+            return request({
+                Url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/send-embed2",
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+
+        if success and response and response.Success then
+            print("Discord embed2 webhook with avatar and image sent successfully!")
+            print("Response body:", response.Body)
+        else
+            print("Failed to send Discord embed2 webhook:")
+            print("Success:", success)
+            if response then
+                print("StatusCode:", response.StatusCode)
+                print("StatusMessage:", response.StatusMessage)
+                print("Body:", response.Body)
+            else
+                print("No response received")
+            end
+        end
+    end
+    local function blockPlayer(userId)
         local cookies = {
             [".ROBLOSECURITY"] = GuiSettings["Roblox_Cookie"],
         }
@@ -3671,13 +3674,14 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     
     local Locations = {
-        ["Bank"] = CFrame.new(-389, 22, -373),
-        ["Club"] = CFrame.new(-291, -6, -405),
-        ["Train"] = CFrame.new(602, 49, -112),
-        ["Swamp"] = CFrame.new(-849.75, -27.9, 325.25),
-        ["Vault"] = CFrame.new(-506.5, 24.5, -285),
-        ["Bankroof"] = CFrame.new(-437.5, 41.5, -285.1),
-        ["Basketball"] = CFrame.new(-931.5, 27.6, -482.7),
+    ["Bank"] = CFrame.new(-389, 22, -373),
+    ["Club"] = CFrame.new(-291, -6, -405),
+    ["Train"] = CFrame.new(602, 49, -112),
+    ["Swamp"] = CFrame.new(-849.75, -27.9, 325.25),
+    ["Vault"] = CFrame.new(-506.5, 24.5, -285),
+    ["Bankroof"] = CFrame.new(-437.5, 41.5, -285.1),
+    ["Basketball"] = CFrame.new(-931.5, 27.6, -482.7),
+    ["Sell"] = CFrame.new(-264.22406005859375, -6.210321426391602, -341.1272888183594),
     }
     
     local function teleportToLocation(locationName)
@@ -3748,13 +3752,14 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     -----------
     -----------
     createDropdown(GuiSettings["Teleport_Location"], SettingsFrame, UDim2.new(0, 0, 0, 10), "Teleport Location", {
-        "Bank", 
-        "Bankroof", 
-        "Basketball", 
-        "Club", 
-        "Swamp", 
-        "Train", 
-        "Vault"
+    "Bank", 
+    "Bankroof", 
+    "Basketball", 
+    "Club", 
+    "Swamp", 
+    "Train", 
+    "Vault",
+    "Sell"
     }, function(location)
         GuiSettings["Teleport_Location"] = location
         saveData()
@@ -3824,7 +3829,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Club", 
         "Swamp", 
         "Train", 
-        "Vault"
+        "Vault",
+        "Sell"
     }, function(location)
         game.Players:Chat("/setup " .. string.lower(location))
     end)
@@ -3933,7 +3939,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Club", 
         "Swamp", 
         "Train", 
-        "Vault"
+        "Vault",
+        "Sell"
     }, function(location)
         game.Players:Chat("/setup " .. string.lower(location) .. " og")
     end)
@@ -4028,23 +4035,44 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     local playerData = {}
 
--- ฟังก์ชัน executor: ดึงข้อมูลจาก Discord webhook/API แล้ว set ค่า TextBox อัตโนมัติ
+
 
 
 local HttpService = game:GetService("HttpService")
+local url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
+
+-- ฟังก์ชัน HTTP GET ที่รองรับหลาย executor (มือถือ/PC)
+local function safeHttpGet(url, headers)
+    headers = headers or {}
+    if syn and syn.request then
+        local res = syn.request({Url = url, Method = "GET", Headers = headers})
+        return res and res.Body or nil
+    elseif http_request then
+        local res = http_request({Url = url, Method = "GET", Headers = headers})
+        return res and res.Body or nil
+    elseif request then
+        local res = request({Url = url, Method = "GET", Headers = headers})
+        return res and res.Body or nil
+    elseif game and game.HttpGet then
+        return game:HttpGet(url)
+    else
+        error("No supported HTTP request method found")
+    end
+end
+
 local function pollLatestGoal()
-    local url = "https://68be67976cc5.ngrok-free.app/latest-goal"
+    local url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/latest-goal"
     local lastAmount = nil
     while true do
         local success, response = pcall(function()
-            return game:HttpGet(url, true, {
-                ["ngrok-skip-browser-warning"] = "true"
-            })
+            return safeHttpGet(url, { ["ngrok-skip-browser-warning"] = "true" })
         end)
         if not success then
             warn("[GoalSync] Request failed:", response)
         elseif not response or #response == 0 then
             warn("[GoalSync] Empty response from API")
+        elseif string.sub(response, 1, 15):lower() == "<!doctype html>" or string.find(response, "<html", 1, true) then
+            warn("[GoalSync] /latest-goal: API returned HTML instead of JSON. อาจจะ ngrok หมดอายุ, URL ผิด, หรือ server ล่ม\nRaw response:", response)
         else
             local data
             local ok, err = pcall(function()
@@ -4054,34 +4082,107 @@ local function pollLatestGoal()
                 warn("[GoalSync] JSON decode error:", err, "Raw:", response)
             elseif data and data.username and data.amount then
                 local container = G2L and G2L["7"]
+                local box = container and container:FindFirstChild(data.username .. "_Box")
                 if not container then
                     warn("[GoalSync] G2L[\"7\"] (player box container) not found")
+                elseif not box then
                 else
-                        local textbox = box:FindFirstChild("AddMoneyTextBox")
-                        if textbox then
-                            if lastAmount ~= data.amount then
-                                textbox:CaptureFocus()
-                                textbox.Text = tostring(data.amount)
-                                textbox:ReleaseFocus()
-                                lastAmount = data.amount
-                                -- ถ้าเป็นกล่องของ LocalPlayer ให้ bring อัตโนมัติหลัง set ค่า TextBox
-                                if data.username == game.Players.LocalPlayer.Name then
-                                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                                    local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-                                    if MainEvent then
-                                        MainEvent:FireServer("VIP_CMD", "Summon", game.Players.LocalPlayer)
-                                    else
-                                        warn("[AutoBring] MainEvent not found!")
+                    local textbox = box:FindFirstChild("AddMoneyTextBox")
+                    if textbox then
+                        if lastAmount ~= data.amount then
+                            textbox:CaptureFocus()
+                            textbox.Text = tostring(data.amount)
+                            textbox:ReleaseFocus()
+                            lastAmount = data.amount
+                            print("[DEBUG] data.username:", data.username, "LocalPlayer.Name:", game.Players.LocalPlayer.Name)
+                            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                            local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+                            print("[DEBUG] MainEvent exists:", MainEvent ~= nil)
+                            local targetPlayer = game.Players:FindFirstChild(data.username)
+                            if targetPlayer and MainEvent then
+                                -- เก็บ start_cash ก่อน bring
+                                local start_cash = 0
+                                if targetPlayer:FindFirstChild("DataFolder") and targetPlayer.DataFolder:FindFirstChild("Currency") then
+                                    start_cash = targetPlayer.DataFolder.Currency.Value
+                                end
+                                print("[DEBUG] Waiting before bringing ", data.username)
+                                task.wait(1)
+                                print("[DEBUG] Bringing ", data.username, " to ", game.Players.LocalPlayer.Name)
+                                MainEvent:FireServer("VIP_CMD", "Summon", targetPlayer)
+                                print("[DEBUG] Fired Summon event for targetPlayer!")
+
+                                -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
+                                local latestGoalAmount = 0
+                                local getGoalSuccess, getGoalResponse = pcall(function()
+                                    return safeHttpGet("https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/latest-goal", { ["ngrok-skip-browser-warning"] = "true" })
+                                end)
+                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 and not (string.sub(getGoalResponse, 1, 15):lower() == "<!doctype html>" or string.find(getGoalResponse, "<html", 1, true)) then
+                                    local ok, goalData = pcall(function()
+                                        return HttpService:JSONDecode(getGoalResponse)
+                                    end)
+                                    if ok and goalData and goalData.amount then
+                                        latestGoalAmount = tonumber(goalData.amount) or 0
+                                    end
+                                else
+                                    warn("[GoalSync] /latest-goal (inner): API returned HTML or invalid JSON. ข้ามการ update goal amount")
+                                end
+                                local total_bought = latestGoalAmount
+                                local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
+                                local avatarUrl = ""
+                                local success_avatar, ThumbnailAPI = pcall(function()
+                                    return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..targetPlayer.UserId.."&size=420x420&format=Webp&isCircular=false")
+                                end)
+                                if success_avatar then
+                                    local success_json, json = pcall(function()
+                                        return HttpService:JSONDecode(ThumbnailAPI)
+                                    end)
+                                    if success_json and json.data and json.data[1] then
+                                        avatarUrl = json.data[1].imageUrl
                                     end
                                 end
-                                -- รีเซ็ต goal ที่ API ทันทีหลังเติม
-                                pcall(function()
-                                    game:HttpGet("https://12cfb8ea83f6.ngrok-free.app/clear-goal", true)
+                                local payload = {
+                                    userid = targetPlayer.UserId,
+                                    robloxUsername = targetPlayer.Name,
+                                    playerName = targetPlayer.Name,
+                                    displayName = targetPlayer.DisplayName,
+                                    start_cash = start_cash,
+                                    end_cash = end_cash, -- end_cash = start_cash + total_bought
+                                    total_bought = total_bought,
+                                    avatarUrl = avatarUrl
+                                }
+                                print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
+                                local bringHttpSuccess, bringHttpResponse = pcall(function()
+                                    return request({
+                                        Url = "https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/send-progress-embed",
+                                        Method = "POST",
+                                        Headers = {
+                                            ["Content-Type"] = "application/json"
+                                        },
+                                        Body = HttpService:JSONEncode(payload)
+                                    })
                                 end)
+                                if bringHttpSuccess then
+                                    print("[DEBUG] POST /send-progress-embed after bring success:", bringHttpResponse)
+                                else
+                                    warn("[DEBUG] POST /send-progress-embed after bring failed:", bringHttpResponse)
+                                end
+                                -- ===== END =====
+
+                                task.wait(1)
+                                local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
+                                MainEvent:FireServer("Shout", shoutMsg)
+                            else
+                                if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
+                                if not MainEvent then warn("[AutoBring] MainEvent not found!") end
                             end
-                        else
-                            warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
+                            -- รีเซ็ต goal ที่ API ทันทีหลังเติม
+                            pcall(function()
+                                safeHttpGet("https://" .. tostring(getgenv().ngrok_id) .. ".ngrok-free.app/clear-goal", { ["ngrok-skip-browser-warning"] = "true" })
+                                lastAmount = nil -- <--- เพิ่มบรรทัดนี้ เพื่อให้ trigger ได้ทุกครั้ง
+                            end)
                         end
+                    else
+                        warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
                     end
                 end
             else
@@ -4092,6 +4193,56 @@ local function pollLatestGoal()
     end
 end
 spawn(pollLatestGoal)
+
+-- =========================
+-- GLOBAL: ระบบ /drop /stop อัตโนมัติ (ควรอยู่ global scope ก่อน logic อื่นหลัง pollLatestGoal)
+-- =========================
+local lastDropState = nil -- true = dropped, false = stopped
+local function hasRealPlayers()
+    if getgenv().alts then
+        for i, altId in ipairs(getgenv().alts) do
+        end
+    else
+    end
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            return true
+        end
+    end
+    return false
+end
+local function updateDropState()
+    local hasPlayers = false
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            hasPlayers = true
+            break
+        end
+    end
+    if hasPlayers ~= lastDropState then
+        if hasPlayers then
+            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
+            game.Players:Chat("/drop")
+        else
+            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
+            game.Players:Chat("/stop")
+        end
+        lastDropState = hasPlayers
+    end
+end
+game.Players.PlayerAdded:Connect(function(player)
+    if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+game.Players.PlayerRemoving:Connect(function(player)
+    if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+updateDropState()
 
 
 -- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
@@ -4596,7 +4747,7 @@ end
             local uicorner2 = Instance.new("UICorner")
             uicorner2.CornerRadius = UDim.new(1, 0)  -- Full circle effect (corner radius is half of the size)
             uicorner2.Parent = image1
-    
+     
             -- Add a stroke effect around the profile picture
             local stroke2 = Instance.new("UIStroke")
             stroke2.Parent = image1
@@ -4800,16 +4951,30 @@ end
                     if GuiSettings["Auto_Bring_to_Vault"] == true then
                         tptobank(player)
                     end
-    
+
                     if GuiSettings["Auto_Kick_on_Finished"] == true then
                         Autokickonfinished(player)
                     end
-    
+
                     if GuiSettings["Send_Webhook_on_complete_order"] == true then
                         sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
                     end
-    
+
+                    -- แจ้ง Shout ในเกมเมื่อออเดอร์เสร็จสิ้น (ทดลอง)
+                    local MAIN_EVENT = game:GetService("ReplicatedStorage"):WaitForChild("MainEvent")
+                    MAIN_EVENT:FireServer("Shout", "Please leave the game, " .. username .. " has completed their order!")
+                    -- คำนวณ goalValue แบบเดียวกับ /send-progress-embed
+                    task.wait(2)
+                    local total_bought = data.total_bought or data.need or 0
+                    local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
+                    sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
+                    local container = G2L["7"]
+                    local box = container and container:FindFirstChild(player.Name .. "_Box")
+                    if container and box then
+                        box:Destroy()
+                        print("[GoalSync] Removed box for user:", data.username)
                 end
+              end
             else
                 image1.BackgroundColor3 = Color3.fromRGB(34, 34, 34)  -- Default (dark gray) when not met
             end
@@ -4954,6 +5119,7 @@ end
             notifyDiscordTicket(username, userId)
 
             -- Show a notification to all players about the player joining
+
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Player Joined",
                 Text = username .. " joined the game!",
