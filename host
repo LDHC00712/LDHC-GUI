@@ -1,4 +1,3 @@
-print("[DROPDEBUG] getgenv().alts table:", getgenv().alts)
 
 
 
