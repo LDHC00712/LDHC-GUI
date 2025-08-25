@@ -2265,9 +2265,6 @@ else -- SELLER GUI
     
     
     
--- Table to keep track of event connections for alts (by player.UserId)
-local altsConnections = {}
-
     -- Function to create a dynamic box to display PFP, username, and cash balance
     local function createProfileBox(parent, player, position)
         local box = Instance.new("Frame", parent)
@@ -2276,11 +2273,11 @@ local altsConnections = {}
         box.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
         box.BorderSizePixel = 0
         box.Name = "ProfileBox_" .. player.UserId  -- Unique name for the box
-
+    
         local uicorner13 = Instance.new("UICorner", box)
-
+    
         local PLACEHOLDER_IMAGE = "rbxassetid://0"
-
+    
         local pfp = Instance.new("ImageLabel", box)
         pfp.Parent = box
         pfp["BorderSizePixel"] = 0;
@@ -2297,14 +2294,16 @@ local altsConnections = {}
         
         pfp.Image =  (isReady and content) or PLACEHOLDER_IMAGE
         
+        
         uicorner2 = Instance.new("UICorner", pfp);
         uicorner2["CornerRadius"] = UDim.new(1, 0);
+        
         
         -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.ImageLabel.UIStroke
         stroke2 = Instance.new("UIStroke", pfp);
         stroke2["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
         stroke2["Color"] = Color3.fromRGB(49, 49, 49);
-
+    
         -- Username Label
         local usernameLabel = Instance.new("TextLabel", box)
         usernameLabel.Size = UDim2.new(0, 200, 0, 25)
@@ -2314,7 +2313,7 @@ local altsConnections = {}
         usernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         usernameLabel.Font = Enum.Font.GothamBold
         usernameLabel.TextSize = 16
-
+    
         -- Cash Balance Label
         local cashBalanceLabel = Instance.new("TextLabel", box)
         cashBalanceLabel.Size = UDim2.new(0, 200, 0, 25)
@@ -2324,18 +2323,13 @@ local altsConnections = {}
         cashBalanceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         cashBalanceLabel.Font = Enum.Font.GothamBold
         cashBalanceLabel.TextSize = 16
-
-        -- Store connection for this alt
-        if altsConnections[userId] then
-            -- Clean up old connection if exists (safety)
-            altsConnections[userId]:Disconnect()
-        end
-        altsConnections[userId] = player:WaitForChild("DataFolder"):WaitForChild("Currency").Changed:Connect(function()
+    
+        player:WaitForChild("DataFolder"):WaitForChild("Currency").Changed:Connect(function()
             cashBalanceLabel.Text = format(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value)
         end)
-
+    
+    
         return box
-    end
     end
     
     -- Function to add the profile boxes dynamically under the existing ones
@@ -2350,18 +2344,12 @@ local altsConnections = {}
         local newBox = createProfileBox(AltsFrame, player, UDim2.new(0, 0, 0, positionY))
     end
     
-    -- Function to remove a profile box when the player leaves (and clean up connection)
+    -- Function to remove a profile box when the player leaves
     local function removeProfileBox(player)
         -- Find the profile box by player UserId
         local profileBox = AltsFrame:FindFirstChild("ProfileBox_" .. player.UserId)
         if profileBox then
             profileBox:Destroy()  -- Remove the profile box from the frame
-        end
-        -- Clean up event connection for this alt (if exists)
-        local userId = player.UserId
-        if altsConnections[userId] then
-            altsConnections[userId]:Disconnect()
-            altsConnections[userId] = nil
         end
     end
     
