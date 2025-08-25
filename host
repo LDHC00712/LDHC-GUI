@@ -2265,8 +2265,8 @@ else -- SELLER GUI
     
     
     
-    -- Table to keep track of event connections for alts (by player.UserId)
-    local altsConnections = {}
+-- Table to keep track of event connections for alts (by player.UserId)
+local altsConnections = {}
 
     -- Function to create a dynamic box to display PFP, username, and cash balance
     local function createProfileBox(parent, player, position)
