@@ -4168,7 +4168,6 @@ local function pollLatestGoal()
                                 end
                                 -- ===== END =====
 
-                                task.wait(1)
                                 local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
                                 MainEvent:FireServer("Shout", shoutMsg)
                             else
@@ -4958,22 +4957,21 @@ end
 
                     if GuiSettings["Send_Webhook_on_complete_order"] == true then
                         sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
+                        -- คำนวณ goalValue แบบเดียวกับ /send-progress-embed
+                        local total_bought = data.total_bought or data.need or 0
+                        local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
+                        sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
+                        local container = G2L["7"]
+                        local box = container and container:FindFirstChild(player.Name .. "_Box")
+                    if container and box then
+                        box:Destroy()
+                        print("[GoalSync] Removed box for user:", data.username)
+                        end
                     end
 
                     -- แจ้ง Shout ในเกมเมื่อออเดอร์เสร็จสิ้น (ทดลอง)
                     local MAIN_EVENT = game:GetService("ReplicatedStorage"):WaitForChild("MainEvent")
                     MAIN_EVENT:FireServer("Shout", "Please leave the game, " .. username .. " has completed their order!")
-                    -- คำนวณ goalValue แบบเดียวกับ /send-progress-embed
-                    task.wait(2)
-                    local total_bought = data.total_bought or data.need or 0
-                    local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
-                    sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
-                    local container = G2L["7"]
-                    local box = container and container:FindFirstChild(player.Name .. "_Box")
-                    if container and box then
-                        box:Destroy()
-                        print("[GoalSync] Removed box for user:", data.username)
-                end
               end
             else
                 image1.BackgroundColor3 = Color3.fromRGB(34, 34, 34)  -- Default (dark gray) when not met
