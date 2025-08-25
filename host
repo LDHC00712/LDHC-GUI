@@ -1,22 +1,3 @@
--- ฟังก์ชันเช็คว่ามี real player (ลูกค้า) เหลืออยู่หรือไม่
-local function hasRealPlayers()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if not table.find(getgenv().alts, player.UserId) and player ~= game.Players.LocalPlayer then
-            return true -- ยังมีลูกค้าอยู่
-        end
-    end
-    return false -- ไม่มีลูกค้าแล้ว
-end
-
--- ฟังก์ชันเคลียร์กล่อง alt และ disconnect event เฉพาะเมื่อไม่มีลูกค้า
-local function clearAllAltsProfileBoxes()
-    if hasRealPlayers() then return end -- ถ้ายังมีลูกค้า ห้ามเคลียร์
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if table.find(getgenv().alts, player.UserId) then
-            removeProfileBox(player)
-        end
-    end
-end
 
 
 
@@ -5204,20 +5185,21 @@ end
         updateProfileBoxes()  
         local Leave_Audio = tonumber(GuiSettings["Leave_Audio_id"])
         playSound(Leave_Audio)
-        -- Fetch the player's profile picture and username
+         -- Fetch the player's profile picture and username
         local username = player.Name
         local userId = player.UserId
-        -- Get the player's profile picture URL
+         
+         -- Get the player's profile picture URL
         local pfpUrl = game:GetService("Players"):GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-        -- Show a notification to all players about the player joining
+     
+         -- Show a notification to all players about the player joining
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Player Left",
-            Text = username .. " left the game!",
-            Icon = pfpUrl,  -- The profile picture URL
-            Duration = 10  -- Notification duration in seconds
+             Title = "Player Left",
+             Text = username .. " left the game!",
+             Icon = pfpUrl,  -- The profile picture URL
+             Duration = 10  -- Notification duration in seconds
         })
-        -- เรียกเคลียร์ alts ถ้าไม่มีลูกค้าเหลืออยู่
-        clearAllAltsProfileBoxes()
+     
     end)
     
     
