@@ -200,7 +200,7 @@ local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
 local function notifyDiscordPlayerJoin(username)
     pcall(function()
         request({
-            Url = "https://" .. tostring(getgenv().lt_id) .. ".loca.lt/notify-ticket",
+            Url = "https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/notify-ticket",
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = HttpService:JSONEncode({ robloxUsername = username })
@@ -3276,7 +3276,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         print("🧪 กำลังทดสอบการเชื่อมต่อ...")
         
         local urls = {
-            "https://" .. tostring(getgenv().lt_id) .. ".loca.lt",
+            "https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
         }
@@ -3446,7 +3446,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://" .. tostring(getgenv().lt_id) .. ".loca.lt/send-embed",
+                Url = "https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/send-embed",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -3521,7 +3521,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
         local success, response = pcall(function()
             return request({
-                Url = "https://" .. tostring(getgenv().lt_id) .. ".loca.lt/send-embed2",
+                Url = "https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/send-embed2",
                 Method = "POST",
                 Headers = {
                     ["Content-Type"] = "application/json"
@@ -4039,7 +4039,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
 
 
 local HttpService = game:GetService("HttpService")
-local url = "https://" .. tostring(getgenv().lt_id) .. ".loca.lt/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
+local url = "https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
 
 -- ฟังก์ชัน HTTP GET ที่รองรับหลาย executor (มือถือ/PC)
 local function safeHttpGet(url, headers)
@@ -4061,7 +4061,7 @@ local function safeHttpGet(url, headers)
 end
 
 local function pollLatestGoal()
-    local url = "https://" .. tostring(getgenv().lt_id) .. ".loca.lt/latest-goal"
+    local url = "https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/latest-goal"
     local lastAmount = nil
     while true do
         local success, response = pcall(function()
@@ -4114,7 +4114,7 @@ local function pollLatestGoal()
                                 -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
                                 local latestGoalAmount = 0
                                 local getGoalSuccess, getGoalResponse = pcall(function()
-                                    return safeHttpGet("https://" .. tostring(getgenv().lt_id) .. ".loca.lt/latest-goal")
+                                    return safeHttpGet("https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/latest-goal")
                                 end)
                                 if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 and not (string.sub(getGoalResponse, 1, 15):lower() == "<!doctype html>" or string.find(getGoalResponse, "<html", 1, true)) then
                                     local ok, goalData = pcall(function()
@@ -4153,7 +4153,7 @@ local function pollLatestGoal()
                                 print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
                                 local bringHttpSuccess, bringHttpResponse = pcall(function()
                                     return request({
-                                        Url = "https://" .. tostring(getgenv().lt_id) .. ".loca.lt/send-progress-embed",
+                                        Url = "https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/send-progress-embed",
                                         Method = "POST",
                                         Headers = {
                                             ["Content-Type"] = "application/json"
@@ -4176,7 +4176,7 @@ local function pollLatestGoal()
                             end
                             -- รีเซ็ต goal ที่ API ทันทีหลังเติม
                             pcall(function()
-                                safeHttpGet("https://" .. tostring(getgenv().lt_id) .. ".loca.lt/clear-goal")
+                                safeHttpGet("https://" .. tostring(getgenv().cf_url) .. ".trycloudflare.com/clear-goal")
                                 lastAmount = nil -- <--- เพิ่มบรรทัดนี้ เพื่อให้ trigger ได้ทุกครั้ง
                             end)
                         end
