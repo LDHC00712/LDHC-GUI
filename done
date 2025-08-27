@@ -194,35 +194,14 @@ local Lighting = game:GetService("Lighting")
 local ChatService = game:GetService("Chat")
 local HttpService = game:GetService("HttpService")
 
+--Module scripts
 local mainModule = require(ReplicatedStorage:WaitForChild("MainModule"))
-
--- ฟังก์ชันแจ้ง Discord เมื่อมีผู้เล่นเข้าเกม
-local function notifyDiscordPlayerJoin(username)
-    pcall(function()
-        request({
-            Url = "https://af2cfac231cf.ngrok-free.app/notify-ticket",
-            Method = "POST",
-            Headers = { ["Content-Type"] = "application/json" },
-            Body = HttpService:JSONEncode({ robloxUsername = username })
-        })
-    end)
-end
-
-Players.PlayerAdded:Connect(function(player)
-    notifyDiscordPlayerJoin(player.Name)
-end)
-
 
 
 --Wait for player to be added
 while Players.LocalPlayer == nil do task.wait() end
-
-
 if getgenv().scriptinject == true then error("Alt control Script is already executed") end
 getgenv().scriptinject = true
-
--- ====== ดึง goal จาก Discord API แล้ว set ค่า TextBox อัตโนมัติ ======
-local HttpService = game:GetService("HttpService")
 
 pcall(function()
     request({
@@ -252,107 +231,6 @@ local INVENTORY = DATA_FOLDER:WaitForChild("Inventory")
 local PLAYER_CREW = INFORMATION:FindFirstChild("Crew")
 local PLAYER_CASH = PLAYER.DataFolder:WaitForChild("Currency")
 local ORIGINAL_CASH_AMOUNT = PLAYER_CASH.Value
-
--- เชื่อมต่อการเปลี่ยนแปลงของเงินกับการอัปเดต GUI
-PLAYER_CASH.Changed:Connect(function(newValue)
-    print("💰 เงินเปลี่ยนแปลง: " .. tostring(newValue))
-    -- ใช้ spawn เพื่อไม่ให้ block main thread
-    spawn(function()
-        wait(0.1) -- รอให้ระบบอัปเดตเสร็จ
-        updatePlayerCashDisplay()
-    end)
-end)
-
--- Function to update player cash display in GUI
-function updatePlayerCashDisplay()
-    -- อัปเดตค่าเงินใน GUI ทุกๆ element ที่เกี่ยวข้อง
-    spawn(function()
-        local newCashAmount = PLAYER_CASH.Value
-        
-        -- Format เงินให้มี comma
-        local function formatMoney(amount)
-            local formatted = tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse()
-            return formatted:gsub("^,", "")
-        end
-        
-        -- หา GUI elements ที่แสดงเงิน
-        local playerGui = PLAYER:FindFirstChild("PlayerGui")
-        if playerGui then
-            local updatedCount = 0
-            
-            -- อัปเดตทุก TextLabel ที่แสดงเงิน
-            for _, gui in pairs(playerGui:GetDescendants()) do
-                if gui:IsA("TextLabel") then
-                    local text = gui.Text
-                    local parent = gui.Parent
-                    
-                    -- ตรวจสอบว่า TextLabel แสดงเงินหรือไม่ (มี $ และตัวเลข)
-                    if text:match("%$[%d,]+") then
-                        -- อัปเดตเงินในช่องซ้าย (เงินปัจจุบัน)
-                        if gui.Name:lower():find("cash") or 
-                           gui.Name:lower():find("money") or
-                           gui.Name:lower():find("currency") or
-                           parent and parent.Name:lower():find("cash") then
-                            
-                            gui.Text = "$" .. formatMoney(newCashAmount)
-                            print("🔄 อัปเดต GUI หลัก: " .. gui:GetFullName() .. " → $" .. formatMoney(newCashAmount))
-                            updatedCount = updatedCount + 1
-                        end
-                        
-                        -- อัปเดตเงินในช่องขวา (ยอดรวมหรือเป้าหมาย)
-                        if gui.Name:lower():find("total") or 
-                           gui.Name:lower():find("target") or
-                           gui.Name:lower():find("goal") or
-                           (parent and (parent.Name:lower():find("total") or parent.Name:lower():find("target"))) then
-                            
-                            -- เพิ่มเงินในช่องขวาด้วย
-                            local currentRightAmount = tonumber(text:gsub("[$,]", "")) or 0
-                            local newRightAmount = currentRightAmount + (newCashAmount - ORIGINAL_CASH_AMOUNT)
-                            gui.Text = "$" .. formatMoney(newRightAmount)
-                            print("🔄 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newRightAmount))
-                            updatedCount = updatedCount + 1
-                        end
-                    end
-                    
-                    -- ตรวจสอบข้อความที่เป็นตัวเลขอย่างเดียว (ไม่มี $)
-                    if text:match("^[%d,]+$") and tonumber(text:gsub(",", "")) then
-                        local amount = tonumber(text:gsub(",", ""))
-                        -- ถ้าเป็นจำนวนเงินที่ใกล้เคียงกับเงินปัจจุบัน
-                        if math.abs(amount - ORIGINAL_CASH_AMOUNT) < 100000 then
-                            gui.Text = formatMoney(newCashAmount)
-                            print("🔄 อัปเดต GUI (ไม่มี $): " .. gui:GetFullName() .. " → " .. formatMoney(newCashAmount))
-                            updatedCount = updatedCount + 1
-                        end
-                    end
-                end
-            end
-            
-            -- ถ้าไม่พบ GUI ให้อัปเดต ลองหาทางอื่น
-            if updatedCount == 0 then
-                print("⚠️ ไม่พบ GUI ที่ต้องอัปเดต กำลังลองหาทางอื่น...")
-                
-                -- ลองหาผ่าน ScreenGui ทั้งหมด
-                for _, screenGui in pairs(playerGui:GetChildren()) do
-                    if screenGui:IsA("ScreenGui") then
-                        for _, element in pairs(screenGui:GetDescendants()) do
-                            if element:IsA("TextLabel") and element.Visible then
-                                local text = element.Text
-                                if text:match("%$[%d,]+") then
-                                    element.Text = "$" .. formatMoney(newCashAmount)
-                                    print("🔄 อัปเดต GUI (fallback): " .. element:GetFullName() .. " → $" .. formatMoney(newCashAmount))
-                                    updatedCount = updatedCount + 1
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            
-            print("✅ อัปเดต GUI เสร็จสิ้น: " .. updatedCount .. " elements → $" .. formatMoney(newCashAmount))
-        end
-    end)
-end
-
 local REQUIRED_CHAR_PARTS = {
     ["Humanoid"] = true,
     ["HumanoidRootPart"] = true,
@@ -384,46 +262,46 @@ end
 
 local ALT_SETUP_LOCATIONS_V2 = {
     ["bank"] = {
-        [1] = Vector3.new(-393.01, 21.75, -338),
-        [2] = Vector3.new(-381.01, 21.75, -338),
-        [3] = Vector3.new(-369.01, 21.75, -338),
-        [4] = Vector3.new(-357.01, 21.75, -338),
-        [5] = Vector3.new(-393.01, 21.75, -325),
-        [6] = Vector3.new(-381.01, 21.75, -325),
-        [7] = Vector3.new(-369.01, 21.75, -325),
-        [8] = Vector3.new(-357.01, 21.75, -325),
-        [9] = Vector3.new(-393.01, 21.75, -312),
-        [10] = Vector3.new(-381.01, 21.75, -312),
-        [11] = Vector3.new(-369.01, 21.75, -312),
-        [12] = Vector3.new(-357.01, 21.75, -312),
-        [13] = Vector3.new(-393.01, 21.75, -299),
-        [14] = Vector3.new(-381.01, 21.75, -299),
-        [15] = Vector3.new(-369.01, 21.75, -299),
-        [16] = Vector3.new(-357.01, 21.75, -299),
-        [17] = Vector3.new(-393.01, 21.75, -286),
-        [18] = Vector3.new(-381.01, 21.75, -286),
-        [19] = Vector3.new(-369.01, 21.75, -286),
-        [20] = Vector3.new(-357.01, 21.75, -286),
-        [21] = Vector3.new(-393.01, 21.75, -273),
-        [22] = Vector3.new(-381.01, 21.75, -273),
-        [23] = Vector3.new(-369.01, 21.75, -273),
-        [24] = Vector3.new(-357.01, 21.75, -273),
-        [25] = Vector3.new(-393.01, 21.75, -260),
-        [26] = Vector3.new(-381.01, 21.75, -260),
-        [27] = Vector3.new(-369.01, 21.75, -260),
-        [28] = Vector3.new(-357.01, 21.75, -260),
-        [29] = Vector3.new(-393.01, 21.75, -247),
-        [30] = Vector3.new(-381.01, 21.75, -247),
-        [31] = Vector3.new(-369.01, 21.75, -247),
-        [32] = Vector3.new(-357.01, 21.75, -247),
-        [33] = Vector3.new(-393.01, 21.75, -233),
-        [34] = Vector3.new(-381.01, 21.75, -233),
-        [35] = Vector3.new(-369.01, 21.75, -233),
-        [36] = Vector3.new(-357.01, 21.75, -233),
-        [37] = Vector3.new(-405.01, 21.75, -299),
-        [38] = Vector3.new(-405.01, 21.75, -286),
-        [39] = Vector3.new(-405.01, 21.75, -273),
-    },
+		[1] = Vector3.new(-393.01, 21.75, -338),
+		[2] = Vector3.new(-381.01, 21.75, -338),
+		[3] = Vector3.new(-369.01, 21.75, -338),
+		[4] = Vector3.new(-357.01, 21.75, -338),
+		[5] = Vector3.new(-393.01, 21.75, -325),
+		[6] = Vector3.new(-381.01, 21.75, -325),
+		[7] = Vector3.new(-369.01, 21.75, -325),
+		[8] = Vector3.new(-357.01, 21.75, -325),
+		[9] = Vector3.new(-393.01, 21.75, -312),
+		[10] = Vector3.new(-381.01, 21.75, -312),
+		[11] = Vector3.new(-369.01, 21.75, -312),
+		[12] = Vector3.new(-357.01, 21.75, -312),
+		[13] = Vector3.new(-393.01, 21.75, -299),
+		[14] = Vector3.new(-381.01, 21.75, -299),
+		[15] = Vector3.new(-369.01, 21.75, -299),
+		[16] = Vector3.new(-357.01, 21.75, -299),
+		[17] = Vector3.new(-393.01, 21.75, -286),
+		[18] = Vector3.new(-381.01, 21.75, -286),
+		[19] = Vector3.new(-369.01, 21.75, -286),
+		[20] = Vector3.new(-357.01, 21.75, -286),
+		[21] = Vector3.new(-393.01, 21.75, -273),
+		[22] = Vector3.new(-381.01, 21.75, -273),
+		[23] = Vector3.new(-369.01, 21.75, -273),
+		[24] = Vector3.new(-357.01, 21.75, -273),
+		[25] = Vector3.new(-393.01, 21.75, -260),
+		[26] = Vector3.new(-381.01, 21.75, -260),
+		[27] = Vector3.new(-369.01, 21.75, -260),
+		[28] = Vector3.new(-357.01, 21.75, -260),
+		[29] = Vector3.new(-393.01, 21.75, -247),
+		[30] = Vector3.new(-381.01, 21.75, -247),
+		[31] = Vector3.new(-369.01, 21.75, -247),
+		[32] = Vector3.new(-357.01, 21.75, -247),
+		[33] = Vector3.new(-393.01, 21.75, -233),
+		[34] = Vector3.new(-381.01, 21.75, -233),
+		[35] = Vector3.new(-369.01, 21.75, -233),
+		[36] = Vector3.new(-357.01, 21.75, -233),
+		[37] = Vector3.new(-405.01, 21.75, -299),
+		[38] = Vector3.new(-405.01, 21.75, -286),
+		[39] = Vector3.new(-405.01, 21.75, -273),
+	},
     ["club"] = {
         [1] = Vector3.new(-236.01, -6.9, -411),
         [2] = Vector3.new(-248.01, -6.9, -411),
@@ -755,49 +633,49 @@ end
 
 --Functions
 local function findPlayer(name)
-    if name then
+	if name then
         --If they typed the name exactly, then return that
         if Players:FindFirstChild(name) then return Players[name] end
 
         --Otherwise search for player name match
-        name = name:lower()
+		name = name:lower()
 
-        for _, player in ipairs(Players:GetPlayers()) do
-            if name == player.Name:lower():sub(1, #name) then
-                return player
-            end
-        end
-    end
-    return nil
+		for _, player in ipairs(Players:GetPlayers()) do
+			if name == player.Name:lower():sub(1, #name) then
+				return player
+			end
+		end
+	end
+	return nil
 end
 
 
 
 local function constructMessage(arguments, startingFromArg)
-    if #arguments < startingFromArg then
-        return nil
-    end
-    
-    local message = ""
-    for i,arg in pairs(arguments) do
-        if i >= startingFromArg then
-            if i == startingFromArg then
-                message = (message..arg)
-            else
-                message = (message.." "..arg)
-            end
-        end
-    end
-    
-    return message
+	if #arguments < startingFromArg then
+		return nil
+	end
+	
+	local message = ""
+	for i,arg in pairs(arguments) do
+		if i >= startingFromArg then
+			if i == startingFromArg then
+				message = (message..arg)
+			else
+				message = (message.." "..arg)
+			end
+		end
+	end
+	
+	return message
 end
 
 local function cashToInt(stringValue)
-    local noDollarSign = string.sub(stringValue, 2, #stringValue)
-    local noComma = string.gsub(noDollarSign, ",", "")
-    local toInt = tonumber(noComma)
-    
-    return toInt
+	local noDollarSign = string.sub(stringValue, 2, #stringValue)
+	local noComma = string.gsub(noDollarSign, ",", "")
+	local toInt = tonumber(noComma)
+	
+	return toInt
 end
 
 local function countFloorCash()
@@ -848,8 +726,8 @@ local function itemCount(player, itemName) -- needs LPH_JIT_ULTRA, but idk how t
 end
 
 local function findNearestPlayer(position, playerToExclude)
-    local found
-    local last = math.huge
+	local found
+	local last = math.huge
     for _, player in pairs(Players:GetPlayers()) do  -- needs LPH_JIT_ULTRA, but idk how to do it
         if (player.Character and player.Character:FindFirstChild("FULLY_LOADED_CHAR") and player.Character.BodyEffects["K.O"].Value ~= true and not playerToExclude) or player ~= playerToExclude then
             local distance = player:DistanceFromCharacter(position)
@@ -859,7 +737,7 @@ local function findNearestPlayer(position, playerToExclude)
             end
         end
     end
-    return found
+	return found
 end
 
 
@@ -891,16 +769,16 @@ local function getAltNumber(userId)
 end
 
 local function isFriend(player)
-    if friendsCache[player] == true then
-        return true
-    else
-        if player:IsFriendsWith(PLAYER.UserId) then
+	if friendsCache[player] == true then
+		return true
+	else
+		if player:IsFriendsWith(PLAYER.UserId) then
             friendsCache[player] = true
-            return true
-        else
-            return false
-        end
-    end
+			return true
+		else
+			return false
+		end
+	end
 end
 
 local function isInCrew(player)
@@ -934,15 +812,15 @@ local function calculateSecondsToDrop(amount)
 end
 
 local function Format(Int)
-    return string.format("%02i", Int)
+	return string.format("%02i", Int)
 end
 
 local function convertToHMS(Seconds)
-    local Minutes = (Seconds - Seconds%60)/60
-    Seconds = Seconds - Minutes*60
-    local Hours = (Minutes - Minutes%60)/60
-    Minutes = Minutes - Hours*60
-    return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds)
+	local Minutes = (Seconds - Seconds%60)/60
+	Seconds = Seconds - Minutes*60
+	local Hours = (Minutes - Minutes%60)/60
+	Minutes = Minutes - Hours*60
+	return Format(Hours)..":"..Format(Minutes)..":"..Format(Seconds)
 end
 
 ------------------------------------------------------------------------------------- ALT ACCOUNTS -------------------------------------------------------------------------------------
@@ -961,395 +839,395 @@ if isAlt(PLAYER.UserId) == true then
     PLAYER_GUI:ClearAllChildren()
 
     --AltGui (of 'ScreenGui' class)
-    local AltGui = Instance.new("ScreenGui")
-    AltGui.Name = "AltGui"
-    AltGui.IgnoreGuiInset = true
-    AltGui.DisplayOrder = 5
-    AltGui.Parent = CORE_GUI
-    --Create instances
-    local Background = Instance.new("Frame")
-    local BackgroundGdt = Instance.new("UIGradient")
-    local Info = Instance.new("Frame")
-    local DisplayName = Instance.new("TextLabel")
-    local BetterDaHood = Instance.new("TextLabel")
-    local Username = Instance.new("TextLabel")
-    local UIListLayout = Instance.new("UIListLayout")
-    local StartingCash = Instance.new("TextLabel")
-    local CashGainedLost = Instance.new("TextLabel")
-    local CurrentCash = Instance.new("TextLabel")
-    local TimeRemainingText = Instance.new("TextLabel")
-    local TimeRemaining = Instance.new("TextLabel")
-    local TotalFloorCash = Instance.new("TextLabel")
-    local RecountFloorCash = Instance.new("TextButton")
-    local DestroyFloorCash = Instance.new("TextButton")
-    local Options = Instance.new("Frame")
-    local DropFrame = Instance.new("Frame")
-    local DroppingTitle = Instance.new("TextLabel")
-    local DropBtn = Instance.new("TextButton")
-    local DropTime = Instance.new("TextLabel")
-    local CashAuraFrame = Instance.new("Frame")
-    local CashAuraTitle = Instance.new("TextLabel")
-    local CashAuraBtn = Instance.new("TextButton")
-    local FpsLockFrame = Instance.new("Frame")
-    local FpsLockTitle = Instance.new("TextLabel")
-    local FpsLockBox = Instance.new("TextBox")
-    local Help = Instance.new("Frame")
-    local HelpButton = Instance.new("TextButton")
-    local HelpFrame = Instance.new("Frame")
-    local HelpText = Instance.new("TextLabel")
+	local AltGui = Instance.new("ScreenGui")
+	AltGui.Name = "AltGui"
+	AltGui.IgnoreGuiInset = true
+	AltGui.DisplayOrder = 5
+	AltGui.Parent = CORE_GUI
+	--Create instances
+	local Background = Instance.new("Frame")
+	local BackgroundGdt = Instance.new("UIGradient")
+	local Info = Instance.new("Frame")
+	local DisplayName = Instance.new("TextLabel")
+	local BetterDaHood = Instance.new("TextLabel")
+	local Username = Instance.new("TextLabel")
+	local UIListLayout = Instance.new("UIListLayout")
+	local StartingCash = Instance.new("TextLabel")
+	local CashGainedLost = Instance.new("TextLabel")
+	local CurrentCash = Instance.new("TextLabel")
+	local TimeRemainingText = Instance.new("TextLabel")
+	local TimeRemaining = Instance.new("TextLabel")
+	local TotalFloorCash = Instance.new("TextLabel")
+	local RecountFloorCash = Instance.new("TextButton")
+	local DestroyFloorCash = Instance.new("TextButton")
+	local Options = Instance.new("Frame")
+	local DropFrame = Instance.new("Frame")
+	local DroppingTitle = Instance.new("TextLabel")
+	local DropBtn = Instance.new("TextButton")
+	local DropTime = Instance.new("TextLabel")
+	local CashAuraFrame = Instance.new("Frame")
+	local CashAuraTitle = Instance.new("TextLabel")
+	local CashAuraBtn = Instance.new("TextButton")
+	local FpsLockFrame = Instance.new("Frame")
+	local FpsLockTitle = Instance.new("TextLabel")
+	local FpsLockBox = Instance.new("TextBox")
+	local Help = Instance.new("Frame")
+	local HelpButton = Instance.new("TextButton")
+	local HelpFrame = Instance.new("Frame")
+	local HelpText = Instance.new("TextLabel")
     local Cursor = Instance.new("Frame")
 
-        Background.Name = "Background"
-        Background.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        Background.BackgroundColor3 = Color3.new(1, 1, 1)
-        Background.Size = UDim2.new(1, 0, 1, 0)
-        Background.Parent = AltGui
-        BackgroundGdt.Name = "BackgroundGdt"
-        BackgroundGdt.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),ColorSequenceKeypoint.new(1, Color3.new(0.176471, 0.176471, 0.176471)),}
-        BackgroundGdt.Rotation = 290
-        BackgroundGdt.Parent = Background
-        Info.Name = "Info"
-        Info.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        Info.AnchorPoint = Vector2.new(0.5, 0.5)
-        Info.BackgroundTransparency = 0.949999988079071
-        Info.Position = UDim2.new(0.5, 0, 0.4, 0)
-        Info.BackgroundColor3 = Color3.new(1, 1, 1)
-        Info.Size = UDim2.new(0.5625, 0, 0.5235, 0)
-        Info.Parent = Background
-        DisplayName.Name = "DisplayName"
-        DisplayName.LayoutOrder = 1
-        DisplayName.TextStrokeTransparency = 0.75
-        DisplayName.Size = UDim2.new(1, 0, 0.25, 0)
-        DisplayName.TextColor3 = Color3.new(1, 1, 1)
-        DisplayName.TextXAlignment = Enum.TextXAlignment.Left
-        DisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        DisplayName.Text = "Display Name"
-        DisplayName.TextSize = 14
-        DisplayName.Font = Enum.Font.SourceSans
-        DisplayName.BackgroundTransparency = 1
-        DisplayName.Position = UDim2.new(0, 0, 0.05, 0)
-        DisplayName.TextScaled = true
-        DisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
-        DisplayName.Parent = Info
-        BetterDaHood.Name = "BetterDaHood"
-        BetterDaHood.TextTransparency = 0.75
-        BetterDaHood.TextStrokeTransparency = 0.8999999761581421
-        BetterDaHood.Size = UDim2.new(1, 0, 0.05, 0)
-        BetterDaHood.TextColor3 = Color3.new(1, 1, 1)
-        BetterDaHood.TextXAlignment = Enum.TextXAlignment.Left
-        BetterDaHood.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        BetterDaHood.Text = "Da Hood Scripts"
-        BetterDaHood.TextSize = 14
-        BetterDaHood.Font = Enum.Font.GothamBold
-        BetterDaHood.BackgroundTransparency = 1
-        BetterDaHood.TextScaled = true
-        BetterDaHood.BackgroundColor3 = Color3.new(1, 1, 1)
-        BetterDaHood.Parent = Info
-        Username.Name = "Username"
-        Username.LayoutOrder = 2
-        Username.TextTransparency = 0.5
-        Username.TextStrokeTransparency = 0.75
-        Username.Size = UDim2.new(1, 0, 0.075, 0)
-        Username.TextColor3 = Color3.new(1, 1, 1)
-        Username.RichText = true
-        Username.TextXAlignment = Enum.TextXAlignment.Left
-        Username.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        Username.Text = "<i>@username</i>"
-        Username.TextSize = 14
-        Username.Font = Enum.Font.SourceSans
-        Username.BackgroundTransparency = 1
-        Username.Position = UDim2.new(0, 0, 0.3, 0)
-        Username.TextScaled = true
-        Username.BackgroundColor3 = Color3.new(1, 1, 1)
-        Username.Parent = Info
-        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        UIListLayout.Parent = Info
-        StartingCash.Name = "StartingCash"
-        StartingCash.LayoutOrder = 3
-        StartingCash.TextStrokeTransparency = 0.75
-        StartingCash.Size = UDim2.new(1, 0, 0.1, 0)
-        StartingCash.TextColor3 = Color3.new(1, 1, 1)
-        StartingCash.RichText = true
-        StartingCash.TextXAlignment = Enum.TextXAlignment.Left
-        StartingCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        StartingCash.Text = "Joined with - <font color='rgb(0,255,0)'>$0</font>"
-        StartingCash.TextSize = 14
-        StartingCash.Font = Enum.Font.SourceSans
-        StartingCash.BackgroundTransparency = 1
-        StartingCash.Position = UDim2.new(0, 0, 0.3, 0)
-        StartingCash.TextScaled = true
-        StartingCash.BackgroundColor3 = Color3.new(1, 1, 1)
-        StartingCash.Parent = Info
-        CashGainedLost.Name = "CashGainedLost"
-        CashGainedLost.LayoutOrder = 5
-        CashGainedLost.TextStrokeTransparency = 0.75
-        CashGainedLost.Size = UDim2.new(1, 0, 0.1, 0)
-        CashGainedLost.TextColor3 = Color3.new(1, 1, 1)
-        CashGainedLost.RichText = true
-        CashGainedLost.TextXAlignment = Enum.TextXAlignment.Left
-        CashGainedLost.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        CashGainedLost.Text = "Cash gained/lost since join - <font color='rgb(255,255,255)'>$0</font>"
-        CashGainedLost.TextSize = 14
-        CashGainedLost.Font = Enum.Font.SourceSans
-        CashGainedLost.BackgroundTransparency = 1
-        CashGainedLost.Position = UDim2.new(0, 0, 0.3, 0)
-        CashGainedLost.TextScaled = true
-        CashGainedLost.BackgroundColor3 = Color3.new(1, 1, 1)
-        CashGainedLost.Parent = Info
-        CurrentCash.Name = "CurrentCash"
-        CurrentCash.LayoutOrder = 4
-        CurrentCash.TextStrokeTransparency = 0.75
-        CurrentCash.Size = UDim2.new(1, 0, 0.1, 0)
-        CurrentCash.TextColor3 = Color3.new(1, 1, 1)
-        CurrentCash.RichText = true
-        CurrentCash.TextXAlignment = Enum.TextXAlignment.Left
-        CurrentCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        CurrentCash.Text = "Cash - <font color='rgb(0,255,0)'>$0</font>"
-        CurrentCash.TextSize = 14
-        CurrentCash.Font = Enum.Font.SourceSans
-        CurrentCash.BackgroundTransparency = 1
-        CurrentCash.Position = UDim2.new(0, 0, 0.3, 0)
-        CurrentCash.TextScaled = true
-        CurrentCash.BackgroundColor3 = Color3.new(1, 1, 1)
-        CurrentCash.Parent = Info
-        TimeRemainingText.Name = "TimeRemainingText"
-        TimeRemainingText.LayoutOrder = 8
-        TimeRemainingText.TextStrokeTransparency = 0.75
-        TimeRemainingText.Size = UDim2.new(1, 0, 0.1, 0)
-        TimeRemainingText.TextColor3 = Color3.new(1, 1, 1)
-        TimeRemainingText.RichText = true
-        TimeRemainingText.TextXAlignment = Enum.TextXAlignment.Left
-        TimeRemainingText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        TimeRemainingText.Text = "ETR until empty -"
-        TimeRemainingText.TextSize = 14
-        TimeRemainingText.Font = Enum.Font.SourceSans
-        TimeRemainingText.BackgroundTransparency = 1
-        TimeRemainingText.Position = UDim2.new(0, 0, 0.3, 0)
-        TimeRemainingText.TextScaled = true
-        TimeRemainingText.BackgroundColor3 = Color3.new(1, 1, 1)
-        TimeRemainingText.Parent = Info
-        TimeRemaining.Name = "TimeRemaining"
-        TimeRemaining.LayoutOrder = 9
-        TimeRemaining.TextStrokeTransparency = 0.75
-        TimeRemaining.Size = UDim2.new(1, 0, 0.15, 0)
-        TimeRemaining.TextColor3 = Color3.new(1, 1, 1)
-        TimeRemaining.TextXAlignment = Enum.TextXAlignment.Left
-        TimeRemaining.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        TimeRemaining.Text = "00:00:00"
-        TimeRemaining.TextSize = 14
-        TimeRemaining.Font = Enum.Font.SourceSans
-        TimeRemaining.BackgroundTransparency = 1
-        TimeRemaining.Position = UDim2.new(0, 0, 0.3, 0)
-        TimeRemaining.TextScaled = true
-        TimeRemaining.BackgroundColor3 = Color3.new(1, 1, 1)
-        TimeRemaining.Parent = Info
-        TotalFloorCash.Name = "TotalFloorCash"
-        TotalFloorCash.LayoutOrder = 7
-        TotalFloorCash.TextStrokeTransparency = 0.75
-        TotalFloorCash.Size = UDim2.new(1, 0, 0.1, 0)
-        TotalFloorCash.TextColor3 = Color3.new(1, 1, 1)
-        TotalFloorCash.RichText = true
-        TotalFloorCash.TextXAlignment = Enum.TextXAlignment.Left
-        TotalFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        TotalFloorCash.Text = "Cash on the floor - <font color='rgb(0,255,0)'>$0</font>"
-        TotalFloorCash.TextSize = 14
-        TotalFloorCash.Font = Enum.Font.SourceSans
-        TotalFloorCash.BackgroundTransparency = 1
-        TotalFloorCash.Position = UDim2.new(0, 0, 0.3, 0)
-        TotalFloorCash.TextScaled = true
-        TotalFloorCash.BackgroundColor3 = Color3.new(1, 1, 1)
-        TotalFloorCash.Parent = Info
-        RecountFloorCash.Name = "RecountFloorCash"
-        RecountFloorCash.TextStrokeTransparency = 0
-        RecountFloorCash.AnchorPoint = Vector2.new(1, 0)
-        RecountFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
-        RecountFloorCash.TextColor3 = Color3.new(1, 1, 1)
-        RecountFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        RecountFloorCash.Text = "Recount"
-        RecountFloorCash.TextSize = 14
-        RecountFloorCash.Font = Enum.Font.SourceSans
-        RecountFloorCash.Position = UDim2.new(1, 0, 0, 0)
-        RecountFloorCash.TextScaled = true
-        RecountFloorCash.BackgroundColor3 = Color3.new(0, 0.533333, 1)
-        RecountFloorCash.Parent = TotalFloorCash
-        DestroyFloorCash.Name = "DestroyFloorCash"
-        DestroyFloorCash.TextStrokeTransparency = 0
-        DestroyFloorCash.AnchorPoint = Vector2.new(1, 0)
-        DestroyFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
-        DestroyFloorCash.TextColor3 = Color3.new(1, 1, 1)
-        DestroyFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        DestroyFloorCash.Text = "Destroy cash (client side)"
-        DestroyFloorCash.TextSize = 14
-        DestroyFloorCash.Font = Enum.Font.SourceSans
-        DestroyFloorCash.Position = UDim2.new(0.899, 0, 0, 0)
-        DestroyFloorCash.TextScaled = true
-        DestroyFloorCash.BackgroundColor3 = Color3.new(0.364706, 0.364706, 0.364706)
-        DestroyFloorCash.Parent = TotalFloorCash
-        Options.Name = "Options"
-        Options.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        Options.AnchorPoint = Vector2.new(0.5, 0.5)
-        Options.BackgroundTransparency = 0.949999988079071
-        Options.Position = UDim2.new(0.5, 0, 0.8, 0)
-        Options.BackgroundColor3 = Color3.new(1, 1, 1)
-        Options.Size = UDim2.new(0.5, 0, 0.2, 0)
-        Options.Parent = Background
-        DropFrame.Name = "DropFrame"
-        DropFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        DropFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        DropFrame.BackgroundTransparency = 1
-        DropFrame.Position = UDim2.new(0.25, 0, 0.5, 0)
-        DropFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-        DropFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
-        DropFrame.Parent = Options
-        DroppingTitle.Name = "DroppingTitle"
-        DroppingTitle.TextStrokeTransparency = 0.75
-        DroppingTitle.Size = UDim2.new(1, 0, 0.3, 0)
-        DroppingTitle.TextColor3 = Color3.new(1, 1, 1)
-        DroppingTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        DroppingTitle.Text = "Dropping"
-        DroppingTitle.TextSize = 14
-        DroppingTitle.Font = Enum.Font.SourceSans
-        DroppingTitle.BackgroundTransparency = 1
-        DroppingTitle.TextScaled = true
-        DroppingTitle.BackgroundColor3 = Color3.new(1, 1, 1)
-        DroppingTitle.Parent = DropFrame
-        DropBtn.Name = "DropBtn"
-        DropBtn.TextStrokeTransparency = 0
-        DropBtn.Size = UDim2.new(1, 0, 0.699, 0)
-        DropBtn.TextColor3 = Color3.new(1, 1, 1)
-        DropBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        DropBtn.Text = "Off"
-        DropBtn.TextSize = 14
-        DropBtn.Font = Enum.Font.SourceSans
-        DropBtn.Position = UDim2.new(0, 0, 0.3, 0)
-        DropBtn.TextScaled = true
-        DropBtn.BackgroundColor3 = Color3.new(1, 0, 0)
-        DropBtn.Parent = DropFrame
-        DropTime.Name = "DropTime"
-        DropTime.TextStrokeTransparency = 0.75
-        DropTime.Size = UDim2.new(1, 0, 0.3, 0)
-        DropTime.TextColor3 = Color3.new(1, 1, 1)
-        DropTime.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        DropTime.Text = "0"
-        DropTime.Visible = false
-        DropTime.TextSize = 14
-        DropTime.Font = Enum.Font.SourceSans
-        DropTime.BackgroundTransparency = 1
-        DropTime.Position = UDim2.new(0, 0, 1, 0)
-        DropTime.TextScaled = true
-        DropTime.BackgroundColor3 = Color3.new(1, 1, 1)
-        DropTime.Parent = DropFrame
-        CashAuraFrame.Name = "CashAuraFrame"
-        CashAuraFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        CashAuraFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        CashAuraFrame.BackgroundTransparency = 1
-        CashAuraFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        CashAuraFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-        CashAuraFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
-        CashAuraFrame.Parent = Options
-        CashAuraTitle.Name = "CashAuraTitle"
-        CashAuraTitle.TextStrokeTransparency = 0.75
-        CashAuraTitle.Size = UDim2.new(1, 0, 0.3, 0)
-        CashAuraTitle.TextColor3 = Color3.new(1, 1, 1)
-        CashAuraTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        CashAuraTitle.Text = "Cash Aura"
-        CashAuraTitle.TextSize = 14
-        CashAuraTitle.Font = Enum.Font.SourceSans
-        CashAuraTitle.BackgroundTransparency = 1
-        CashAuraTitle.TextScaled = true
-        CashAuraTitle.BackgroundColor3 = Color3.new(1, 1, 1)
-        CashAuraTitle.Parent = CashAuraFrame
-        CashAuraBtn.Name = "CashAuraBtn"
-        CashAuraBtn.TextStrokeTransparency = 0
-        CashAuraBtn.Size = UDim2.new(1, 0, 0.699, 0)
-        CashAuraBtn.TextColor3 = Color3.new(1, 1, 1)
-        CashAuraBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        CashAuraBtn.Text = "Off"
-        CashAuraBtn.TextSize = 14
-        CashAuraBtn.Font = Enum.Font.SourceSans
-        CashAuraBtn.Position = UDim2.new(0, 0, 0.3, 0)
-        CashAuraBtn.TextScaled = true
-        CashAuraBtn.BackgroundColor3 = Color3.new(1, 0, 0)
-        CashAuraBtn.Parent = CashAuraFrame
-        FpsLockFrame.Name = "FpsLockFrame"
-        FpsLockFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        FpsLockFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        FpsLockFrame.BackgroundTransparency = 1
-        FpsLockFrame.Position = UDim2.new(0.75, 0, 0.5, 0)
-        FpsLockFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-        FpsLockFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
-        FpsLockFrame.Parent = Options
-        FpsLockTitle.Name = "FpsLockTitle"
-        FpsLockTitle.TextStrokeTransparency = 0.75
-        FpsLockTitle.Size = UDim2.new(1, 0, 0.3, 0)
-        FpsLockTitle.TextColor3 = Color3.new(1, 1, 1)
-        FpsLockTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        FpsLockTitle.Text = "FPS Lock"
-        FpsLockTitle.TextSize = 14
-        FpsLockTitle.Font = Enum.Font.SourceSans
-        FpsLockTitle.BackgroundTransparency = 1
-        FpsLockTitle.TextScaled = true
-        FpsLockTitle.BackgroundColor3 = Color3.new(1, 1, 1)
-        FpsLockTitle.Parent = FpsLockFrame
-        FpsLockBox.Name = "FpsLockBox"
-        FpsLockBox.TextStrokeTransparency = 0.75
-        FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
-        FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
-        FpsLockBox.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        FpsLockBox.Text = "3"
-        FpsLockBox.TextSize = 14
-        FpsLockBox.Font = Enum.Font.SourceSans
-        FpsLockBox.BackgroundTransparency = 0.800000011920929
-        FpsLockBox.Position = UDim2.new(0, 0, 0.3, 0)
-        FpsLockBox.ClearTextOnFocus = false
-        FpsLockBox.TextScaled = true
-        FpsLockBox.BackgroundColor3 = Color3.new(1, 1, 1)
-        FpsLockBox.Parent = FpsLockFrame
-        Help.Name = "Help"
-        Help.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        Help.AnchorPoint = Vector2.new(0, 1)
-        Help.BackgroundTransparency = 1
-        Help.Position = UDim2.new(0, 0, 1, 0)
-        Help.BackgroundColor3 = Color3.new(1, 1, 1)
-        Help.Size = UDim2.new(0.25, 0, 0.5, 0)
-        Help.Parent = Background
-        HelpButton.Name = "HelpButton"
-        HelpButton.TextStrokeTransparency = 0.75
-        HelpButton.Size = UDim2.new(0.15, 0, 0.15, 0)
-        HelpButton.TextColor3 = Color3.new(1, 1, 1)
-        HelpButton.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        HelpButton.Text = "Help"
-        HelpButton.TextSize = 14
-        HelpButton.Font = Enum.Font.SourceSans
-        HelpButton.BackgroundTransparency = 0.949999988079071
-        HelpButton.Position = UDim2.new(0, 0, 0.85, 0)
-        HelpButton.TextScaled = true
-        HelpButton.BackgroundColor3 = Color3.new(1, 1, 1)
-        HelpButton.Parent = Help
-        HelpFrame.Name = "HelpFrame"
-        HelpFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        HelpFrame.Visible = false
-        HelpFrame.AnchorPoint = Vector2.new(0, 1)
-        HelpFrame.BackgroundTransparency = 0.949999988079071
-        HelpFrame.Position = UDim2.new(0, 0, 0.85, 0)
-        HelpFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-        HelpFrame.Size = UDim2.new(1, 0, 0.6, 0)
-        HelpFrame.Parent = Help
-        HelpText.Name = "HelpText"
-        HelpText.TextTransparency = 0.25
-        HelpText.TextStrokeTransparency = 0.8999999761581421
-        HelpText.Size = UDim2.new(1, 0, 1, 0)
-        HelpText.TextColor3 = Color3.new(1, 1, 1)
-        HelpText.TextXAlignment = Enum.TextXAlignment.Left
-        HelpText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-        HelpText.Text = "You are seeing this screen because it saves CPU usage. Connect to the server on your main account to control this and any other alts."
-        HelpText.TextSize = 14
-        HelpText.Font = Enum.Font.SourceSans
-        HelpText.BackgroundTransparency = 1
-        HelpText.TextYAlignment = Enum.TextYAlignment.Top
-        HelpText.TextScaled = true
-        HelpText.BackgroundColor3 = Color3.new(1, 1, 1)
-        HelpText.Parent = HelpFrame
+		Background.Name = "Background"
+		Background.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Background.BackgroundColor3 = Color3.new(1, 1, 1)
+		Background.Size = UDim2.new(1, 0, 1, 0)
+		Background.Parent = AltGui
+		BackgroundGdt.Name = "BackgroundGdt"
+		BackgroundGdt.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),ColorSequenceKeypoint.new(1, Color3.new(0.176471, 0.176471, 0.176471)),}
+		BackgroundGdt.Rotation = 290
+		BackgroundGdt.Parent = Background
+		Info.Name = "Info"
+		Info.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Info.AnchorPoint = Vector2.new(0.5, 0.5)
+		Info.BackgroundTransparency = 0.949999988079071
+		Info.Position = UDim2.new(0.5, 0, 0.4, 0)
+		Info.BackgroundColor3 = Color3.new(1, 1, 1)
+		Info.Size = UDim2.new(0.5625, 0, 0.5235, 0)
+		Info.Parent = Background
+		DisplayName.Name = "DisplayName"
+		DisplayName.LayoutOrder = 1
+		DisplayName.TextStrokeTransparency = 0.75
+		DisplayName.Size = UDim2.new(1, 0, 0.25, 0)
+		DisplayName.TextColor3 = Color3.new(1, 1, 1)
+		DisplayName.TextXAlignment = Enum.TextXAlignment.Left
+		DisplayName.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DisplayName.Text = "Display Name"
+		DisplayName.TextSize = 14
+		DisplayName.Font = Enum.Font.SourceSans
+		DisplayName.BackgroundTransparency = 1
+		DisplayName.Position = UDim2.new(0, 0, 0.05, 0)
+		DisplayName.TextScaled = true
+		DisplayName.BackgroundColor3 = Color3.new(1, 1, 1)
+		DisplayName.Parent = Info
+		BetterDaHood.Name = "BetterDaHood"
+		BetterDaHood.TextTransparency = 0.75
+		BetterDaHood.TextStrokeTransparency = 0.8999999761581421
+		BetterDaHood.Size = UDim2.new(1, 0, 0.05, 0)
+		BetterDaHood.TextColor3 = Color3.new(1, 1, 1)
+		BetterDaHood.TextXAlignment = Enum.TextXAlignment.Left
+		BetterDaHood.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		BetterDaHood.Text = "Da Hood Scripts"
+		BetterDaHood.TextSize = 14
+		BetterDaHood.Font = Enum.Font.GothamBold
+		BetterDaHood.BackgroundTransparency = 1
+		BetterDaHood.TextScaled = true
+		BetterDaHood.BackgroundColor3 = Color3.new(1, 1, 1)
+		BetterDaHood.Parent = Info
+		Username.Name = "Username"
+		Username.LayoutOrder = 2
+		Username.TextTransparency = 0.5
+		Username.TextStrokeTransparency = 0.75
+		Username.Size = UDim2.new(1, 0, 0.075, 0)
+		Username.TextColor3 = Color3.new(1, 1, 1)
+		Username.RichText = true
+		Username.TextXAlignment = Enum.TextXAlignment.Left
+		Username.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Username.Text = "<i>@username</i>"
+		Username.TextSize = 14
+		Username.Font = Enum.Font.SourceSans
+		Username.BackgroundTransparency = 1
+		Username.Position = UDim2.new(0, 0, 0.3, 0)
+		Username.TextScaled = true
+		Username.BackgroundColor3 = Color3.new(1, 1, 1)
+		Username.Parent = Info
+		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		UIListLayout.Parent = Info
+		StartingCash.Name = "StartingCash"
+		StartingCash.LayoutOrder = 3
+		StartingCash.TextStrokeTransparency = 0.75
+		StartingCash.Size = UDim2.new(1, 0, 0.1, 0)
+		StartingCash.TextColor3 = Color3.new(1, 1, 1)
+		StartingCash.RichText = true
+		StartingCash.TextXAlignment = Enum.TextXAlignment.Left
+		StartingCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		StartingCash.Text = "Joined with - <font color='rgb(0,255,0)'>$0</font>"
+		StartingCash.TextSize = 14
+		StartingCash.Font = Enum.Font.SourceSans
+		StartingCash.BackgroundTransparency = 1
+		StartingCash.Position = UDim2.new(0, 0, 0.3, 0)
+		StartingCash.TextScaled = true
+		StartingCash.BackgroundColor3 = Color3.new(1, 1, 1)
+		StartingCash.Parent = Info
+		CashGainedLost.Name = "CashGainedLost"
+		CashGainedLost.LayoutOrder = 5
+		CashGainedLost.TextStrokeTransparency = 0.75
+		CashGainedLost.Size = UDim2.new(1, 0, 0.1, 0)
+		CashGainedLost.TextColor3 = Color3.new(1, 1, 1)
+		CashGainedLost.RichText = true
+		CashGainedLost.TextXAlignment = Enum.TextXAlignment.Left
+		CashGainedLost.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		CashGainedLost.Text = "Cash gained/lost since join - <font color='rgb(255,255,255)'>$0</font>"
+		CashGainedLost.TextSize = 14
+		CashGainedLost.Font = Enum.Font.SourceSans
+		CashGainedLost.BackgroundTransparency = 1
+		CashGainedLost.Position = UDim2.new(0, 0, 0.3, 0)
+		CashGainedLost.TextScaled = true
+		CashGainedLost.BackgroundColor3 = Color3.new(1, 1, 1)
+		CashGainedLost.Parent = Info
+		CurrentCash.Name = "CurrentCash"
+		CurrentCash.LayoutOrder = 4
+		CurrentCash.TextStrokeTransparency = 0.75
+		CurrentCash.Size = UDim2.new(1, 0, 0.1, 0)
+		CurrentCash.TextColor3 = Color3.new(1, 1, 1)
+		CurrentCash.RichText = true
+		CurrentCash.TextXAlignment = Enum.TextXAlignment.Left
+		CurrentCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		CurrentCash.Text = "Cash - <font color='rgb(0,255,0)'>$0</font>"
+		CurrentCash.TextSize = 14
+		CurrentCash.Font = Enum.Font.SourceSans
+		CurrentCash.BackgroundTransparency = 1
+		CurrentCash.Position = UDim2.new(0, 0, 0.3, 0)
+		CurrentCash.TextScaled = true
+		CurrentCash.BackgroundColor3 = Color3.new(1, 1, 1)
+		CurrentCash.Parent = Info
+		TimeRemainingText.Name = "TimeRemainingText"
+		TimeRemainingText.LayoutOrder = 8
+		TimeRemainingText.TextStrokeTransparency = 0.75
+		TimeRemainingText.Size = UDim2.new(1, 0, 0.1, 0)
+		TimeRemainingText.TextColor3 = Color3.new(1, 1, 1)
+		TimeRemainingText.RichText = true
+		TimeRemainingText.TextXAlignment = Enum.TextXAlignment.Left
+		TimeRemainingText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		TimeRemainingText.Text = "ETR until empty -"
+		TimeRemainingText.TextSize = 14
+		TimeRemainingText.Font = Enum.Font.SourceSans
+		TimeRemainingText.BackgroundTransparency = 1
+		TimeRemainingText.Position = UDim2.new(0, 0, 0.3, 0)
+		TimeRemainingText.TextScaled = true
+		TimeRemainingText.BackgroundColor3 = Color3.new(1, 1, 1)
+		TimeRemainingText.Parent = Info
+		TimeRemaining.Name = "TimeRemaining"
+		TimeRemaining.LayoutOrder = 9
+		TimeRemaining.TextStrokeTransparency = 0.75
+		TimeRemaining.Size = UDim2.new(1, 0, 0.15, 0)
+		TimeRemaining.TextColor3 = Color3.new(1, 1, 1)
+		TimeRemaining.TextXAlignment = Enum.TextXAlignment.Left
+		TimeRemaining.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		TimeRemaining.Text = "00:00:00"
+		TimeRemaining.TextSize = 14
+		TimeRemaining.Font = Enum.Font.SourceSans
+		TimeRemaining.BackgroundTransparency = 1
+		TimeRemaining.Position = UDim2.new(0, 0, 0.3, 0)
+		TimeRemaining.TextScaled = true
+		TimeRemaining.BackgroundColor3 = Color3.new(1, 1, 1)
+		TimeRemaining.Parent = Info
+		TotalFloorCash.Name = "TotalFloorCash"
+		TotalFloorCash.LayoutOrder = 7
+		TotalFloorCash.TextStrokeTransparency = 0.75
+		TotalFloorCash.Size = UDim2.new(1, 0, 0.1, 0)
+		TotalFloorCash.TextColor3 = Color3.new(1, 1, 1)
+		TotalFloorCash.RichText = true
+		TotalFloorCash.TextXAlignment = Enum.TextXAlignment.Left
+		TotalFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		TotalFloorCash.Text = "Cash on the floor - <font color='rgb(0,255,0)'>$0</font>"
+		TotalFloorCash.TextSize = 14
+		TotalFloorCash.Font = Enum.Font.SourceSans
+		TotalFloorCash.BackgroundTransparency = 1
+		TotalFloorCash.Position = UDim2.new(0, 0, 0.3, 0)
+		TotalFloorCash.TextScaled = true
+		TotalFloorCash.BackgroundColor3 = Color3.new(1, 1, 1)
+		TotalFloorCash.Parent = Info
+		RecountFloorCash.Name = "RecountFloorCash"
+		RecountFloorCash.TextStrokeTransparency = 0
+		RecountFloorCash.AnchorPoint = Vector2.new(1, 0)
+		RecountFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
+		RecountFloorCash.TextColor3 = Color3.new(1, 1, 1)
+		RecountFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		RecountFloorCash.Text = "Recount"
+		RecountFloorCash.TextSize = 14
+		RecountFloorCash.Font = Enum.Font.SourceSans
+		RecountFloorCash.Position = UDim2.new(1, 0, 0, 0)
+		RecountFloorCash.TextScaled = true
+		RecountFloorCash.BackgroundColor3 = Color3.new(0, 0.533333, 1)
+		RecountFloorCash.Parent = TotalFloorCash
+		DestroyFloorCash.Name = "DestroyFloorCash"
+		DestroyFloorCash.TextStrokeTransparency = 0
+		DestroyFloorCash.AnchorPoint = Vector2.new(1, 0)
+		DestroyFloorCash.Size = UDim2.new(0.1, 0, 1, 0)
+		DestroyFloorCash.TextColor3 = Color3.new(1, 1, 1)
+		DestroyFloorCash.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DestroyFloorCash.Text = "Destroy cash (client side)"
+		DestroyFloorCash.TextSize = 14
+		DestroyFloorCash.Font = Enum.Font.SourceSans
+		DestroyFloorCash.Position = UDim2.new(0.899, 0, 0, 0)
+		DestroyFloorCash.TextScaled = true
+		DestroyFloorCash.BackgroundColor3 = Color3.new(0.364706, 0.364706, 0.364706)
+		DestroyFloorCash.Parent = TotalFloorCash
+		Options.Name = "Options"
+		Options.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Options.AnchorPoint = Vector2.new(0.5, 0.5)
+		Options.BackgroundTransparency = 0.949999988079071
+		Options.Position = UDim2.new(0.5, 0, 0.8, 0)
+		Options.BackgroundColor3 = Color3.new(1, 1, 1)
+		Options.Size = UDim2.new(0.5, 0, 0.2, 0)
+		Options.Parent = Background
+		DropFrame.Name = "DropFrame"
+		DropFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DropFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+		DropFrame.BackgroundTransparency = 1
+		DropFrame.Position = UDim2.new(0.25, 0, 0.5, 0)
+		DropFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+		DropFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+		DropFrame.Parent = Options
+		DroppingTitle.Name = "DroppingTitle"
+		DroppingTitle.TextStrokeTransparency = 0.75
+		DroppingTitle.Size = UDim2.new(1, 0, 0.3, 0)
+		DroppingTitle.TextColor3 = Color3.new(1, 1, 1)
+		DroppingTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DroppingTitle.Text = "Dropping"
+		DroppingTitle.TextSize = 14
+		DroppingTitle.Font = Enum.Font.SourceSans
+		DroppingTitle.BackgroundTransparency = 1
+		DroppingTitle.TextScaled = true
+		DroppingTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+		DroppingTitle.Parent = DropFrame
+		DropBtn.Name = "DropBtn"
+		DropBtn.TextStrokeTransparency = 0
+		DropBtn.Size = UDim2.new(1, 0, 0.699, 0)
+		DropBtn.TextColor3 = Color3.new(1, 1, 1)
+		DropBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DropBtn.Text = "Off"
+		DropBtn.TextSize = 14
+		DropBtn.Font = Enum.Font.SourceSans
+		DropBtn.Position = UDim2.new(0, 0, 0.3, 0)
+		DropBtn.TextScaled = true
+		DropBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+		DropBtn.Parent = DropFrame
+		DropTime.Name = "DropTime"
+		DropTime.TextStrokeTransparency = 0.75
+		DropTime.Size = UDim2.new(1, 0, 0.3, 0)
+		DropTime.TextColor3 = Color3.new(1, 1, 1)
+		DropTime.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		DropTime.Text = "0"
+		DropTime.Visible = false
+		DropTime.TextSize = 14
+		DropTime.Font = Enum.Font.SourceSans
+		DropTime.BackgroundTransparency = 1
+		DropTime.Position = UDim2.new(0, 0, 1, 0)
+		DropTime.TextScaled = true
+		DropTime.BackgroundColor3 = Color3.new(1, 1, 1)
+		DropTime.Parent = DropFrame
+		CashAuraFrame.Name = "CashAuraFrame"
+		CashAuraFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		CashAuraFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+		CashAuraFrame.BackgroundTransparency = 1
+		CashAuraFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+		CashAuraFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+		CashAuraFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+		CashAuraFrame.Parent = Options
+		CashAuraTitle.Name = "CashAuraTitle"
+		CashAuraTitle.TextStrokeTransparency = 0.75
+		CashAuraTitle.Size = UDim2.new(1, 0, 0.3, 0)
+		CashAuraTitle.TextColor3 = Color3.new(1, 1, 1)
+		CashAuraTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		CashAuraTitle.Text = "Cash Aura"
+		CashAuraTitle.TextSize = 14
+		CashAuraTitle.Font = Enum.Font.SourceSans
+		CashAuraTitle.BackgroundTransparency = 1
+		CashAuraTitle.TextScaled = true
+		CashAuraTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+		CashAuraTitle.Parent = CashAuraFrame
+		CashAuraBtn.Name = "CashAuraBtn"
+		CashAuraBtn.TextStrokeTransparency = 0
+		CashAuraBtn.Size = UDim2.new(1, 0, 0.699, 0)
+		CashAuraBtn.TextColor3 = Color3.new(1, 1, 1)
+		CashAuraBtn.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		CashAuraBtn.Text = "Off"
+		CashAuraBtn.TextSize = 14
+		CashAuraBtn.Font = Enum.Font.SourceSans
+		CashAuraBtn.Position = UDim2.new(0, 0, 0.3, 0)
+		CashAuraBtn.TextScaled = true
+		CashAuraBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+		CashAuraBtn.Parent = CashAuraFrame
+		FpsLockFrame.Name = "FpsLockFrame"
+		FpsLockFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		FpsLockFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+		FpsLockFrame.BackgroundTransparency = 1
+		FpsLockFrame.Position = UDim2.new(0.75, 0, 0.5, 0)
+		FpsLockFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+		FpsLockFrame.Size = UDim2.new(0.174, 0, 0.5, 0)
+		FpsLockFrame.Parent = Options
+		FpsLockTitle.Name = "FpsLockTitle"
+		FpsLockTitle.TextStrokeTransparency = 0.75
+		FpsLockTitle.Size = UDim2.new(1, 0, 0.3, 0)
+		FpsLockTitle.TextColor3 = Color3.new(1, 1, 1)
+		FpsLockTitle.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		FpsLockTitle.Text = "FPS Lock"
+		FpsLockTitle.TextSize = 14
+		FpsLockTitle.Font = Enum.Font.SourceSans
+		FpsLockTitle.BackgroundTransparency = 1
+		FpsLockTitle.TextScaled = true
+		FpsLockTitle.BackgroundColor3 = Color3.new(1, 1, 1)
+		FpsLockTitle.Parent = FpsLockFrame
+		FpsLockBox.Name = "FpsLockBox"
+		FpsLockBox.TextStrokeTransparency = 0.75
+		FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
+		FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
+		FpsLockBox.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		FpsLockBox.Text = "3"
+		FpsLockBox.TextSize = 14
+		FpsLockBox.Font = Enum.Font.SourceSans
+		FpsLockBox.BackgroundTransparency = 0.800000011920929
+		FpsLockBox.Position = UDim2.new(0, 0, 0.3, 0)
+		FpsLockBox.ClearTextOnFocus = false
+		FpsLockBox.TextScaled = true
+		FpsLockBox.BackgroundColor3 = Color3.new(1, 1, 1)
+		FpsLockBox.Parent = FpsLockFrame
+		Help.Name = "Help"
+		Help.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		Help.AnchorPoint = Vector2.new(0, 1)
+		Help.BackgroundTransparency = 1
+		Help.Position = UDim2.new(0, 0, 1, 0)
+		Help.BackgroundColor3 = Color3.new(1, 1, 1)
+		Help.Size = UDim2.new(0.25, 0, 0.5, 0)
+		Help.Parent = Background
+		HelpButton.Name = "HelpButton"
+		HelpButton.TextStrokeTransparency = 0.75
+		HelpButton.Size = UDim2.new(0.15, 0, 0.15, 0)
+		HelpButton.TextColor3 = Color3.new(1, 1, 1)
+		HelpButton.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		HelpButton.Text = "Help"
+		HelpButton.TextSize = 14
+		HelpButton.Font = Enum.Font.SourceSans
+		HelpButton.BackgroundTransparency = 0.949999988079071
+		HelpButton.Position = UDim2.new(0, 0, 0.85, 0)
+		HelpButton.TextScaled = true
+		HelpButton.BackgroundColor3 = Color3.new(1, 1, 1)
+		HelpButton.Parent = Help
+		HelpFrame.Name = "HelpFrame"
+		HelpFrame.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		HelpFrame.Visible = false
+		HelpFrame.AnchorPoint = Vector2.new(0, 1)
+		HelpFrame.BackgroundTransparency = 0.949999988079071
+		HelpFrame.Position = UDim2.new(0, 0, 0.85, 0)
+		HelpFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+		HelpFrame.Size = UDim2.new(1, 0, 0.6, 0)
+		HelpFrame.Parent = Help
+		HelpText.Name = "HelpText"
+		HelpText.TextTransparency = 0.25
+		HelpText.TextStrokeTransparency = 0.8999999761581421
+		HelpText.Size = UDim2.new(1, 0, 1, 0)
+		HelpText.TextColor3 = Color3.new(1, 1, 1)
+		HelpText.TextXAlignment = Enum.TextXAlignment.Left
+		HelpText.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
+		HelpText.Text = "You are seeing this screen because it saves CPU usage. Connect to the server on your main account to control this and any other alts."
+		HelpText.TextSize = 14
+		HelpText.Font = Enum.Font.SourceSans
+		HelpText.BackgroundTransparency = 1
+		HelpText.TextYAlignment = Enum.TextYAlignment.Top
+		HelpText.TextScaled = true
+		HelpText.BackgroundColor3 = Color3.new(1, 1, 1)
+		HelpText.Parent = HelpFrame
         Cursor.Name = "Cursor"
         Cursor.LayoutOrder = 1
         Cursor.BorderColor3 = Color3.new(0, 0, 0)
@@ -1362,15 +1240,15 @@ if isAlt(PLAYER.UserId) == true then
         local corneraa = Instance.new("UICorner")
         corneraa.CornerRadius = UDim.new(0.5, 0)  -- This makes it a circle
         corneraa.Parent = Cursor
-        --Secondary instances
-        local secondaryInsts = {{["ClassName"] = "UICorner", ["Parent"] = RecountFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = DestroyFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = Info,["Parent"] = Cursor, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = Options, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = DropBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = CashAuraBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},}
-        for _, instInfo in ipairs(secondaryInsts) do
-            local inst = Instance.new(instInfo.ClassName)
-            for propertyName, value in pairs(instInfo.Properties) do
-                inst[propertyName] = value
-            end
-            inst.Parent = instInfo.Parent
-        end
+		--Secondary instances
+		local secondaryInsts = {{["ClassName"] = "UICorner", ["Parent"] = RecountFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = DestroyFloorCash, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = Info,["Parent"] = Cursor, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = Options, ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},{["ClassName"] = "UICorner", ["Parent"] = DropBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Parent"] = CashAuraBtn, ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {}},{["ClassName"] = "UICorner", ["Properties"] = {["CornerRadius"] = UDim.new(0.05, 0),}},}
+		for _, instInfo in ipairs(secondaryInsts) do
+			local inst = Instance.new(instInfo.ClassName)
+			for propertyName, value in pairs(instInfo.Properties) do
+				inst[propertyName] = value
+			end
+			inst.Parent = instInfo.Parent
+		end
 
     --
     --
@@ -1387,10 +1265,10 @@ if isAlt(PLAYER.UserId) == true then
     local UserInputService = game:GetService("UserInputService")
 
     Cursor.Visible = true
-    cursorConnection = RunService.PreRender:Connect(function()
-        local mouseLocation = UserInputService:GetMouseLocation()
-        Cursor.Position = UDim2.new(0, mouseLocation.X, 0, mouseLocation.Y)
-    end)
+	cursorConnection = RunService.PreRender:Connect(function()
+		local mouseLocation = UserInputService:GetMouseLocation()
+		Cursor.Position = UDim2.new(0, mouseLocation.X, 0, mouseLocation.Y)
+	end)
     --Vars
     local playerOldPosition
     local cleanupConnections = {} -- [character] = cleanupConnection
@@ -2734,22 +2612,26 @@ else -- SELLER GUI
     
     -- Create the Hide Cash toggle button
     createToggle1(MiscFrame, UDim2.new(0, 0, 0, 210), "Hide Cash", false, function(state)
+    
+        
         -- Set the hideCash flag based on the state of the toggle
         hideCash = state
-
+    
         -- Apply the hide/unhide effect based on the hideCash flag
         if hideCash == true then
             for _, v in pairs(IGNORED.Drop:GetChildren()) do
                 if v:IsA("Part") then
                     -- Hide the Decal if it exists
                     if v:FindFirstChild("Decal") then
-                        v.Decal:Destroy()
+                        v.Decal:Destroy()  -- Removing Decal(s)
+                        v.Decal:Destroy()  -- Destroying the second Decal instance if it exists
                     end
+    
                     -- Hide the BillboardGui and make the part transparent
                     if v:FindFirstChild("BillboardGui") then
                         v.BillboardGui.Enabled = false
                     end
-                    v.Transparency = 1
+                    v.Transparency = 1  -- Make the part transparent
                 end
             end
         else
@@ -2759,46 +2641,12 @@ else -- SELLER GUI
                     if v:FindFirstChild("BillboardGui") then
                         v.BillboardGui.Enabled = true
                     end
-                    v.Transparency = 0
+                    v.Transparency = 0  -- Make the part visible again
                 end
             end
         end
     end)
     
-
-    -- Noclip toggle (on/off)
-    local noclipActive = false
-    local noclipConnection = nil
-    createToggle1(MiscFrame, UDim2.new(0, 0, 0, 260), "Noclip", false, function(state)
-        noclipActive = state
-        local player = game.Players.LocalPlayer
-        local function setNoclip(enabled)
-            local char = player.Character
-            if char then
-                for _, part in ipairs(char:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = not enabled
-                    end
-                end
-            end
-        end
-        if noclipActive then
-            setNoclip(true)
-            if not noclipConnection then
-                noclipConnection = game:GetService("RunService").Stepped:Connect(function()
-                    if noclipActive then
-                        setNoclip(true)
-                    end
-                end)
-            end
-        else
-            setNoclip(false)
-            if noclipConnection then
-                noclipConnection:Disconnect()
-                noclipConnection = nil
-            end
-        end
-    end)
     
     
     -- Monitor for new parts in the IGNORED.Drop folder (optional)
@@ -3151,501 +2999,39 @@ else -- SELLER GUI
     
     local HttpService = game:GetService("HttpService")
     
-    -- ตัวแปรสำหรับเก็บข้อมูลการเพิ่มเงิน
-    local pendingMoneyRequests = {}
-    local totalAddedMoney = 0 -- ติดตามจำนวนเงินที่เพิ่มจาก Discord
-    
-    -- Function to check for money requests from Discord
-    local function checkMoneyRequests()
-        spawn(function()
-            while true do
-                wait(5) -- ตรวจสอบทุก 5 วินาที
-                local success, response = pcall(function()
-                    return request({
-                        Method = "GET",
-                        Headers = {
-                            ["ngrok-skip-browser-warning"] = "true"
-                        }
-                    })
-                end)
-                if success and response and response.StatusCode == 200 then
-                    local data = HttpService:JSONDecode(response.Body)
-                    if data.success and data.requests then
-                        for _, request in ipairs(data.requests) do
-                            if not pendingMoneyRequests[request.id] then
-                                pendingMoneyRequests[request.id] = true
-                                -- แปลง amount เช่น 1m, 500k, 10000
-                                local function parseAmount(str)
-                                    str = tostring(str):lower():gsub(",", ""):gsub("%s", "")
-                                    if str == "" then return nil end
-                                    if str:find("m") then
-                                        local numstr = str:gsub("m", "")
-                                        if numstr == "" then return nil end
-                                        local num = tonumber(numstr)
-                                        if num then return num * 1e6 end
-                                    elseif str:find("k") then
-                                        local numstr = str:gsub("k", "")
-                                        if numstr == "" then return nil end
-                                        local num = tonumber(numstr)
-                                        if num then return num * 1e3 end
-                                    else
-                                        local num = tonumber(str)
-                                        if num then return num end
-                                    end
-                                    return nil
-                                end
-                                local amountNum = parseAmount(request.amount)
-                                local validType = type(request.amount) == "string" or type(request.amount) == "number"
-                                local amountNum = validType and parseAmount(request.amount) or nil
-                                if amountNum and amountNum > 0 then
-                                    print("[AUTO DHC] เพิ่มเงินให้ ", request.username, "จำนวน:", amountNum, "เหตุผล:", request.reason or "-")
-                                    addMoneyToPlayer(request.username, amountNum, request.reason, request.amount)
-                                else
-                                    print("[AUTO DHC] amount ไม่ถูกต้อง:", tostring(request.amount))
-                                end
-                            end
-                        end
-                    end
-                else
-                end
-            end
-        end)
-    end
-    
-    -- Function to add money to player
-function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
-        local targetPlayer = nil
-        
-        -- หาผู้เล่นในเซิร์ฟเวอร์
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player.Name == targetUsername then
-                targetPlayer = player
-                break
-            end
-        end
-        
-        if not targetPlayer then
-            print("❌ ไม่พบผู้เล่น " .. targetUsername .. " ในเซิร์ฟเวอร์")
-            return
-        end
-        
-        -- เพิ่มเงินให้ผู้เล่น
-        local success, error = pcall(function()
-            -- วิธีหลัก: อัปเดต Currency ใน DataFolder
-            local dataFolder = targetPlayer:FindFirstChild("DataFolder")
-            if dataFolder then
-                local currency = dataFolder:FindFirstChild("Currency")
-                if currency then
-                    local oldAmount = currency.Value
-                    currency.Value = currency.Value + amount
-
-                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี) ด้วยค่าตรงจาก Discord (amountRaw)
-                    local playerGui = targetPlayer:FindFirstChild("PlayerGui")
-                    if playerGui then
-                        local found = false
-                        print("[DEBUG] TextBox ทั้งหมดใน PlayerGui ของ " .. targetPlayer.Name .. ":")
-                        for _, gui in pairs(playerGui:GetDescendants()) do
-                            if gui:IsA("TextBox") then
-                                print("  Name=", gui.Name, " PlaceholderText=", gui.PlaceholderText, " Text=", gui.Text)
-                            end
-                        end
-                        for _, gui in pairs(playerGui:GetDescendants()) do
-                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
-                                gui.Text = tostring(amountRaw or amount)
-                                print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
-                                found = true
-                            end
-                        end
-                        if not found then
-                            print("❌ ไม่พบ TextBox ใน PlayerGui ของ " .. targetPlayer.Name)
-                        end
-                    else
-                        print("❌ ไม่พบ PlayerGui ของ " .. targetPlayer.Name)
-                    end
-
-                    -- เพิ่มการติดตามเงินที่เพิ่มจาก Discord
-                    if targetPlayer == PLAYER then
-                        totalAddedMoney = totalAddedMoney + amount
-                        print("💰 ติดตาม: เพิ่มเงินจาก Discord รวม $" .. totalAddedMoney)
-                        -- อัปเดต GUI พิเศษสำหรับช่องด้านขวา
-                        updateRightSideGUI(amount, totalAddedMoney)
-                    end
-
-                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername)
-                    print("   เงินเดิม: $" .. oldAmount .. " → เงินใหม่: $" .. currency.Value)
-                    print("   เหตุผล: " .. reason)
-                    
-                    return
-                end
-            end
-            
-            -- วิธีสำรอง: ใช้ leaderstats
-            if targetPlayer:FindFirstChild("leaderstats") then
-                local cashStat = targetPlayer.leaderstats:FindFirstChild("Cash") or 
-                               targetPlayer.leaderstats:FindFirstChild("Money") or
-                               targetPlayer.leaderstats:FindFirstChild("DHC") or
-                               targetPlayer.leaderstats:FindFirstChild("Currency")
-                if cashStat then
-                    cashStat.Value = cashStat.Value + amount
-                    print("✅ เพิ่มเงิน $" .. amount .. " ให้ " .. targetUsername .. " (ผ่าน leaderstats)")
-                    print("   เหตุผล: " .. reason)
-                    return
-                end
-            end
-            
-            print("⚠️ ไม่พบระบบเงินสำหรับ " .. targetUsername)
-        end)
-        
-        if not success then
-            print("❌ เกิดข้อผิดพลาดในการเพิ่มเงิน: " .. tostring(error))
-        end
-    end
-    
-    -- Function to update right side GUI (ช่องด้านขวา)
-    function updateRightSideGUI(addedAmount, totalAdded)
-        spawn(function()
-            local function formatMoney(amount)
-                local formatted = tostring(amount):reverse():gsub("(%d%d%d)", "%1,"):reverse()
-                return formatted:gsub("^,", "")
-            end
-            
-            local playerGui = PLAYER:FindFirstChild("PlayerGui")
-            if playerGui then
-                -- หา GUI elements ในช่องด้านขวา
-                for _, gui in pairs(playerGui:GetDescendants()) do
-                    if gui:IsA("TextLabel") then
-                        local text = gui.Text
-                        local parent = gui.Parent
-                        
-                        -- ลองหา GUI ที่อาจเป็นช่องด้านขวา
-                        if text:match("%$[%d,]+") then
-                            -- ตรวจสอบตำแหน่งหรือชื่อที่บ่งบอกว่าเป็นช่องขวา
-                            local isRightSide = false
-                            
-                            -- วิธีที่ 1: ตรวจสอบจาก Position
-                            if gui.Position.X.Scale > 0.5 or gui.Position.X.Offset > 200 then
-                                isRightSide = true
-                            end
-                            
-                            -- วิธีที่ 2: ตรวจสอบจากชื่อ
-                            if gui.Name:lower():find("right") or 
-                               gui.Name:lower():find("total") or
-                               gui.Name:lower():find("target") or
-                               gui.Name:lower():find("goal") or
-                               (parent and (parent.Name:lower():find("right") or parent.Name:lower():find("total"))) then
-                                isRightSide = true
-                            end
-                            
-                            -- วิธีที่ 3: ตรวจสอบจากจำนวนเงินที่แสดง
-                            local displayedAmount = tonumber(text:gsub("[$,]", "")) or 0
-                            if displayedAmount > PLAYER_CASH.Value then
-                                isRightSide = true
-                            end
-                            
-                            if isRightSide then
-                                -- อัปเดตช่องขวาให้แสดงเงินรวมที่เพิ่มจาก Discord
-                                local newAmount = ORIGINAL_CASH_AMOUNT + totalAdded
-                                gui.Text = "$" .. formatMoney(newAmount)
-                                print("💎 อัปเดต GUI ด้านขวา: " .. gui:GetFullName() .. " → $" .. formatMoney(newAmount))
-                            end
-                        end
-                        
-                        -- ตรวจสอบปุ่มหรือ element ที่แสดงจำนวนที่เพิ่ม
-                        if gui.Name:lower():find("button") or gui.Name:lower():find("add") then
-                            if text:match("^[%d]+[km]?$") then -- เช่น "1m", "500k"
-                                gui.Text = formatMoney(addedAmount)
-                                print("🔘 อัปเดตปุ่ม: " .. gui:GetFullName() .. " → " .. formatMoney(addedAmount))
-                            end
-                        end
-                    end
-                end
-            end
-            
-            print("✨ อัปเดต GUI ด้านขวาเสร็จสิ้น: +$" .. formatMoney(addedAmount) .. " (รวม: $" .. formatMoney(totalAdded) .. ")")
-        end)
-    end
     
     
     
-    
-    -- เริ่มระบบตรวจสอบคำสั่งเพิ่มเงิน
-    checkMoneyRequests()
-    
-    -- Function to test connection
-    local function testConnection()
-        print("🧪 กำลังทดสอบการเชื่อมต่อ...")
-        
-        local urls = {
-            "https://af2cfac231cf.ngrok-free.app",
-            "http://localhost:3000",
-            "http://127.0.0.1:3000"
-        }
-        
-        for _, url in ipairs(urls) do
-            print("🌐 ทดสอบ: " .. url)
-            
-            local success, response = pcall(function()
-                return request({
-                    Url = url,
-                    Method = "GET",
-                    Headers = {
-                        ["ngrok-skip-browser-warning"] = "true"
-                    }
-                })
-            end)
-            
-            if success and response and response.StatusCode == 200 then
-                print("✅ เชื่อมต่อ " .. url .. " สำเร็จ!")
-                print("   StatusCode: " .. tostring(response.StatusCode))
-                print("   Body: " .. tostring(response.Body):sub(1, 100) .. "...")
-                return url
-            else
-                print("❌ " .. url .. " ไม่สามารถเชื่อมต่อได้")
-                if response then
-                    print("   StatusCode: " .. tostring(response.StatusCode))
-                end
-            end
-        end
-        
-        print("❌ ไม่สามารถเชื่อมต่อได้จากทุก URL")
-        return nil
-    end
-
-    -- Function to notify Discord ticket when player joins
-    local function notifyDiscordTicket(playerName, userId)
-        -- ตรวจสอบว่าไม่ใช่ alt account
-        if getgenv().alts and getgenv().alts[playerName] then
-            print("🚫 " .. playerName .. " เป็น alt account, ไม่ส่งการแจ้งเตือน")
-            return
-        end
-        
-        print("🔔 กำลังส่งการแจ้งเตือนสำหรับ: " .. playerName)
-
-        -- ทดสอบการเชื่อมต่อก่อน
-        local baseUrl = testConnection()
-        if not baseUrl then
-            print("❌ ไม่สามารถเชื่อมต่อ Discord Bot ได้")
-            return
-        end
-
-        -- ส่งข้อมูลที่จำเป็นเท่านั้น
-        local payload = {
-            robloxUsername = playerName
-        }
-
-        local url = baseUrl .. "/notify-ticket"
-        print("🌐 ใช้ URL: " .. url)
-        
-        local requestSuccess, response = pcall(function()
-            return request({
-                Url = url,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json",
-                    ["ngrok-skip-browser-warning"] = "true"
-                },
-                Body = HttpService:JSONEncode(payload)
-            })
-        end)
-
-        if requestSuccess and response and response.StatusCode == 200 then
-            print("✅ ส่งการแจ้งเตือนสำเร็จสำหรับ: " .. playerName)
-            print("📄 Response: " .. (response.Body or "ไม่มี response body"))
-        elseif requestSuccess and response then
-            print("⚠️  การส่งการแจ้งเตือนล้มเหลว:")
-            print("   StatusCode: " .. tostring(response.StatusCode or "nil"))
-            print("   StatusMessage: " .. tostring(response.StatusMessage or "nil"))
-            print("   Body: " .. tostring(response.Body or "nil"))
-        else
-            print("❌ ไม่สามารถส่งการแจ้งเตือนได้")
-            print("   Error: " .. tostring(response))
-        end
-    end
-
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
-        -- Get player name from userid
-        local playerName = "Unknown"
-        local displayName = "Unknown"
-        local player = Players:GetPlayerByUserId(userid)
-        if player then
-            playerName = player.Name
-            displayName = player.DisplayName
-        end
-
-        -- Calculate total bought DHC
-        local total_bought = bought or 0
-
-        -- Get player avatar
-        local avatarUrl = ""
-                local success_avatar, ThumbnailAPI = pcall(function()
-                    return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Webp&isCircular=false")
-                end)
-        
-        if success_avatar then
-            local success_json, json = pcall(function()
-                return HttpService:JSONDecode(ThumbnailAPI)
-            end)
-            
-            if success_json and json.data and json.data[1] then
-                avatarUrl = json.data[1].imageUrl
-            end
-        end
-
-        -- Get image from PHP server (direct URL without calling webhook)
-        local imageUrl = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
+        -- Construct the URL with the parameters
+        local php_url = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
                         "&start_cash=" .. start_cash ..
                         "&end_cash=" .. end_cash ..
-                        "&total_bought=" .. total_bought ..
-                        "&format=image_only"
-
-        -- Create Discord embed payload
-        local embed = {
-            title = "Order Completed",
-            description = "**" .. playerName .. "** has reached their goal!",
-            fields = {
-                {
-                    name = "Total DHC",
-                    value = "`$" .. commaValue(start_cash) .. "`",
-                    inline = false
-                },
-                {
-                    name = "Final DHC", 
-                    value = "`$" .. commaValue(end_cash) .. "`",
-                    inline = false
-                },
-                {
-                    name = "Total Bought DHC",
-                    value = "`$" .. commaValue(total_bought) .. "`",
-                    inline = false
-                }
-            },
+                        "&webhook=" .. discord_webhook ..
+                        "&total_bought=" .. bought
+    
+        -- Prepare the request options for a GET request
+        local options = {
+            Url = php_url,  -- The full URL with query parameters
+            Method = "GET"  -- Using GET method
         }
-
-        -- Add avatar thumbnail if available
-        if avatarUrl ~= "" then
-            embed.thumbnail = {
-                url = avatarUrl
-            }
-        end
-
-        -- Send data to your Discord bot server
-        local payload = {
-            userid = userid,
-            robloxUsername = playerName,
-            playerName = playerName,
-            displayName = displayName,
-            start_cash = start_cash,
-            end_cash = end_cash,
-            total_bought = total_bought,
-            avatarUrl = avatarUrl,
-            discord_webhook = discord_webhook
-        }
-
-        print("Sending payload to webhook server...")
-        print("Payload:", HttpService:JSONEncode(payload))
-
-        local success, response = pcall(function()
-            return request({
-                Url = "https://af2cfac231cf.ngrok-free.app/send-embed",
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = HttpService:JSONEncode(payload)
-            })
-        end)
-
-        if success and response.Success then
-            print("Discord embed webhook with avatar and image sent successfully!")
-            print("Response body:", response.Body)
+    
+        -- Send the HTTP request using the request function
+        local response = request(options)
+    
+        -- Check if the response is successful
+        if response.Success then
+            print("Image sent to Discord webhook successfully!")
         else
-            print("Failed to send Discord embed webhook:")
-            print("Success:", success)
-            if response then
-                print("StatusCode:", response.StatusCode)
-                print("StatusMessage:", response.StatusMessage)
-                print("Body:", response.Body)
-            else
-                print("No response received")
-            end
+            print("Failed to send image to Discord: " .. response.StatusCode .. " - " .. response.StatusMessage)
         end
     end
-
-    -- ฟังก์ชันใหม่สำหรับ /send-embed2
-    local function sendToPHPServer2(userid, start_cash, end_cash, discord_webhook, bought, goal)
-        -- Get player name from userid
-        -- Get player name from userid
-        local playerName = "Unknown"
-        local displayName = "Unknown"
-        local player = Players and Players:GetPlayerByUserId(userid)
-        if player then
-            playerName = player.Name
-            displayName = player.DisplayName
-        end
-
-        -- Calculate total bought DHC
-        local total_bought = bought or 0
-
-        -- goal รับมาจาก argument (ไม่คำนวณใหม่)
-
-        -- Get player avatar
-        local avatarUrl = ""
-        local success_avatar, ThumbnailAPI = pcall(function()
-            return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Webp&isCircular=false")
-        end)
-        if success_avatar then
-            local success_json, json = pcall(function()
-                return HttpService:JSONDecode(ThumbnailAPI)
-            end)
-            if success_json and json.data and json.data[1] then
-                avatarUrl = json.data[1].imageUrl
-            end
-        end
-
-        -- Create Discord embed payload
-        local payload = {
-            userid = userid,
-            robloxUsername = playerName,
-            playerName = playerName,
-            displayName = displayName,
-            start_cash = start_cash,
-            end_cash = end_cash,
-            total_bought = total_bought,
-            avatarUrl = avatarUrl,
-            discord_webhook = discord_webhook,
-            goal = goal -- ใช้ goal ที่รับมา
-        }
-
-        print("Sending payload to webhook server (send-embed2)...")
-        print("Payload:", HttpService:JSONEncode(payload))
-
-        local success, response = pcall(function()
-            return request({
-                Url = "https://af2cfac231cf.ngrok-free.app/send-embed2",
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = HttpService:JSONEncode(payload)
-            })
-        end)
-
-        if success and response and response.Success then
-            print("Discord embed2 webhook with avatar and image sent successfully!")
-            print("Response body:", response.Body)
-        else
-            print("Failed to send Discord embed2 webhook:")
-            print("Success:", success)
-            if response then
-                print("StatusCode:", response.StatusCode)
-                print("StatusMessage:", response.StatusMessage)
-                print("Body:", response.Body)
-            else
-                print("No response received")
-            end
-        end
-    end
-    local function blockPlayer(userId)
+    
+    
+    
+    
+    
+    local function unblockPlayer(userId)
         local cookies = {
             [".ROBLOSECURITY"] = GuiSettings["Roblox_Cookie"],
         }
@@ -3774,14 +3160,13 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     
     local Locations = {
-    ["Bank"] = CFrame.new(-389, 22, -373),
-    ["Club"] = CFrame.new(-291, -6, -405),
-    ["Train"] = CFrame.new(602, 49, -112),
-    ["Swamp"] = CFrame.new(-849.75, -27.9, 325.25),
-    ["Vault"] = CFrame.new(-506.5, 24.5, -285),
-    ["Bankroof"] = CFrame.new(-437.5, 41.5, -285.1),
-    ["Basketball"] = CFrame.new(-931.5, 27.6, -482.7),
-    ["Sell"] = CFrame.new(-264.22406005859375, -6.210321426391602, -341.1272888183594),
+        ["Bank"] = CFrame.new(-389, 22, -373),
+        ["Club"] = CFrame.new(-291, -6, -405),
+        ["Train"] = CFrame.new(602, 49, -112),
+        ["Swamp"] = CFrame.new(-849.75, -27.9, 325.25),
+        ["Vault"] = CFrame.new(-506.5, 24.5, -285),
+        ["Bankroof"] = CFrame.new(-437.5, 41.5, -285.1),
+        ["Basketball"] = CFrame.new(-931.5, 27.6, -482.7),
     }
     
     local function teleportToLocation(locationName)
@@ -3852,14 +3237,13 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     -----------
     -----------
     createDropdown(GuiSettings["Teleport_Location"], SettingsFrame, UDim2.new(0, 0, 0, 10), "Teleport Location", {
-    "Bank", 
-    "Bankroof", 
-    "Basketball", 
-    "Club", 
-    "Swamp", 
-    "Train", 
-    "Vault",
-    "Sell"
+        "Bank", 
+        "Bankroof", 
+        "Basketball", 
+        "Club", 
+        "Swamp", 
+        "Train", 
+        "Vault"
     }, function(location)
         GuiSettings["Teleport_Location"] = location
         saveData()
@@ -3929,8 +3313,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Club", 
         "Swamp", 
         "Train", 
-        "Vault",
-        "Sell"
+        "Vault"
     }, function(location)
         game.Players:Chat("/setup " .. string.lower(location))
     end)
@@ -4039,8 +3422,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Club", 
         "Swamp", 
         "Train", 
-        "Vault",
-        "Sell"
+        "Vault"
     }, function(location)
         game.Players:Chat("/setup " .. string.lower(location) .. " og")
     end)
@@ -4134,176 +3516,6 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     
     
     local playerData = {}
-
-
-
-
-local HttpService = game:GetService("HttpService")
-local url = "https://af2cfac231cf.ngrok-free.app/set-goal" -- <--- เพิ่มไว้ให้แก้ไข url เอง
-
--- ฟังก์ชัน HTTP GET ที่รองรับหลาย executor (มือถือ/PC)
-local function safeHttpGet(url, headers)
-    headers = headers or {}
-    if syn and syn.request then
-        local res = syn.request({Url = url, Method = "GET", Headers = headers})
-        return res and res.Body or nil
-    elseif http_request then
-        local res = http_request({Url = url, Method = "GET", Headers = headers})
-        return res and res.Body or nil
-    elseif request then
-        local res = request({Url = url, Method = "GET", Headers = headers})
-        return res and res.Body or nil
-    elseif game and game.HttpGet then
-        return game:HttpGet(url)
-    else
-        error("No supported HTTP request method found")
-    end
-end
-
-local function pollLatestGoal()
-    local url = "https://af2cfac231cf.ngrok-free.app/latest-goal"
-    local lastAmount = nil
-    while true do
-        local success, response = pcall(function()
-            return safeHttpGet(url, { ["ngrok-skip-browser-warning"] = "true" })
-        end)
-        if not success then
-            warn("[GoalSync] Request failed:", response)
-        elseif not response or #response == 0 then
-            warn("[GoalSync] Empty response from API")
-        elseif string.sub(response, 1, 15):lower() == "<!doctype html>" or string.find(response, "<html", 1, true) then
-            warn("[GoalSync] /latest-goal: API returned HTML instead of JSON. อาจจะ ngrok หมดอายุ, URL ผิด, หรือ server ล่ม\nRaw response:", response)
-        else
-            local data
-            local ok, err = pcall(function()
-                data = HttpService:JSONDecode(response)
-            end)
-            if not ok then
-                warn("[GoalSync] JSON decode error:", err, "Raw:", response)
-            elseif data and data.username and data.amount then
-                local container = G2L and G2L["7"]
-                local box = container and container:FindFirstChild(data.username .. "_Box")
-                if not container then
-                    warn("[GoalSync] G2L[\"7\"] (player box container) not found")
-                elseif not box then
-                else
-                    local textbox = box:FindFirstChild("AddMoneyTextBox")
-                    if textbox then
-                        if lastAmount ~= data.amount then
-                            textbox:CaptureFocus()
-                            textbox.Text = tostring(data.amount)
-                            textbox:ReleaseFocus()
-                            lastAmount = data.amount
-                            print("[DEBUG] data.username:", data.username, "LocalPlayer.Name:", game.Players.LocalPlayer.Name)
-                            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                            local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-                            print("[DEBUG] MainEvent exists:", MainEvent ~= nil)
-                            local targetPlayer = game.Players:FindFirstChild(data.username)
-                            if targetPlayer and MainEvent then
-                                -- เก็บ start_cash ก่อน bring
-                                local start_cash = 0
-                                if targetPlayer:FindFirstChild("DataFolder") and targetPlayer.DataFolder:FindFirstChild("Currency") then
-                                    start_cash = targetPlayer.DataFolder.Currency.Value
-                                end
-                                print("[DEBUG] Waiting before bringing ", data.username)
-                                task.wait(1)
-                                print("[DEBUG] Bringing ", data.username, " to ", game.Players.LocalPlayer.Name)
-                                MainEvent:FireServer("VIP_CMD", "Summon", targetPlayer)
-                                print("[DEBUG] Fired Summon event for targetPlayer!")
-
-                                -- ===== ดึง goal/amount ใหม่จาก API ทันที ก่อน POST =====
-                                local latestGoalAmount = 0
-                                local getGoalSuccess, getGoalResponse = pcall(function()
-                                    return safeHttpGet("https://af2cfac231cf.ngrok-free.app/latest-goal", { ["ngrok-skip-browser-warning"] = "true" })
-                                end)
-                                if getGoalSuccess and getGoalResponse and #getGoalResponse > 0 and not (string.sub(getGoalResponse, 1, 15):lower() == "<!doctype html>" or string.find(getGoalResponse, "<html", 1, true)) then
-                                    local ok, goalData = pcall(function()
-                                        return HttpService:JSONDecode(getGoalResponse)
-                                    end)
-                                    if ok and goalData and goalData.amount then
-                                        latestGoalAmount = tonumber(goalData.amount) or 0
-                                    end
-                                else
-                                    warn("[GoalSync] /latest-goal (inner): API returned HTML or invalid JSON. ข้ามการ update goal amount")
-                                end
-                                local total_bought = latestGoalAmount
-                                local end_cash = start_cash + total_bought -- ให้ end_cash = start_cash + total_bought เพื่อให้ backend ใช้เป็น Goal
-                                local avatarUrl = ""
-                                local success_avatar, ThumbnailAPI = pcall(function()
-                                    return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..targetPlayer.UserId.."&size=420x420&format=Webp&isCircular=false")
-                                end)
-                                if success_avatar then
-                                    local success_json, json = pcall(function()
-                                        return HttpService:JSONDecode(ThumbnailAPI)
-                                    end)
-                                    if success_json and json.data and json.data[1] then
-                                        avatarUrl = json.data[1].imageUrl
-                                    end
-                                end
-                                local payload = {
-                                    userid = targetPlayer.UserId,
-                                    robloxUsername = targetPlayer.Name,
-                                    playerName = targetPlayer.Name,
-                                    displayName = targetPlayer.DisplayName,
-                                    start_cash = start_cash,
-                                    end_cash = end_cash, -- end_cash = start_cash + total_bought
-                                    total_bought = total_bought,
-                                    avatarUrl = avatarUrl
-                                }
-                                print("[DEBUG] BRING PAYLOAD:", HttpService:JSONEncode(payload))
-                                local bringHttpSuccess, bringHttpResponse = pcall(function()
-                                    return request({
-                                        Url = "https://af2cfac231cf.ngrok-free.app/send-progress-embed",
-                                        Method = "POST",
-                                        Headers = {
-                                            ["Content-Type"] = "application/json"
-                                        },
-                                        Body = HttpService:JSONEncode(payload)
-                                    })
-                                end)
-                                if bringHttpSuccess then
-                                    print("[DEBUG] POST /send-progress-embed after bring success:", bringHttpResponse)
-                                else
-                                    warn("[DEBUG] POST /send-progress-embed after bring failed:", bringHttpResponse)
-                                end
-                                -- ===== END =====
-
-                                -- แจ้ง Shout หลัง Bring
-                                task.wait(1)
-                                local shoutMsg = string.format("Bring %s Check your order in Ticket to make sure it is correct.", data.username)
-                                MainEvent:FireServer("Shout", shoutMsg)
-                            else
-                                if not targetPlayer then print("[DEBUG] Target player not found:", data.username) end
-                                if not MainEvent then warn("[AutoBring] MainEvent not found!") end
-                            end
-                            -- รีเซ็ต goal ที่ API ทันทีหลังเติม
-                            pcall(function()
-                                safeHttpGet("https://af2cfac231cf.ngrok-free.app/clear-goal", { ["ngrok-skip-browser-warning"] = "true" })
-                                lastAmount = nil -- <--- เพิ่มบรรทัดนี้ เพื่อให้ trigger ได้ทุกครั้ง
-                            end)
-                        end
-                    else
-                        warn("[GoalSync] AddMoneyTextBox not found in box for user '" .. data.username .. "'")
-                    end
-                end
-            else
-                warn("[GoalSync] API data missing username/amount. Raw:", response)
-            end
-        end
-        wait(3)
-    end
-end
-spawn(pollLatestGoal)
-
-
--- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local SetGoalFromDiscord = ReplicatedStorage:FindFirstChild("SetGoalFromDiscord")
-if not SetGoalFromDiscord then
-    SetGoalFromDiscord = Instance.new("RemoteEvent")
-    SetGoalFromDiscord.Name = "SetGoalFromDiscord"
-    SetGoalFromDiscord.Parent = ReplicatedStorage
-end
     
     -- Initialize data for a player
     function initializePlayerData(player)
@@ -4567,9 +3779,7 @@ end
     textbox["Size"] = UDim2.new(0, 104, 0, 23);
     textbox["Position"] = UDim2.new(0.67018, 0, 0.61136, 0);
     textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-    textbox["Text"] = ""; -- รีเซ็ตเป็นค่าว่างทุกครั้งที่สร้าง box (เข้าเซิร์ฟเวอร์)
-    textbox.PlaceholderText = "ใส่จำนวนเงินที่ต้องการเพิ่ม";
-    textbox.Name = "AddMoneyTextBox";
+    textbox["Text"] = "";
     
     
     -- StarterGui.ScreenGui.Frame.ScrollingFrame.Frame.TextBox.UICorner
@@ -4670,27 +3880,6 @@ end
         else
             game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Kick", player)
         end
-
-    -- ฟังก์ชันสำหรับ set ค่า TextBox จาก Discord
-    local function setGoalFromDiscord(amount)
-        textbox.Text = tostring(amount)
-        textbox:ReleaseFocus() -- trigger FocusLost
-        -- เรียก bring อัตโนมัติหลัง set ค่า TextBox
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-        if MainEvent then
-            MainEvent:FireServer("VIP_CMD", "Summon", player)
-        else
-            warn("[AutoBring] MainEvent not found!")
-        end
-    end
-
-    -- เชื่อมต่อ RemoteEvent เฉพาะกล่องของ player นี้
-    SetGoalFromDiscord.OnClientEvent:Connect(function(targetName, amount)
-        if player.Name == targetName then
-            setGoalFromDiscord(amount)
-        end
-    end)
     end)
     button2.MouseButton1Click:Connect(function()
         local localPlayer = game.Players.LocalPlayer
@@ -4798,7 +3987,7 @@ end
             local uicorner2 = Instance.new("UICorner")
             uicorner2.CornerRadius = UDim.new(1, 0)  -- Full circle effect (corner radius is half of the size)
             uicorner2.Parent = image1
-     
+    
             -- Add a stroke effect around the profile picture
             local stroke2 = Instance.new("UIStroke")
             stroke2.Parent = image1
@@ -5002,30 +4191,16 @@ end
                     if GuiSettings["Auto_Bring_to_Vault"] == true then
                         tptobank(player)
                     end
-
+    
                     if GuiSettings["Auto_Kick_on_Finished"] == true then
                         Autokickonfinished(player)
                     end
-
+    
                     if GuiSettings["Send_Webhook_on_complete_order"] == true then
                         sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
                     end
-
-                    -- แจ้ง Shout ในเกมเมื่อออเดอร์เสร็จสิ้น (ทดลอง)
-                    local MAIN_EVENT = game:GetService("ReplicatedStorage"):WaitForChild("MainEvent")
-                    MAIN_EVENT:FireServer("Shout", "Please leave the game, " .. username .. " has completed their order!")
-                    -- คำนวณ goalValue แบบเดียวกับ /send-progress-embed
-                    task.wait(2)
-                    local total_bought = data.total_bought or data.need or 0
-                    local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
-                    sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
-                    local container = G2L["7"]
-                    local box = container and container:FindFirstChild(player.Name .. "_Box")
-                    if container and box then
-                        box:Destroy()
-                        print("[GoalSync] Removed box for user:", data.username)
+    
                 end
-              end
             else
                 image1.BackgroundColor3 = Color3.fromRGB(34, 34, 34)  -- Default (dark gray) when not met
             end
@@ -5048,7 +4223,7 @@ end
             removeButton.Visible = true
         end
     end)
-
+    
     removeButton.MouseButton1Click:Connect(function()
         if playerData[player.Name] then
             playerData[player.Name] = nil
@@ -5158,39 +4333,35 @@ end
             -- Play the sound as soon as the player joins
             local Join_Audio = tonumber(GuiSettings["Join_Audio_id"])
             playSound(Join_Audio)
-
+    
             -- Fetch the player's profile picture and username
             local username = player.Name
             local userId = player.UserId
             
             -- Get the player's profile picture URL
             local pfpUrl = game:GetService("Players"):GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-
-            -- Send notification to Discord ticket (New feature) - Only for non-alt players
-            notifyDiscordTicket(username, userId)
-
+    
             -- Show a notification to all players about the player joining
-
             game:GetService("StarterGui"):SetCore("SendNotification", {
                 Title = "Player Joined",
                 Text = username .. " joined the game!",
                 Icon = pfpUrl,  -- The profile picture URL
                 Duration = 10  -- Notification duration in seconds
             })
-
+    
             -- Start the character loading and ForceField removal check as before
             local startTime = tick()  -- Get the current time
             local timeout = 30  -- Timeout limit in seconds
-
+    
             repeat
                 task.wait()
             until player.Character and player.Character:FindFirstChild("FULLY_LOADED_CHAR") ~= nil or (tick() - startTime > timeout)
-
+    
             -- Check if we exited the loop due to timeout
             if tick() - startTime > timeout then
                 warn("Player character took too long to load.")
             else
-
+    
                 local container = G2L["7"]
                 if container then
                     -- Look for the player's box in the container
@@ -5206,7 +4377,7 @@ end
                         box:Destroy()
                         createbox(player,THREE,LABEL1)
                     end
-
+    
                     if GuiSettings["Bring_on_Join"] == true then
                         task.wait(0.5)
                         game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
@@ -5217,7 +4388,9 @@ end
             addProfileBoxes(player)
             updateProfileBoxes()
         end
-    end)    -- PlayerRemoving event: Delete box when a player leaves
+    end)
+    
+    -- PlayerRemoving event: Delete box when a player leaves
     Players.PlayerRemoving:Connect(function(player)
         if playerData[player.Name] == nil then
             deletebox(player)
