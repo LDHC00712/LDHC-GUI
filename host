@@ -3139,7 +3139,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                     local oldAmount = currency.Value
                     currency.Value = currency.Value + amount
 
-                    -- อัปเดต TextBox ช่อง "ใส่จำนวนเงินที่ต้องการเพิ่ม" (ถ้ามี) ด้วยค่าตรงจาก Discord (amountRaw)
+                    -- อัปเดต TextBox ช่อง "AmountDHC" (ถ้ามี) ด้วยค่าตรงจาก Discord (amountRaw)
                     local playerGui = targetPlayer:FindFirstChild("PlayerGui")
                     if playerGui then
                         local found = false
@@ -3150,7 +3150,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
                             end
                         end
                         for _, gui in pairs(playerGui:GetDescendants()) do
-                            if gui:IsA("TextBox") and gui.PlaceholderText == "ใส่จำนวนเงินที่ต้องการเพิ่ม" and gui.Name == "AddMoneyTextBox" then
+                            if gui:IsA("TextBox") and gui.PlaceholderText == "AmountDHC" and gui.Name == "AddMoneyTextBox" then
                                 gui.Text = tostring(amountRaw or amount)
                                 print("✅ อัปเดต TextBox ให้ player: " .. targetPlayer.Name .. " ด้วยค่า: " .. tostring(amountRaw or amount))
                                 found = true
@@ -4516,7 +4516,7 @@ end
     textbox["Position"] = UDim2.new(0.67018, 0, 0.61136, 0);
     textbox["BorderColor3"] = Color3.fromRGB(0, 0, 0);
     textbox["Text"] = ""; -- รีเซ็ตเป็นค่าว่างทุกครั้งที่สร้าง box (เข้าเซิร์ฟเวอร์)
-    textbox.PlaceholderText = "ใส่จำนวนเงินที่ต้องการเพิ่ม";
+    textbox.PlaceholderText = "AmountDHC";
     textbox.Name = "AddMoneyTextBox";
     
     
