@@ -3516,6 +3516,66 @@ else -- SELLER GUI
     
     
     local playerData = {}
+
+-- =========================
+-- GLOBAL: ระบบ /drop /stop อัตโนมัติ (ควรอยู่ global scope ก่อน logic อื่นหลัง pollLatestGoal)
+-- =========================
+local lastDropState = nil -- true = dropped, false = stopped
+local function hasRealPlayers()
+    if getgenv().alts then
+        for i, altId in ipairs(getgenv().alts) do
+        end
+    else
+    end
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            return true
+        end
+    end
+    return false
+end
+local function updateDropState()
+    local hasPlayers = false
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            hasPlayers = true
+            break
+        end
+    end
+    if hasPlayers ~= lastDropState then
+        if hasPlayers then
+            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
+            game.Players:Chat("/drop")
+        else
+            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
+            game.Players:Chat("/stop")
+        end
+        lastDropState = hasPlayers
+    end
+end
+game.Players.PlayerAdded:Connect(function(player)
+    if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+game.Players.PlayerRemoving:Connect(function(player)
+    if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+updateDropState()
+
+
+-- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SetGoalFromDiscord = ReplicatedStorage:FindFirstChild("SetGoalFromDiscord")
+if not SetGoalFromDiscord then
+    SetGoalFromDiscord = Instance.new("RemoteEvent")
+    SetGoalFromDiscord.Name = "SetGoalFromDiscord"
+    SetGoalFromDiscord.Parent = ReplicatedStorage
+end
     
     -- Initialize data for a player
     function initializePlayerData(player)
