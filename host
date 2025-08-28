@@ -2898,10 +2898,7 @@ else -- SELLER GUI
         dropdownFrame.BorderSizePixel = 0
         local uiCorner = Instance.new("UICorner", dropdownFrame)
         uiCorner.CornerRadius = UDim.new(0, 8)
-    
-    
-    
-    
+
         local label = Instance.new("TextLabel", dropdownFrame)
         label.Size = UDim2.new(0.7, 0, 1, 0)
         label.BackgroundTransparency = 1
@@ -2909,7 +2906,7 @@ else -- SELLER GUI
         label.TextColor3 = Color3.fromRGB(255, 255, 255)
         label.Font = Enum.Font.GothamBold
         label.TextSize = 13
-    
+
         local dropdownButton = Instance.new("TextButton", dropdownFrame)
         dropdownButton.Size = UDim2.new(0, 100, 0, 40)
         dropdownButton.Position = UDim2.new(0.7, 0, 0, 0)
@@ -2929,38 +2926,38 @@ else -- SELLER GUI
             selection.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             selection.Parent = parent
             selection.ZIndex = 2  -- Ensure dropdown appears above the button
-        
+
             -- Round the corners of the dropdown box
             local corner = Instance.new("UICorner", selection)
             corner.CornerRadius = UDim.new(0, 10)  -- Set roundness of the dropdown box
-        
+
             -- Create the ScrollingFrame to handle scrollable content
             local scrollFrame = Instance.new("ScrollingFrame", selection)
             scrollFrame.Size = UDim2.new(0, 100, 0, 160)  -- Size matches the parent frame
             scrollFrame.Position = UDim2.new(0, 0, 0, 0)  -- Align with the parent frame
             scrollFrame.BackgroundTransparency = 1
             scrollFrame.ScrollBarThickness = 6  -- Thickness of the scrollbar
-            -- Adjust CanvasSize to fit a maximum of 4 options visible
-            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, math.min(#options, 4) * 80)  -- Allow only 4 options to be visible at once
+            -- Adjust CanvasSize to fit all options
+            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 45)  -- Allow all options to be visible via scroll
             scrollFrame.ScrollBarImageTransparency = 0.7  -- Transparency of the scrollbar
             scrollFrame.ZIndex = 3  -- Make sure the scrollable content is above the background
-        
+
             -- Create a button for each option inside the scrollable frame
             for i, option in ipairs(options) do
                 local optionButton = Instance.new("TextButton", scrollFrame)
                 optionButton.Size = UDim2.new(0, 95, 0, 40)  -- Size each option button
-                optionButton.Position = UDim2.new(0, 0, 0, (i - 1) * 45)  -- Proper vertical spacing (50px per option)
+                optionButton.Position = UDim2.new(0, 0, 0, (i - 1) * 45)  -- Proper vertical spacing (45px per option)
                 optionButton.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
                 optionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
                 optionButton.Text = option
                 optionButton.Font = Enum.Font.GothamBold
                 optionButton.TextSize = 10
                 optionButton.BorderSizePixel = 0
-        
+
                 -- Round the corners of the individual option buttons
                 local optionCorner = Instance.new("UICorner", optionButton)
                 optionCorner.CornerRadius = UDim.new(0, 8)  -- Set roundness for option buttons
-        
+
                 optionButton.MouseButton1Click:Connect(function()
                     dropdownButton.Text = option  -- Set selected option text on the button
                     selection:Destroy()  -- Close dropdown after selection
@@ -2970,8 +2967,7 @@ else -- SELLER GUI
                 end)
             end
         end)
-        
-    
+
         return dropdownFrame
     end
     
@@ -3905,16 +3901,26 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         game.Players:Chat("/animation " .. location)
     end)
     createDropdown("Circle", altcontrol, UDim2.new(0, 0, 0, 660), "Size", {
-        "1", 
-        "2", 
-        "3", 
-        "4", 
+        "1",
+        "2",
+        "3",
+        "4",
         "5",
         "6",
         "7",
         "8",
         "9",
-        "10"
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20"
     }, function(location)
         game.Players:Chat("/circle " .. location)
     end)
