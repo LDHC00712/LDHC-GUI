@@ -4952,7 +4952,14 @@ end
                     -- Set the flag to prevent multiple notifications
                     data.notificationPlayed = true
                     data.istracking = false
-    
+
+                    if GuiSettings["Send_Webhook_on_complete_order"] == true then
+                        sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
+                    -- คำนวณ goalValue แบบเดียวกับ /send-progress-embed
+                        local total_bought = data.total_bought or data.need or 0
+                        local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
+                        sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
+                    end
                     if GuiSettings["Auto_Bring_to_Vault"] == true then
                         tptobank(player)
                     end
@@ -4960,13 +4967,6 @@ end
                     if GuiSettings["Auto_Kick_on_Finished"] == true then
                         Autokickonfinished(player)
                     end
-
-                    if GuiSettings["Send_Webhook_on_complete_order"] == true then
-                        sendToPHPServer(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], data.need)
-                        -- คำนวณ goalValue แบบเดียวกับ /send-progress-embed
-                        local total_bought = data.total_bought or data.need or 0
-                        local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
-                        sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
                         local container = G2L["7"]
                         local box = container and container:FindFirstChild(player.Name .. "_Box")
                     if container and box then
