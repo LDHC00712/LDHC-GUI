@@ -4972,7 +4972,6 @@ end
                     if container and box then
                         box:Destroy()
                         print("[GoalSync] Removed box for user:", data.username)
-                        end
                     end
 
                     -- แจ้ง Shout ในเกมเมื่อออเดอร์เสร็จสิ้น (ทดลอง)
