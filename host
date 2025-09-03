@@ -4897,7 +4897,7 @@ end
         
     
         if GuiSettings["Auto_Kick_on_Extra_Pickup"] == true then
-            if data.missing - data.CASH_SPENT <= -30000 then
+            if data.missing - data.CASH_SPENT <= -150000 then
                 if playerData[player.Name] then
                         playerData[player.Name] = nil
                 end       
