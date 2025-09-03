@@ -4959,7 +4959,7 @@ end
                         local total_bought = data.total_bought or data.need or 0
                         local goalValue = (tonumber(data.starter) or 0) + (tonumber(total_bought) or 0)
                         sendToPHPServer2(player.userId, data.starter, tonumber(player:WaitForChild("DataFolder"):WaitForChild("Currency").Value), GuiSettings["Discord_Webhook"], total_bought, goalValue)
-                    end
+
                     if GuiSettings["Auto_Bring_to_Vault"] == true then
                         tptobank(player)
                     end
@@ -4972,6 +4972,7 @@ end
                     if container and box then
                         box:Destroy()
                         print("[GoalSync] Removed box for user:", data.username)
+                        end
                     end
 
                     -- แจ้ง Shout ในเกมเมื่อออเดอร์เสร็จสิ้น (ทดลอง)
