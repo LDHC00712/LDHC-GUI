@@ -1380,7 +1380,6 @@ if isAlt(PLAYER.UserId) == true then
     local altCommands = {}
     --local crouchAnim = PLAYER.Character.Humanoid:LoadAnimation(game.ReplicatedStorage.ClientAnimations.Block)
     altCommands.drop = function(player, args)
-        print("[altCommands] drop", player, args)
         if DropBtn.Text == "On" then
             MAIN_EVENT:FireServer("Block", false) -- (doesn't work if stuff in IGNORED is destroyed idk why)
             Chat("Stopped Dropping")
@@ -1428,7 +1427,6 @@ if isAlt(PLAYER.UserId) == true then
     local cdrop_stop = false
 
     altCommands.cdrop = function(player, args)
-        print("[altCommands] cdrop", player, args)
         local amountString = args[1]
         local limit = tonumber(amountString)
         if not limit then
@@ -1468,13 +1466,11 @@ if isAlt(PLAYER.UserId) == true then
     
 
     altCommands.dropped = function(player, args)
-        print("[altCommands] dropped", player, args)
         Chat("Cash on floor: $"..commaValue(countFloorCash()))
     end
 
 
     altCommands.aura = function(player, args)
-        print("[altCommands] aura", player, args)
   
             if CashAuraBtn.Text == "Off" then
                 CashAuraBtn.Text = "On"
@@ -1500,21 +1496,19 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.dupefor = function(player, args)
-        print("[altCommands] dupefor", player, args)
         local playerToDupeFor = findPlayer(args[1])
 
         if playerToDupeFor then
             if PLAYER == playerToDupeFor then
-                altCommands.aura(PLAYER, {PLAYER.Name})
+                altCommands.aura(nil, {PLAYER.Name})
             else
                 teleport(CFrame.new(playerToDupeFor.Character.HumanoidRootPart.Position + Vector3.new(math.random(70) / 10 - 3.5, -5, math.random(70) / 10 - 3.5)))
-                altCommands.drop(PLAYER, {})
+                altCommands.drop()
             end
         end
     end
 
     altCommands.redeem = function(player, args)
-        print("[altCommands] redeem", player, args)
         local code = tostring(args[1])
 
         if code then
@@ -1523,7 +1517,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.stop = function(player, args)
-        print("[altCommands] stop", player, args)
         dropToggle = false
         cdrop_stop = true
         CashAuraBtn.Text = "Off"
@@ -1535,7 +1528,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.destroycash = function(player, args)
-        print("[altCommands] destroycash", player, args)
             for _,v in ipairs(IGNORED.Drop:GetChildren()) do
                 if v:IsA("Part") then
                     v:Destroy()
@@ -1549,7 +1541,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.setup = function(player, args)
-        print("[altCommands] setup", player, args)
         local locationName = tostring(args[1]) -- tostring incase nil
         local ogPlacement = tostring(args[2]) == "og" and true or false
 
@@ -1580,7 +1571,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.freeze = function(player, args)
-        print("[altCommands] freeze", player, args)
         local playerToFreeze = findPlayer(args[1])
 
         if playerToFreeze == PLAYER or args[1] == nil then
@@ -1589,7 +1579,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.unfreeze = function(player, args)
-        print("[altCommands] unfreeze", player, args)
         local playerToFreeze = findPlayer(args[1])
 
         if playerToFreeze == PLAYER or args[1] == nil then
@@ -1601,7 +1590,6 @@ if isAlt(PLAYER.UserId) == true then
     local backpack = player2.Backpack
     local character2 = player2.Character or player2.CharacterAdded:Wait() 
     altCommands.wallet = function(player, args)
-        print("[altCommands] wallet", player, args)
         print(player,args)
         for _, v in pairs(character:GetChildren()) do
             if v:IsA("Tool") and v.Name ~= "[Wallet]" then
@@ -1619,7 +1607,6 @@ if isAlt(PLAYER.UserId) == true then
 
     local advertising = false
     altCommands.advert = function(player, args)
-        print("[altCommands] advert", player, args)
         local message = constructMessage(args, 1)
 
         if message then
@@ -1635,7 +1622,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.animation = function(player, args)
-        print("[altCommands] animation", player, args)
             local message = constructMessage(args, 1)
             
             for _, animation in PLAYER.Character.Humanoid:GetPlayingAnimationTracks() do
@@ -1691,7 +1677,6 @@ if isAlt(PLAYER.UserId) == true then
 
 
     altCommands.say = function(player, args)
-        print("[altCommands] say", player, args)
         local message = constructMessage(args, 1)
 
         if message then
@@ -1700,7 +1685,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.joincrew = function(player, args)
-        print("[altCommands] joincrew", player, args)
         local crewId = tonumber(args[1])
 
         if crewId then
@@ -1713,17 +1697,14 @@ if isAlt(PLAYER.UserId) == true then
 
 
     altCommands.airlock = function(player, args)
-        print("[altCommands] airlock", player, args)
         teleport(CFrame.new(PLAYER.Character.HumanoidRootPart.Position + Vector3.new(0, 10, 0)))
     end
 
     altCommands.hide = function(player, args)
-        print("[altCommands] hide", player, args)
         teleport(CFrame.new(PLAYER.Character.HumanoidRootPart.Position + Vector3.new(0, -6.5, 0)))
     end
 
     altCommands.hidecash = function(player, args)
-        print("[altCommands] hidecash", player, args)
         if args[1] then
             if args[1] == "on" then
                 hideCash = true
@@ -1756,7 +1737,6 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.line = function(player, args)
-        print("[altCommands] line", player, args)
         teleport(CFrame.new(player.Character.HumanoidRootPart.Position + Vector3.new(getAltNumber(PLAYER.UserId)*2 - 1, 0, 0)))
     end
 
@@ -1770,10 +1750,10 @@ if isAlt(PLAYER.UserId) == true then
 
         if playerToDupeFor then
             if PLAYER == playerToDupeFor then
-                altCommands.aura(PLAYER, {PLAYER.Name})
+                altCommands.aura(nil, {PLAYER.Name})
             else
                 teleport(CFrame.new(playerToDupeFor.Character.HumanoidRootPart.Position + Vector3.new(math.random(70) / 10 - 3.5, -5, math.random(70) / 10 - 3.5)))
-                altCommands.drop(PLAYER, {})
+                altCommands.drop()
             end
         end
     end
@@ -1781,7 +1761,6 @@ if isAlt(PLAYER.UserId) == true then
 
 
     altCommands.circle = function(player, args)
-        print("[altCommands] circle", player, args)
         local distance = tonumber(args[1])
         local alts = getgenv().alts  -- Fetch the alts from getgenv()
     
@@ -1803,7 +1782,6 @@ if isAlt(PLAYER.UserId) == true then
     end
     
     altCommands.tower = function(player, args)
-        print("[altCommands] tower", player, args)
         -- Fetch the alts from getgenv()
         local alts = getgenv().alts
     
@@ -1896,7 +1874,7 @@ if isAlt(PLAYER.UserId) == true then
 
     --DestroyFloorCash
     DestroyFloorCash.MouseButton1Down:Connect(function()
-    altCommands.destroycash(PLAYER, {})
+        altCommands.destroycash()
     end)
 
     --RecountFloorCash
@@ -1911,12 +1889,12 @@ if isAlt(PLAYER.UserId) == true then
 
     --DropBtn
     DropBtn.MouseButton1Down:Connect(function()
-    altCommands.drop(PLAYER, {})
+        altCommands.drop()
     end)
 
     --CashAuraBtn
     CashAuraBtn.MouseButton1Down:Connect(function()
-    altCommands.aura(PLAYER, {PLAYER.Name})
+        altCommands.aura(nil, {PLAYER.Name})
     end)
 
     --FpsLockBox
@@ -1931,7 +1909,7 @@ if isAlt(PLAYER.UserId) == true then
 
 
     --Setup
-    --altCommands.setup(PLAYER, {"bank"})
+    --altCommands.setup(nil, {"bank"})
 
     --Optimise
     setfpscap(3)
@@ -2053,29 +2031,27 @@ if isAlt(PLAYER.UserId) == true then
 
 
     game.Players.PlayerAdded:Connect(function(player)
-        print("[setupChatListener] called for", player and player.Name, player and player.UserId)
         if player.UserId == getgenv().mainId then
-            print("[setupChatListener] mainId matched for", player.Name)
             player.Chatted:Connect(function(message)
-                print("[Chatted event] received from", player.Name, ":", message)
+
                 local splitString = message:split(" ")
+        
                 local cmdName = ""
                 local firstWord = splitString[1]
-                print("[Chatted event] firstWord:", firstWord)
+                print(firstWord)
                 if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
                     cmdName = string.lower(firstWord:sub(2))
                 end
-                print("[Chatted event] cmdName:", cmdName)
+
                 if altCommands[cmdName] then
                     local args = {}
                     for i = 2, #splitString, 1 do
                         table.insert(args, splitString[i])
                     end
-                    print("[Chatted event] calling altCommands["..cmdName.."] with args:", args)
+            
                     altCommands[cmdName](player, args)
-                else
-                    print("[Chatted event] cmdName not found in altCommands:", cmdName)
                 end
+
             end)
         end
     end)
@@ -3852,9 +3828,11 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Vault",
         "Sell"
     }, function(location)
-        game.Players:Chat("/setup " .. string.lower(location))
+    print("[LOG] game.Players:Chat called with:", "/setup " .. string.lower(location))
+    game.Players:Chat("/setup " .. string.lower(location))
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 60), "Drop", false, function(state)
+        print("[LOG] game.Players:Chat called with:", state and "/drop" or "/stop")
         if state == true then
             game.Players:Chat("/drop")
         else
@@ -3862,6 +3840,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 110), "Cdrop", "Press a key", function(input)
+        print("[LOG] game.Players:Chat called with:", input == "" and "/stop" or "/cdrop " .. string.lower(input))
         if input == "" then
             game.Players:Chat("/stop")
         else
@@ -3869,6 +3848,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 160), "Airlock", false, function(state)
+        print("[LOG] game.Players:Chat called with:", state and "/airlock" or "/hide")
         if state == true then
             game.Players:Chat("/airlock")
         else
@@ -3876,6 +3856,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 210), "Hide", false, function(state)
+        print("[LOG] game.Players:Chat called with:", state and "/hide" or "/airlock")
         if state == true then
             game.Players:Chat("/hide")
         else
@@ -3883,9 +3864,11 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 260), "Line", false, function(state)
-        game.Players:Chat("/line")
+    print("[LOG] game.Players:Chat called with: /line")
+    game.Players:Chat("/line")
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 310), "Aura", false, function(state)
+        print("[LOG] game.Players:Chat called with:", state and "/aura" or "/stop")
         if state == true then
             game.Players:Chat("/aura")
         else
@@ -3893,9 +3876,11 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 360), "Redeem", "Press a key", function(input)
-        game.Players:Chat("/redeem " .. input)
+    print("[LOG] game.Players:Chat called with: /redeem", input)
+    game.Players:Chat("/redeem " .. input)
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 410), "Freeze", false, function(state)
+        print("[LOG] game.Players:Chat called with:", state and "/freeze" or "/unfreeze")
         if state == true then
             game.Players:Chat("/freeze")
         else
@@ -3903,6 +3888,7 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 460), "Advert", "Press a key", function(input)
+        print("[LOG] game.Players:Chat called with:", input == "" and "/advert off" or "/advert " .. input)
         if input == "" then
             game.Players:Chat("/advert off")
         else
@@ -3910,10 +3896,12 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 510), "Advert", "Press a key", function(input)
-        game.Players:Chat("/say " .. input)
+    print("[LOG] game.Players:Chat called with: /say", input)
+    game.Players:Chat("/say " .. input)
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 560), "Join Crew", "Press a key", function(input)
-        game.Players:Chat("/joincrew " .. input)
+    print("[LOG] game.Players:Chat called with: /joincrew", input)
+    game.Players:Chat("/joincrew " .. input)
     end)
     createDropdown("Animations", altcontrol, UDim2.new(0, 0, 0, 610), "Animation", {
         "fly", 
@@ -3922,7 +3910,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "tpose", 
         "speed"
     }, function(location)
-        game.Players:Chat("/animation " .. location)
+    print("[LOG] game.Players:Chat called with: /animation", location)
+    game.Players:Chat("/animation " .. location)
     end)
     createDropdown("Circle", altcontrol, UDim2.new(0, 0, 0, 660), "Size", {
         "1",
@@ -3946,21 +3935,16 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "19",
         "20"
     }, function(location)
-        game.Players:Chat("/circle " .. location)
+    print("[LOG] game.Players:Chat called with: /circle", location)
+    game.Players:Chat("/circle " .. location)
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 710), "Tower", false, function(state)
-        if state == true then
-            game.Players:Chat("/tower")
-        else
-            game.Players:Chat("/tower")
-        end
+    print("[LOG] game.Players:Chat called with: /tower")
+    game.Players:Chat("/tower")
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 710), "Dupe", false, function(state)
-        if state == true then
-            game.Players:Chat("/dupefor")
-        else
-            game.Players:Chat("/dupefor")
-        end
+    print("[LOG] game.Players:Chat called with: /dupefor")
+    game.Players:Chat("/dupefor")
     end)
     createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 760), "Setup OG", {
         "Bank", 
@@ -3972,7 +3956,8 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Vault",
         "Sell"
     }, function(location)
-        game.Players:Chat("/setup " .. string.lower(location) .. " og")
+    print("[LOG] game.Players:Chat called with:", "/setup " .. string.lower(location) .. " og")
+    game.Players:Chat("/setup " .. string.lower(location) .. " og")
     end)
     
     
