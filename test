@@ -1,7 +1,6 @@
 
 
 
-
 local exe_name, exe_version = identifyexecutor()
 local function home999() end
 local function home888() end
@@ -3813,20 +3812,9 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         GuiSettings["Leave_Audio_id"] = input
         saveData()
     end)
-    ----------------
-    ----------------
-    
+    -------------
+    -------------
     --Alt Control
--- Alt Control: require ChatModule เฉพาะส่วนนี้
-local ChatModule = nil
-local success, result = pcall(function()
-    return require(game:GetService("ReplicatedStorage"):WaitForChild("ChatModule"))
-end)
-if success then
-    ChatModule = result
-else
-    warn("ChatModule not found in ReplicatedStorage")
-end
     -------------
     -------------
     createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 10), "Setup", {
@@ -3839,95 +3827,68 @@ end
         "Vault",
         "Sell"
     }, function(location)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/setup " .. string.lower(location))
+        game.Players:Chat("/setup " .. string.lower(location))
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 60), "Drop", false, function(state)
         if state == true then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/drop")
+            game.Players:Chat("/drop")
         else
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/stop")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/stop")
+            game.Players:Chat("/stop")
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 110), "Cdrop", "Press a key", function(input)
         if input == "" then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/stop")
+            game.Players:Chat("/stop")
         else
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/cdrop " .. string.lower(input))
+            game.Players:Chat("/cdrop " .. string.lower(input))
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 160), "Airlock", false, function(state)
         if state == true then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/airlock")
+            game.Players:Chat("/airlock")
         else
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/hide")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/hide")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/airlock")
+            game.Players:Chat("/hide")
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 210), "Hide", false, function(state)
         if state == true then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/hide")
+            game.Players:Chat("/hide")
         else
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/hide")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/hide")
+            game.Players:Chat("/airlock")
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 260), "Line", false, function(state)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/line")
+        game.Players:Chat("/line")
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 310), "Aura", false, function(state)
         if state == true then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/aura")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/stop")
+            game.Players:Chat("/aura")
         else
+            game.Players:Chat("/stop")
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 360), "Redeem", "Press a key", function(input)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/redeem " .. input)
+        game.Players:Chat("/redeem " .. input)
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 410), "Freeze", false, function(state)
         if state == true then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/freeze")
+            game.Players:Chat("/freeze")
         else
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/unfreeze")
+            game.Players:Chat("/unfreeze")
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 460), "Advert", "Press a key", function(input)
         if input == "" then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/advert off")
+            game.Players:Chat("/advert off")
         else
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/advert " .. input)
+            game.Players:Chat("/advert " .. input)
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 510), "Advert", "Press a key", function(input)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/say " .. input)
+        game.Players:Chat("/say " .. input)
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 560), "Join Crew", "Press a key", function(input)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/joincrew " .. input)
+        game.Players:Chat("/joincrew " .. input)
     end)
     createDropdown("Animations", altcontrol, UDim2.new(0, 0, 0, 610), "Animation", {
         "fly", 
@@ -3936,8 +3897,7 @@ end
         "tpose", 
         "speed"
     }, function(location)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/animation " .. location)
+        game.Players:Chat("/animation " .. location)
     end)
     createDropdown("Circle", altcontrol, UDim2.new(0, 0, 0, 660), "Size", {
         "1",
@@ -3961,25 +3921,20 @@ end
         "19",
         "20"
     }, function(location)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/circle " .. location)
+        game.Players:Chat("/circle " .. location)
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 710), "Tower", false, function(state)
         if state == true then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/tower")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/tower")
+            game.Players:Chat("/tower")
         else
+            game.Players:Chat("/tower")
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 710), "Dupe", false, function(state)
         if state == true then
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/dupefor")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/dupefor")
+            game.Players:Chat("/dupefor")
         else
+            game.Players:Chat("/dupefor")
         end
     end)
     createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 760), "Setup OG", {
@@ -3992,12 +3947,7 @@ end
         "Vault",
         "Sell"
     }, function(location)
-    local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-    ChatModule.SendChatMessage(speaker, "all", "/setup " .. string.lower(location) .. " og")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/drop")
-            local speaker = ChatModule.GetSpeakerFromPlayer(game.Players.LocalPlayer)
-            ChatModule.SendChatMessage(speaker, "all", "/stop")
+        game.Players:Chat("/setup " .. string.lower(location) .. " og")
     end)
     
     
@@ -4277,11 +4227,23 @@ local function updateDropState()
     end
     if hasPlayers ~= lastDropState then
         if hasPlayers then
-            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
-            game.Players:Chat("/drop")
+            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> DropMoney (ครั้งเดียว)")
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+            if MainEvent then
+                MainEvent:FireServer("DropMoney")
+            else
+                warn("MainEvent not found! ไม่สามารถ drop ได้")
+            end
         else
-            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
-            game.Players:Chat("/stop")
+            print("[DROPLOG] ไม่มี Players จริงเหลือ -> StopDrop (ครั้งเดียว)")
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+            if MainEvent then
+                MainEvent:FireServer("StopDrop")
+            else
+                warn("MainEvent not found! ไม่สามารถ stop ได้")
+            end
         end
         lastDropState = hasPlayers
     end
