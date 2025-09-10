@@ -827,6 +827,18 @@ end
 if isAlt(PLAYER.UserId) == true then
     --Setup
 
+    print("[Alt] mainId:", getgenv().mainId)
+    local mainPlayer = nil
+    while mainPlayer == nil do
+        mainPlayer = game:GetService("Players"):GetPlayerByUserId(getgenv().mainId)
+        if mainPlayer == nil then
+            print("[Alt] Waiting for mainPlayer with UserId:", getgenv().mainId)
+            task.wait(1)
+        end
+    end
+    print("[Alt] Found mainPlayer:", mainPlayer.Name, mainPlayer.UserId)
+    setupChatListener(mainPlayer)
+
     hookfunction(game:GetService("UserInputService").GetFocusedTextBox, newcclosure(function(...)
         return 
     end))
@@ -1977,7 +1989,9 @@ if isAlt(PLAYER.UserId) == true then
   
 
     local function setupChatListener(player)
-        if player.UserId == getgenv().mainId then
+        print("[Alt] setupChatListener called for player:", player and player.Name, "UserId:", player and player.UserId)
+        if player and player.UserId == getgenv().mainId then
+            print("[Alt] Connecting Chatted event for mainId:", player.Name)
             player.Chatted:Connect(function(message)
                 print("[Alt] Received chat from mainId:", message)
                 local splitString = message:split(" ")
