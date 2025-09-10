@@ -1979,24 +1979,27 @@ if isAlt(PLAYER.UserId) == true then
     local function setupChatListener(player)
         if player.UserId == getgenv().mainId then
             player.Chatted:Connect(function(message)
-
-                
+                print("[Alt] Received chat from mainId:", message)
                 local splitString = message:split(" ")
-        
                 local cmdName = ""
                 local firstWord = splitString[1]
-                print(firstWord)
+                print("[Alt] First word:", firstWord)
                 if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
                     cmdName = string.lower(firstWord:sub(2))
                 end
-
                 if altCommands[cmdName] then
                     local args = {}
                     for i = 2, #splitString, 1 do
                         table.insert(args, splitString[i])
                     end
-            
-                    altCommands[cmdName](player, args)
+                    local success, err = pcall(function()
+                        altCommands[cmdName](player, args)
+                    end)
+                    if not success then
+                        warn("[Alt] Error executing command:", cmdName, err)
+                    end
+                else
+                    print("[Alt] Unknown command:", cmdName)
                 end
             end)
              
