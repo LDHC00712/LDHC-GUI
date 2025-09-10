@@ -4199,6 +4199,53 @@ end
 spawn(pollLatestGoal)
 
 -- =========================
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
+
+local lastDropState = nil -- true = dropped, false = stopped
+local function isAltUser()
+    local LocalPlayer = game.Players.LocalPlayer
+    return getgenv().alts and table.find(getgenv().alts, LocalPlayer.UserId)
+end
+
+local function hasRealPlayers()
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if not (getgenv().alts and table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            return true
+        end
+    end
+    return false
+end
+
+local function updateAltDropState()
+    if not isAltUser() then return end -- เฉพาะ alt เท่านั้น
+    local hasPlayers = hasRealPlayers()
+    if hasPlayers ~= lastDropState then
+        if hasPlayers then
+            print("[ALT AUTO] พบ Players จริง -> Dropping")
+            if MainEvent then
+                MainEvent:FireServer("Dropping")
+            end
+        else
+            print("[ALT AUTO] ไม่มี Players จริง -> Stopped Dropping")
+            if MainEvent then
+                MainEvent:FireServer("Stopped Dropping")
+            end
+        end
+        lastDropState = hasPlayers
+    end
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    updateAltDropState()
+end)
+game.Players.PlayerRemoving:Connect(function(player)
+    updateAltDropState()
+end)
+updateAltDropState()
+
+-- =========================
 -- GLOBAL: ระบบ /drop /stop อัตโนมัติ (ควรอยู่ global scope ก่อน logic อื่นหลัง pollLatestGoal)
 -- =========================
 local lastDropState = nil -- true = dropped, false = stopped
@@ -4231,7 +4278,7 @@ local function updateDropState()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
             if MainEvent then
-                MainEvent:FireServer("DropMoney")
+                MainEvent:FireServer("DropMoney", 15000)
             else
                 warn("MainEvent not found! ไม่สามารถ drop ได้")
             end
