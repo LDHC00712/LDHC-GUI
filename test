@@ -1,3 +1,13 @@
+-- Ensure ChatModule is loaded before use
+local ChatModule = nil
+local success, result = pcall(function()
+    return require(game:GetService("ReplicatedStorage"):WaitForChild("ChatModule"))
+end)
+if success then
+    ChatModule = result
+else
+    warn("ChatModule not found in ReplicatedStorage")
+end
 
 
 
@@ -3816,6 +3826,16 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     ----------------
     
     --Alt Control
+-- Alt Control: require ChatModule เฉพาะส่วนนี้
+local ChatModule = nil
+local success, result = pcall(function()
+    return require(game:GetService("ReplicatedStorage"):WaitForChild("ChatModule"))
+end)
+if success then
+    ChatModule = result
+else
+    warn("ChatModule not found in ReplicatedStorage")
+end
     -------------
     -------------
     createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 10), "Setup", {
