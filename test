@@ -4227,10 +4227,20 @@ local function updateAltDropState()
             if MainEvent then
                 MainEvent:FireServer("Dropping")
             end
+            -- Sync DropBtn to ON
+            if DropBtn then
+                DropBtn.Text = "On"
+                DropBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            end
         else
             print("[ALT AUTO] ไม่มี Players จริง -> Stopped Dropping")
             if MainEvent then
                 MainEvent:FireServer("Stopped Dropping")
+            end
+            -- Sync DropBtn to OFF
+            if DropBtn then
+                DropBtn.Text = "Off"
+                DropBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
             end
         end
         lastDropState = hasPlayers
