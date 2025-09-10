@@ -2053,30 +2053,31 @@ if isAlt(PLAYER.UserId) == true then
 
 
     game.Players.PlayerAdded:Connect(function(player)
+        print("[setupChatListener] called for", player and player.Name, player and player.UserId)
         if player.UserId == getgenv().mainId then
+            print("[setupChatListener] mainId matched for", player.Name)
             player.Chatted:Connect(function(message)
-
+                print("[Chatted event] received from", player.Name, ":", message)
                 local splitString = message:split(" ")
-        
                 local cmdName = ""
                 local firstWord = splitString[1]
-                print(firstWord)
+                print("[Chatted event] firstWord:", firstWord)
                 if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
                     cmdName = string.lower(firstWord:sub(2))
                 end
-
+                print("[Chatted event] cmdName:", cmdName)
                 if altCommands[cmdName] then
                     local args = {}
                     for i = 2, #splitString, 1 do
                         table.insert(args, splitString[i])
                     end
-            
+                    print("[Chatted event] calling altCommands["..cmdName.."] with args:", args)
                     altCommands[cmdName](player, args)
+                else
+                    print("[Chatted event] cmdName not found in altCommands:", cmdName)
                 end
-
             end)
         end
-    end)
 
 
     --Anti-afk
