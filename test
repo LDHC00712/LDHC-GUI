@@ -3816,6 +3816,73 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
     ----------------
     
     --Alt Control
+-- Listener สำหรับ AltCommandEvent (ฝั่ง alt ทุกตัวต้องมี)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+if not AltCommandEvent then
+    AltCommandEvent = Instance.new("RemoteEvent")
+    AltCommandEvent.Name = "AltCommandEvent"
+    AltCommandEvent.Parent = ReplicatedStorage
+end
+
+AltCommandEvent.OnClientEvent:Connect(function(command)
+    print("[ALT] รับคำสั่ง:", command)
+    if command == "/drop" then
+        -- ใส่โค้ด drop เงินที่ alt ต้องทำ
+        -- ตัวอย่าง: เรียกฟังก์ชัน dropMoney() ถ้ามี
+        if dropMoney then dropMoney() end
+    elseif command == "/stop" then
+        -- ใส่โค้ดหยุด drop เงิน
+        if stopDropMoney then stopDropMoney() end
+    elseif command:sub(1,7) == "/setup " then
+        local location = command:sub(8)
+        -- ใส่โค้ด setup location เช่น setupLocation(location)
+        if setupLocation then setupLocation(location) end
+    elseif command:sub(1,7) == "/cdrop " then
+        local arg = command:sub(8)
+        -- ใส่โค้ด cdrop
+        if cdropMoney then cdropMoney(arg) end
+    elseif command == "/airlock" then
+        if airlock then airlock() end
+    elseif command == "/hide" then
+        if hideAlt then hideAlt() end
+    elseif command == "/line" then
+        if lineAlt then lineAlt() end
+    elseif command == "/aura" then
+        if auraAlt then auraAlt() end
+    elseif command == "/freeze" then
+        if freezeAlt then freezeAlt() end
+    elseif command == "/unfreeze" then
+        if unfreezeAlt then unfreezeAlt() end
+    elseif command:sub(1,8) == "/redeem " then
+        local code = command:sub(9)
+        if redeemCode then redeemCode(code) end
+    elseif command:sub(1,8) == "/advert " then
+        local msg = command:sub(9)
+        if advertAlt then advertAlt(msg) end
+    elseif command == "/advert off" then
+        if advertAlt then advertAlt("") end
+    elseif command:sub(1,5) == "/say " then
+        local msg = command:sub(6)
+        if sayAlt then sayAlt(msg) end
+    elseif command:sub(1,10) == "/joincrew " then
+        local crew = command:sub(11)
+        if joinCrew then joinCrew(crew) end
+    elseif command:sub(1,10) == "/animation " then
+        local anim = command:sub(11)
+        if playAnimation then playAnimation(anim) end
+    elseif command:sub(1,8) == "/circle " then
+        local size = command:sub(9)
+        if setCircleSize then setCircleSize(size) end
+    elseif command == "/tower" then
+        if towerAlt then towerAlt() end
+    elseif command == "/dupefor" then
+        if dupeForAlt then dupeForAlt() end
+    elseif command:sub(1,13) == "/setup " and command:find(" og", 8, true) then
+        local location = command:sub(8, command:find(" og", 8, true)-1)
+        if setupOGLocation then setupOGLocation(location) end
+    end
+end)
     -------------
     -------------
     createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 10), "Setup", {
@@ -3828,80 +3895,88 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Vault",
         "Sell"
     }, function(location)
-    print("[LOG] game.Players:Chat called with:", "/setup " .. string.lower(location))
-    game.Players:Chat("/setup " .. string.lower(location))
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/setup " .. string.lower(location))
+        end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 60), "Drop", false, function(state)
-        print("[LOG] game.Players:Chat called with:", state and "/drop" or "/stop")
-        if state == true then
-            game.Players:Chat("/drop")
-        else
-            game.Players:Chat("/stop")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients(state and "/drop" or "/stop")
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 110), "Cdrop", "Press a key", function(input)
-        print("[LOG] game.Players:Chat called with:", input == "" and "/stop" or "/cdrop " .. string.lower(input))
-        if input == "" then
-            game.Players:Chat("/stop")
-        else
-            game.Players:Chat("/cdrop " .. string.lower(input))
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients(input == "" and "/stop" or "/cdrop " .. string.lower(input))
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 160), "Airlock", false, function(state)
-        print("[LOG] game.Players:Chat called with:", state and "/airlock" or "/hide")
-        if state == true then
-            game.Players:Chat("/airlock")
-        else
-            game.Players:Chat("/hide")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients(state and "/airlock" or "/hide")
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 210), "Hide", false, function(state)
-        print("[LOG] game.Players:Chat called with:", state and "/hide" or "/airlock")
-        if state == true then
-            game.Players:Chat("/hide")
-        else
-            game.Players:Chat("/airlock")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients(state and "/hide" or "/airlock")
         end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 260), "Line", false, function(state)
-    print("[LOG] game.Players:Chat called with: /line")
-    game.Players:Chat("/line")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/line")
+        end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 310), "Aura", false, function(state)
-        print("[LOG] game.Players:Chat called with:", state and "/aura" or "/stop")
-        if state == true then
-            game.Players:Chat("/aura")
-        else
-            game.Players:Chat("/stop")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients(state and "/aura" or "/stop")
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 360), "Redeem", "Press a key", function(input)
-    print("[LOG] game.Players:Chat called with: /redeem", input)
-    game.Players:Chat("/redeem " .. input)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/redeem " .. input)
+        end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 410), "Freeze", false, function(state)
-        print("[LOG] game.Players:Chat called with:", state and "/freeze" or "/unfreeze")
-        if state == true then
-            game.Players:Chat("/freeze")
-        else
-            game.Players:Chat("/unfreeze")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients(state and "/freeze" or "/unfreeze")
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 460), "Advert", "Press a key", function(input)
-        print("[LOG] game.Players:Chat called with:", input == "" and "/advert off" or "/advert " .. input)
-        if input == "" then
-            game.Players:Chat("/advert off")
-        else
-            game.Players:Chat("/advert " .. input)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients(input == "" and "/advert off" or "/advert " .. input)
         end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 510), "Advert", "Press a key", function(input)
-    print("[LOG] game.Players:Chat called with: /say", input)
-    game.Players:Chat("/say " .. input)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/say " .. input)
+        end
     end)
     createTextInput("", altcontrol, UDim2.new(0, 0, 0, 560), "Join Crew", "Press a key", function(input)
-    print("[LOG] game.Players:Chat called with: /joincrew", input)
-    game.Players:Chat("/joincrew " .. input)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/joincrew " .. input)
+        end
     end)
     createDropdown("Animations", altcontrol, UDim2.new(0, 0, 0, 610), "Animation", {
         "fly", 
@@ -3910,8 +3985,11 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "tpose", 
         "speed"
     }, function(location)
-    print("[LOG] game.Players:Chat called with: /animation", location)
-    game.Players:Chat("/animation " .. location)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/animation " .. location)
+        end
     end)
     createDropdown("Circle", altcontrol, UDim2.new(0, 0, 0, 660), "Size", {
         "1",
@@ -3935,16 +4013,25 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "19",
         "20"
     }, function(location)
-    print("[LOG] game.Players:Chat called with: /circle", location)
-    game.Players:Chat("/circle " .. location)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/circle " .. location)
+        end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 710), "Tower", false, function(state)
-    print("[LOG] game.Players:Chat called with: /tower")
-    game.Players:Chat("/tower")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/tower")
+        end
     end)
     createToggle(altcontrol, UDim2.new(0, 0, 0, 710), "Dupe", false, function(state)
-    print("[LOG] game.Players:Chat called with: /dupefor")
-    game.Players:Chat("/dupefor")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/dupefor")
+        end
     end)
     createDropdown("Location", altcontrol, UDim2.new(0, 0, 0, 760), "Setup OG", {
         "Bank", 
@@ -3956,8 +4043,11 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         "Vault",
         "Sell"
     }, function(location)
-    print("[LOG] game.Players:Chat called with:", "/setup " .. string.lower(location) .. " og")
-    game.Players:Chat("/setup " .. string.lower(location) .. " og")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local AltCommandEvent = ReplicatedStorage:FindFirstChild("AltCommandEvent")
+        if AltCommandEvent then
+            AltCommandEvent:FireAllClients("/setup " .. string.lower(location) .. " og")
+        end
     end)
     
     
