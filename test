@@ -1,13 +1,4 @@
--- Ensure ChatModule is loaded before use
-local ChatModule = nil
-local success, result = pcall(function()
-    return require(game:GetService("ReplicatedStorage"):WaitForChild("ChatModule"))
-end)
-if success then
-    ChatModule = result
-else
-    warn("ChatModule not found in ReplicatedStorage")
-end
+
 
 
 
