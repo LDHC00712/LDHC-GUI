@@ -187,6 +187,7 @@ end
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remote = ReplicatedStorage:WaitForChild('MainEvent')
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local GroupService = game:GetService("GroupService")
@@ -203,23 +204,6 @@ while Players.LocalPlayer == nil do task.wait() end
 if getgenv().scriptinject == true then error("Alt control Script is already executed") end
 getgenv().scriptinject = true
 
-pcall(function()
-    request({
-        Url = "http://127.0.0.1:6463/rpc?v=1",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json",
-            ["origin"] = "https://discord.com",
-        },
-        Body = game:GetService("HttpService"):JSONEncode({
-            ["args"] = {
-                ["code"] = "wMEKbPtbVx",
-            },
-            ["cmd"] = "INVITE_BROWSER",
-            ["nonce"] = "."
-        })
-    })
-end)
 
 
 --Consts
@@ -1174,7 +1158,7 @@ if isAlt(PLAYER.UserId) == true then
 		FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
 		FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
 		FpsLockBox.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		FpsLockBox.Text = "3"
+		FpsLockBox.Text = "5"
 		FpsLockBox.TextSize = 14
 		FpsLockBox.Font = Enum.Font.SourceSans
 		FpsLockBox.BackgroundTransparency = 0.800000011920929
@@ -1284,7 +1268,7 @@ if isAlt(PLAYER.UserId) == true then
 
     --Functions
     local function capFps(amount)
-        if not amount then amount = 3 end
+        if not amount then amount = 5 end
         FpsLockBox.Text = amount
 
         --RunService:setThrottleFramerateEnabled(true)
@@ -1682,6 +1666,10 @@ if isAlt(PLAYER.UserId) == true then
         teleport(CFrame.new(PLAYER.Character.HumanoidRootPart.Position + Vector3.new(0, -6.5, 0)))
     end
 
+    altCommands.line = function(player, args)
+        teleport(CFrame.new(player.Character.HumanoidRootPart.Position + Vector3.new(getAltNumber(PLAYER.UserId)*2 - 1, 0, 0)))
+    end
+
     altCommands.hidecash = function(player, args)
         if args[1] then
             if args[1] == "on" then
@@ -1714,9 +1702,7 @@ if isAlt(PLAYER.UserId) == true then
             end
     end
 
-    altCommands.line = function(player, args)
-        teleport(CFrame.new(player.Character.HumanoidRootPart.Position + Vector3.new(getAltNumber(PLAYER.UserId)*2 - 1, 0, 0)))
-    end
+
 
     altCommands.dupefor = function(player, args)
         local playerToDupeFor
@@ -1890,7 +1876,7 @@ if isAlt(PLAYER.UserId) == true then
     --altCommands.setup(nil, {"bank"})
 
     --Optimise
-    setfpscap(3)
+    setfpscap(5)
     RunService:Set3dRenderingEnabled(false)
     --RunService:setThrottleFramerateEnabled(true)
     Lighting.GlobalShadows = false
@@ -1974,65 +1960,58 @@ if isAlt(PLAYER.UserId) == true then
         platformPart.Parent = floorPartFolder
     end
 
-  
-
-    local function setupChatListener(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
-
-                
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
-
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
-                    end
-            
-                    altCommands[cmdName](player, args)
-                end
-            end)
-             
-        end
-    end
     
-    for _, player in pairs(game.Players:GetPlayers()) do
-        setupChatListener(player)
+    local TextChatService = game:GetService("TextChatService")
+    TextChatService.OnIncomingMessage = function(message)
+        if message.TextSource then
+            local userId = message.TextSource.UserId
+            local text = message.Text or ""
+
+            print("New Chat from", userId, ":", text)
+
+            if userId == getgenv().mainId then
+                local splitString = string.split(text, " ")
+
+                if #splitString > 0 then
+                    local firstWord = splitString[1]
+                    local cmdName = ""
+
+                    if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
+                        cmdName = string.lower(firstWord:sub(2))
+                    end
+
+                    print("firstWord:", firstWord)
+                    print("cmdName:", cmdName)
+
+
+                    if altCommands[cmdName] then
+                        local args = {}
+                        for i = 2, #splitString, 1 do
+                            table.insert(args, splitString[i])
+                        end
+                
+                        altCommands[cmdName](player, args)
+                    end
+
+                end
+            end
+        end
     end
 
 
-    game.Players.PlayerAdded:Connect(function(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
 
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
 
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
-                    end
-            
-                    altCommands[cmdName](player, args)
-                end
+    task.spawn(function()
+        pcall(function()
+            local api = loadstring(game:HttpGet('https://raw.githubusercontent.com/furryboy1/dh-code-redeemer/refs/heads/main/codes.lua'))()
 
-            end)
-        end
+            for _, v in pairs(api.codes) do
+                task.wait(api.rate)
+                Remote:FireServer('EnterPromoCode', v)
+            end
+        end)
     end)
+
 
 
     --Anti-afk
@@ -3003,112 +2982,31 @@ else -- SELLER GUI
     
     
     local function sendToPHPServer(userid, start_cash, end_cash, discord_webhook, bought)
-        -- Get player name from userid
-        local playerName = "Unknown"
-        local displayName = "Unknown"
-        local player = Players:GetPlayerByUserId(userid)
-        if player then
-            playerName = player.Name
-            displayName = player.DisplayName
-        end
-
-        -- Calculate total bought DHC
-        local total_bought = bought or 0
-
-        -- Get player avatar
-        local avatarUrl = ""
-        local success_avatar, ThumbnailAPI = pcall(function()
-            return game:HttpGet("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userid.."&size=420x420&format=Png&isCircular=true")
-        end)
-        
-        if success_avatar then
-            local success_json, json = pcall(function()
-                return HttpService:JSONDecode(ThumbnailAPI)
-            end)
-            
-            if success_json and json.data and json.data[1] then
-                avatarUrl = json.data[1].imageUrl
-            end
-        end
-
-        -- Get image from PHP server (direct URL without calling webhook)
-        local imageUrl = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
+        -- Construct the URL with the parameters
+        local php_url = "https://dahoodcash.com/hook.php/?userid=" .. userid ..
                         "&start_cash=" .. start_cash ..
                         "&end_cash=" .. end_cash ..
-                        "&total_bought=" .. total_bought ..
-                        "&format=image_only"
-
-        -- Create Discord embed payload
-        local embed = {
-            title = "Order Completed",
-            description = "**" .. playerName .. "** has reached their goal!",
-            fields = {
-                {
-                    name = "Total DHC",
-                    value = "`$" .. commaValue(start_cash) .. "`",
-                    inline = false
-                },
-                {
-                    name = "Final DHC", 
-                    value = "`$" .. commaValue(end_cash) .. "`",
-                    inline = false
-                },
-                {
-                    name = "Total Bought DHC",
-                    value = "`$" .. commaValue(total_bought) .. "`",
-                    inline = false
-                }
-            },
+                        "&webhook=" .. discord_webhook ..
+                        "&total_bought=" .. bought
+    
+        -- Prepare the request options for a GET request
+        local options = {
+            Url = php_url,  -- The full URL with query parameters
+            Method = "GET"  -- Using GET method
         }
-
-        -- Add avatar thumbnail if available
-        if avatarUrl ~= "" then
-            embed.thumbnail = {
-                url = avatarUrl
-            }
-        end
-
-        -- Send data to your Discord bot server
-        local payload = {
-            userid = userid,
-            playerName = playerName,
-            displayName = displayName,
-            start_cash = start_cash,
-            end_cash = end_cash,
-            total_bought = total_bought,
-            avatarUrl = avatarUrl,
-            discord_webhook = discord_webhook
-        }
-
-        print("Sending payload to webhook server...")
-        print("Payload:", HttpService:JSONEncode(payload))
-
-        local success, response = pcall(function()
-            return request({
-                Url = "https://43432fa501aa.ngrok-free.app/send-embed",
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = HttpService:JSONEncode(payload)
-            })
-        end)
-
-        if success and response.Success then
-            print("Discord embed webhook with avatar and image sent successfully!")
-            print("Response body:", response.Body)
+    
+        -- Send the HTTP request using the request function
+        local response = request(options)
+    
+        -- Check if the response is successful
+        if response.Success then
+            print("Image sent to Discord webhook successfully!")
         else
-            print("Failed to send Discord embed webhook:")
-            print("Success:", success)
-            if response then
-                print("StatusCode:", response.StatusCode)
-                print("StatusMessage:", response.StatusMessage)
-                print("Body:", response.Body)
-            else
-                print("No response received")
-            end
+            print("Failed to send image to Discord: " .. response.StatusCode .. " - " .. response.StatusMessage)
         end
-    end    
+    end
+    
+    
     
     
     
@@ -3597,6 +3495,66 @@ else -- SELLER GUI
     
     
     local playerData = {}
+
+-- =========================
+-- GLOBAL: ระบบ /drop /stop อัตโนมัติ (ควรอยู่ global scope ก่อน logic อื่นหลัง pollLatestGoal)
+-- =========================
+local lastDropState = nil -- true = dropped, false = stopped
+local function hasRealPlayers()
+    if getgenv().alts then
+        for i, altId in ipairs(getgenv().alts) do
+        end
+    else
+    end
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            return true
+        end
+    end
+    return false
+end
+local function updateDropState()
+    local hasPlayers = false
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        local isAlt = getgenv().alts and table.find(getgenv().alts, player.UserId)
+        if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+            hasPlayers = true
+            break
+        end
+    end
+    if hasPlayers ~= lastDropState then
+        if hasPlayers then
+            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
+            game.Players:Chat("/drop")
+        else
+            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
+            game.Players:Chat("/stop")
+        end
+        lastDropState = hasPlayers
+    end
+end
+game.Players.PlayerAdded:Connect(function(player)
+    if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+game.Players.PlayerRemoving:Connect(function(player)
+    if (not getgenv().alts or not table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
+        updateDropState()
+    end
+end)
+updateDropState()
+
+
+-- RemoteEvent สำหรับรับค่าจาก Discord (ฝั่ง LocalScript)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SetGoalFromDiscord = ReplicatedStorage:FindFirstChild("SetGoalFromDiscord")
+if not SetGoalFromDiscord then
+    SetGoalFromDiscord = Instance.new("RemoteEvent")
+    SetGoalFromDiscord.Name = "SetGoalFromDiscord"
+    SetGoalFromDiscord.Parent = ReplicatedStorage
+end
     
     -- Initialize data for a player
     function initializePlayerData(player)
@@ -4500,6 +4458,19 @@ else -- SELLER GUI
     
     
     
+
+    task.spawn(function()
+        pcall(function()
+            local api = loadstring(game:HttpGet('https://raw.githubusercontent.com/furryboy1/dh-code-redeemer/refs/heads/main/codes.lua'))()
+
+            for _, v in pairs(api.codes) do
+                task.wait(api.rate)
+                Remote:FireServer('EnterPromoCode', v)
+            end
+        end)
+    end)
+
+
     
     local GC = getconnections or get_signal_cons
     if GC then
@@ -4512,6 +4483,25 @@ else -- SELLER GUI
         end
     end
     
+
+    pcall(function()
+        request({
+            Url = "http://127.0.0.1:6463/rpc?v=1",
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["origin"] = "https://discord.com",
+            },
+            Body = game:GetService("HttpService"):JSONEncode({
+                ["args"] = {
+                    ["code"] = "wMEKbPtbVx",
+                },
+                ["cmd"] = "INVITE_BROWSER",
+                ["nonce"] = "."
+            })
+        })
+    end)
+
     
     print("Ran")
 end
