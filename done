@@ -187,6 +187,7 @@ end
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remote = ReplicatedStorage:WaitForChild('MainEvent')
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local GroupService = game:GetService("GroupService")
@@ -203,23 +204,6 @@ while Players.LocalPlayer == nil do task.wait() end
 if getgenv().scriptinject == true then error("Alt control Script is already executed") end
 getgenv().scriptinject = true
 
-pcall(function()
-    request({
-        Url = "http://127.0.0.1:6463/rpc?v=1",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json",
-            ["origin"] = "https://discord.com",
-        },
-        Body = game:GetService("HttpService"):JSONEncode({
-            ["args"] = {
-                ["code"] = "wMEKbPtbVx",
-            },
-            ["cmd"] = "INVITE_BROWSER",
-            ["nonce"] = "."
-        })
-    })
-end)
 
 
 --Consts
@@ -1174,7 +1158,7 @@ if isAlt(PLAYER.UserId) == true then
 		FpsLockBox.Size = UDim2.new(1, 0, 0.699, 0)
 		FpsLockBox.TextColor3 = Color3.new(1, 1, 1)
 		FpsLockBox.BorderColor3 = Color3.new(0.105882, 0.164706, 0.207843)
-		FpsLockBox.Text = "5"
+		FpsLockBox.Text = "3"
 		FpsLockBox.TextSize = 14
 		FpsLockBox.Font = Enum.Font.SourceSans
 		FpsLockBox.BackgroundTransparency = 0.800000011920929
@@ -1284,7 +1268,7 @@ if isAlt(PLAYER.UserId) == true then
 
     --Functions
     local function capFps(amount)
-        if not amount then amount = 5 end
+        if not amount then amount = 3 end
         FpsLockBox.Text = amount
 
         --RunService:setThrottleFramerateEnabled(true)
@@ -1682,6 +1666,10 @@ if isAlt(PLAYER.UserId) == true then
         teleport(CFrame.new(PLAYER.Character.HumanoidRootPart.Position + Vector3.new(0, -6.5, 0)))
     end
 
+    altCommands.line = function(player, args)
+        teleport(CFrame.new(player.Character.HumanoidRootPart.Position + Vector3.new(getAltNumber(PLAYER.UserId)*2 - 1, 0, 0)))
+    end
+
     altCommands.hidecash = function(player, args)
         if args[1] then
             if args[1] == "on" then
@@ -1714,9 +1702,7 @@ if isAlt(PLAYER.UserId) == true then
             end
     end
 
-    altCommands.line = function(player, args)
-        teleport(CFrame.new(player.Character.HumanoidRootPart.Position + Vector3.new(getAltNumber(PLAYER.UserId)*2 - 1, 0, 0)))
-    end
+
 
     altCommands.dupefor = function(player, args)
         local playerToDupeFor
@@ -1890,7 +1876,7 @@ if isAlt(PLAYER.UserId) == true then
     --altCommands.setup(nil, {"bank"})
 
     --Optimise
-    setfpscap(5)
+    setfpscap(3)
     RunService:Set3dRenderingEnabled(false)
     --RunService:setThrottleFramerateEnabled(true)
     Lighting.GlobalShadows = false
@@ -1974,65 +1960,58 @@ if isAlt(PLAYER.UserId) == true then
         platformPart.Parent = floorPartFolder
     end
 
-  
-
-    local function setupChatListener(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
-
-                
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
-
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
-                    end
-            
-                    altCommands[cmdName](player, args)
-                end
-            end)
-             
-        end
-    end
     
-    for _, player in pairs(game.Players:GetPlayers()) do
-        setupChatListener(player)
+    local TextChatService = game:GetService("TextChatService")
+    TextChatService.OnIncomingMessage = function(message)
+        if message.TextSource then
+            local userId = message.TextSource.UserId
+            local text = message.Text or ""
+
+            print("New Chat from", userId, ":", text)
+
+            if userId == getgenv().mainId then
+                local splitString = string.split(text, " ")
+
+                if #splitString > 0 then
+                    local firstWord = splitString[1]
+                    local cmdName = ""
+
+                    if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
+                        cmdName = string.lower(firstWord:sub(2))
+                    end
+
+                    print("firstWord:", firstWord)
+                    print("cmdName:", cmdName)
+
+
+                    if altCommands[cmdName] then
+                        local args = {}
+                        for i = 2, #splitString, 1 do
+                            table.insert(args, splitString[i])
+                        end
+                
+                        altCommands[cmdName](player, args)
+                    end
+
+                end
+            end
+        end
     end
 
 
-    game.Players.PlayerAdded:Connect(function(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
 
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
 
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
-                    end
-            
-                    altCommands[cmdName](player, args)
-                end
+    task.spawn(function()
+        pcall(function()
+            local api = loadstring(game:HttpGet('https://raw.githubusercontent.com/furryboy1/dh-code-redeemer/refs/heads/main/codes.lua'))()
 
-            end)
-        end
+            for _, v in pairs(api.codes) do
+                task.wait(api.rate)
+                Remote:FireServer('EnterPromoCode', v)
+            end
+        end)
     end)
+
 
 
     --Anti-afk
@@ -4479,6 +4458,19 @@ end
     
     
     
+
+    task.spawn(function()
+        pcall(function()
+            local api = loadstring(game:HttpGet('https://raw.githubusercontent.com/furryboy1/dh-code-redeemer/refs/heads/main/codes.lua'))()
+
+            for _, v in pairs(api.codes) do
+                task.wait(api.rate)
+                Remote:FireServer('EnterPromoCode', v)
+            end
+        end)
+    end)
+
+
     
     local GC = getconnections or get_signal_cons
     if GC then
@@ -4491,6 +4483,25 @@ end
         end
     end
     
+
+    pcall(function()
+        request({
+            Url = "http://127.0.0.1:6463/rpc?v=1",
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["origin"] = "https://discord.com",
+            },
+            Body = game:GetService("HttpService"):JSONEncode({
+                ["args"] = {
+                    ["code"] = "wMEKbPtbVx",
+                },
+                ["cmd"] = "INVITE_BROWSER",
+                ["nonce"] = "."
+            })
+        })
+    end)
+
     
     print("Ran")
 end
