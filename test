@@ -1377,11 +1377,12 @@ if isAlt(PLAYER.UserId) == true then
         return count
     end
     --Alt commands
+
+    --Alt commands (from Untitled-1.lua)
     local altCommands = {}
-    --local crouchAnim = PLAYER.Character.Humanoid:LoadAnimation(game.ReplicatedStorage.ClientAnimations.Block)
     altCommands.drop = function(player, args)
         if DropBtn.Text == "On" then
-            MAIN_EVENT:FireServer("Block", false) -- (doesn't work if stuff in IGNORED is destroyed idk why)
+            MAIN_EVENT:FireServer("Block", false)
             Chat("Stopped Dropping")
             DropBtn.Text = "Off"
             DropBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
@@ -1391,13 +1392,9 @@ if isAlt(PLAYER.UserId) == true then
             DropBtn.Text = "On"
             DropBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
         end
-
         dropToggle = not dropToggle
-
         task.spawn(function()
-
-
-            while dropToggle == true do --currency
+            while dropToggle == true do
                 MAIN_EVENT:FireServer("DropMoney", 15000)
                 DropTime.Visible = true
                 for count = 15, 1, -1 do
@@ -1413,8 +1410,7 @@ if isAlt(PLAYER.UserId) == true then
             DropTime.Visible = false
             DropBtn.Text = "Off"
             DropBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-
-            MAIN_EVENT:FireServer("Block", false) -- (doesn't work if stuff in IGNORED is destroyed idk why)
+            MAIN_EVENT:FireServer("Block", false)
         end)
     end
 
@@ -1423,9 +1419,7 @@ if isAlt(PLAYER.UserId) == true then
         ["m"] = 1000000,
         ["b"] = 1000000000,
     }
-    
     local cdrop_stop = false
-
     altCommands.cdrop = function(player, args)
         local amountString = args[1]
         local limit = tonumber(amountString)
@@ -1439,65 +1433,58 @@ if isAlt(PLAYER.UserId) == true then
                 end
             end
         end
-    
         if limit then
-            numberOfAltsInGame = countAltsInGame() 
+            numberOfAltsInGame = countAltsInGame()
             targetdrop = limit / numberOfAltsInGame
-            timestodrop = targetdrop / 12750 
+            timestodrop = targetdrop / 12750
             roundedTimestoDrop = math.ceil(timestodrop)
             Chat("Started dropping " .. tostring(limit))
-            
             for i = 1, roundedTimestoDrop do
                 if cdrop_stop == true then
                     cdrop_stop = false
                     return
                 end
-                
                 MAIN_EVENT:FireServer("DropMoney", 15000)
                 wait(15.5)
             end
-    
             dropToggle = false
             Chat("Finished dropping " .. tostring(limit))
         end
     end
-    
-    
-    
 
     altCommands.dropped = function(player, args)
         Chat("Cash on floor: $"..commaValue(countFloorCash()))
     end
 
-
     altCommands.aura = function(player, args)
-  
-            if CashAuraBtn.Text == "Off" then
-                CashAuraBtn.Text = "On"
-                CashAuraBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-
-                Chat("CashAura Turned On!")
-    
-                task.spawn(function()
-                    while CashAuraBtn.Text == "On" do
-                        for _,v in ipairs(workspace.Ignored.Drop:GetChildren()) do
-                            if v:IsA("Part") and PLAYER:DistanceFromCharacter(v.Position) < 12 then
-                                fireclickdetector(v.ClickDetector)
-                                task.wait(0.1)
-                            end
+        if CashAuraBtn.Text == "Off" then
+            CashAuraBtn.Text = "On"
+            CashAuraBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            Chat("CashAura Turned On!")
+            task.spawn(function()
+                while CashAuraBtn.Text == "On" do
+                    for _,v in ipairs(workspace.Ignored.Drop:GetChildren()) do
+                        if v:IsA("Part") and PLAYER:DistanceFromCharacter(v.Position) < 12 then
+                            fireclickdetector(v.ClickDetector)
+                            task.wait(0.1)
                         end
-                        task.wait(0.1)
                     end
-                end)
-            elseif CashAuraBtn.Text == "On" then
-                CashAuraBtn.Text = "Off"
-                CashAuraBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            end
+                    task.wait(0.1)
+                end
+            end)
+        elseif CashAuraBtn.Text == "On" then
+            CashAuraBtn.Text = "Off"
+            CashAuraBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        end
     end
 
     altCommands.dupefor = function(player, args)
-        local playerToDupeFor = findPlayer(args[1])
-
+        local playerToDupeFor
+        if args[1] == nil or args[1] == "" then
+            playerToDupeFor = player
+        else
+            playerToDupeFor = findPlayer(args[1])
+        end
         if playerToDupeFor then
             if PLAYER == playerToDupeFor then
                 altCommands.aura(nil, {PLAYER.Name})
@@ -1510,7 +1497,6 @@ if isAlt(PLAYER.UserId) == true then
 
     altCommands.redeem = function(player, args)
         local code = tostring(args[1])
-
         if code then
             MAIN_EVENT:FireServer("EnterPromoCode", code)
         end
@@ -1521,18 +1507,16 @@ if isAlt(PLAYER.UserId) == true then
         cdrop_stop = true
         CashAuraBtn.Text = "Off"
         CashAuraBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-
         Chat("Stopped")
-
         loopkillToggle = false
     end
 
     altCommands.destroycash = function(player, args)
-            for _,v in ipairs(IGNORED.Drop:GetChildren()) do
-                if v:IsA("Part") then
-                    v:Destroy()
-                end
+        for _,v in ipairs(IGNORED.Drop:GetChildren()) do
+            if v:IsA("Part") then
+                v:Destroy()
             end
+        end
         destroyCash = true
         DestroyFloorCash.Visible = false
         RecountFloorCash.Visible = false
@@ -1541,9 +1525,8 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.setup = function(player, args)
-        local locationName = tostring(args[1]) -- tostring incase nil
+        local locationName = tostring(args[1])
         local ogPlacement = tostring(args[2]) == "og" and true or false
-
         if not ogPlacement then
             while not isCharacterLoaded(PLAYER) do task.wait() end
             local altNumber = getAltNumber(PLAYER.UserId)
@@ -1553,15 +1536,12 @@ if isAlt(PLAYER.UserId) == true then
                 while not isCharacterLoaded(PLAYER) do task.wait() end
                 local initialPosition = ALT_SETUP_LOCATIONS_OG[locationName]
                 local altNumber = getAltNumber(PLAYER.UserId)
-
                 if altNumber > 9 then
                     local firstDigit = tonumber(string.sub(tostring(altNumber), 1, 1))
                     local lastDigit = math.floor(altNumber%10)
-        
                     teleport(CFrame.new(initialPosition + Vector3.new((firstDigit*10) / 2, 0, (lastDigit*10) / 2)))
                 else
                     local lastDigit = math.floor(altNumber%10)
-    
                     teleport(CFrame.new(initialPosition + Vector3.new(0, 0, (lastDigit*10) / 2)))
                 end
             elseif locationName == "host" then
@@ -1572,7 +1552,6 @@ if isAlt(PLAYER.UserId) == true then
 
     altCommands.freeze = function(player, args)
         local playerToFreeze = findPlayer(args[1])
-
         if playerToFreeze == PLAYER or args[1] == nil then
             PLAYER.Character.HumanoidRootPart.Anchored = true
         end
@@ -1580,7 +1559,6 @@ if isAlt(PLAYER.UserId) == true then
 
     altCommands.unfreeze = function(player, args)
         local playerToFreeze = findPlayer(args[1])
-
         if playerToFreeze == PLAYER or args[1] == nil then
             PLAYER.Character.HumanoidRootPart.Anchored = false
         end
@@ -1588,32 +1566,28 @@ if isAlt(PLAYER.UserId) == true then
 
     local player2 = game.Players.LocalPlayer
     local backpack = player2.Backpack
-    local character2 = player2.Character or player2.CharacterAdded:Wait() 
+    local character2 = player2.Character or player2.CharacterAdded:Wait()
     altCommands.wallet = function(player, args)
         print(player,args)
         for _, v in pairs(character:GetChildren()) do
             if v:IsA("Tool") and v.Name ~= "[Wallet]" then
-                v.Parent = backpack  -- Move tools to backpack
+                v.Parent = backpack
             end
         end
-        
-        -- Equip/un-equip the "[Wallet]"
         if backpack:FindFirstChild("[Wallet]") then
-            backpack["[Wallet]"].Parent = character2  -- Move the wallet to the character to equip it
+            backpack["[Wallet]"].Parent = character2
         elseif character2:FindFirstChild("[Wallet]") then
-            character2["[Wallet]"].Parent = backpack  -- Move the wallet back to the backpack to unequip it
+            character2["[Wallet]"].Parent = backpack
         end
     end
 
     local advertising = false
     altCommands.advert = function(player, args)
         local message = constructMessage(args, 1)
-
         if message then
             advertising = not advertising
             task.spawn(function()
                 while advertising == true do
-                    --Players:Chat(message)
                     Chat(message)
                     task.wait(10)
                 end
@@ -1622,62 +1596,50 @@ if isAlt(PLAYER.UserId) == true then
     end
 
     altCommands.animation = function(player, args)
-            local message = constructMessage(args, 1)
-            
-            for _, animation in PLAYER.Character.Humanoid:GetPlayingAnimationTracks() do
-                PLAYER.Character.HumanoidRootPart.Anchored = false
-                animation:Stop()
-            end
-            if message == "fly" then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://13850660986"
-
-                local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
-                loadedanimation:Play()
-                PLAYER.Character.HumanoidRootPart.Anchored = true
-            elseif message == "sturdy" then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://11710524717"
-
-                local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
-                loadedanimation:Play()
-                PLAYER.Character.HumanoidRootPart.Anchored = true
-            elseif message == "rossy" then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://1171052744"
-
-                local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
-                PLAYER.Character.HumanoidRootPart.Anchored = true
-                loadedanimation:Play()
-                PLAYER.Character.HumanoidRootPart.Anchored = true
-            elseif message == "griddy" then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://11710529220"
-
-                local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
-                loadedanimation:Play()
-                PLAYER.Character.HumanoidRootPart.Anchored = true
-            elseif message == "tpose" then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://11710524200"
-
-                local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
-                loadedanimation:Play()
-                PLAYER.Character.HumanoidRootPart.Anchored = true
-            elseif message == "speed" then
-                local animation = Instance.new("Animation")
-                animation.AnimationId = "rbxassetid://11710541744"
-
-                local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
-                loadedanimation:Play()
-                PLAYER.Character.HumanoidRootPart.Anchored = true
-            end
-    end
-
-
-
-    altCommands.say = function(player, args)
         local message = constructMessage(args, 1)
+        for _, animation in PLAYER.Character.Humanoid:GetPlayingAnimationTracks() do
+            PLAYER.Character.HumanoidRootPart.Anchored = false
+            animation:Stop()
+        end
+        if message == "fly" then
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://13850660986"
+            local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
+            loadedanimation:Play()
+            PLAYER.Character.HumanoidRootPart.Anchored = true
+        elseif message == "sturdy" then
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://11710524717"
+            local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
+            loadedanimation:Play()
+            PLAYER.Character.HumanoidRootPart.Anchored = true
+        elseif message == "rossy" then
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://1171052744"
+            local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
+            PLAYER.Character.HumanoidRootPart.Anchored = true
+            loadedanimation:Play()
+            PLAYER.Character.HumanoidRootPart.Anchored = true
+        elseif message == "griddy" then
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://11710529220"
+            local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
+            loadedanimation:Play()
+            PLAYER.Character.HumanoidRootPart.Anchored = true
+        elseif message == "tpose" then
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://11710524200"
+            local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
+            loadedanimation:Play()
+            PLAYER.Character.HumanoidRootPart.Anchored = true
+        elseif message == "speed" then
+            local animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://11710541744"
+            local loadedanimation = PLAYER.Character.Humanoid:LoadAnimation(animation)
+            loadedanimation:Play()
+            PLAYER.Character.HumanoidRootPart.Anchored = true
+        end
+    end
 
         if message then
             Chat(message)
@@ -1998,63 +1960,41 @@ if isAlt(PLAYER.UserId) == true then
 
   
 
-    local function setupChatListener(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
 
-                
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
+    -- Chat listener for commands (from Untitled-1.lua)
+    local TextChatService = game:GetService("TextChatService")
+    TextChatService.OnIncomingMessage = function(message)
+        if message.TextSource then
+            local userId = message.TextSource.UserId
+            local text = message.Text or ""
 
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
+            print("New Chat from", userId, ":", text)
+
+            if userId == getgenv().mainId then
+                local splitString = string.split(text, " ")
+
+                if #splitString > 0 then
+                    local firstWord = splitString[1]
+                    local cmdName = ""
+
+                    if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
+                        cmdName = string.lower(firstWord:sub(2))
                     end
-            
-                    altCommands[cmdName](player, args)
+
+                    print("firstWord:", firstWord)
+                    print("cmdName:", cmdName)
+
+                    if altCommands[cmdName] then
+                        local args = {}
+                        for i = 2, #splitString, 1 do
+                            table.insert(args, splitString[i])
+                        end
+                        altCommands[cmdName](game.Players:GetPlayerByUserId(userId), args)
+                    end
                 end
-            end)
-             
+            end
         end
     end
-    
-    for _, player in pairs(game.Players:GetPlayers()) do
-        setupChatListener(player)
-    end
-
-
-    game.Players.PlayerAdded:Connect(function(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
-
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
-
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
-                    end
-            
-                    altCommands[cmdName](player, args)
-                end
-
-            end)
-        end
-    end)
 
 
     --Anti-afk
@@ -3812,8 +3752,9 @@ function addMoneyToPlayer(targetUsername, amount, reason, amountRaw)
         GuiSettings["Leave_Audio_id"] = input
         saveData()
     end)
-    -------------
-    -------------
+    ----------------
+    ----------------
+    
     --Alt Control
     -------------
     -------------
@@ -4199,63 +4140,6 @@ end
 spawn(pollLatestGoal)
 
 -- =========================
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-
-local lastDropState = nil -- true = dropped, false = stopped
-local function isAltUser()
-    local LocalPlayer = game.Players.LocalPlayer
-    return getgenv().alts and table.find(getgenv().alts, LocalPlayer.UserId)
-end
-
-local function hasRealPlayers()
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if not (getgenv().alts and table.find(getgenv().alts, player.UserId)) and player ~= game.Players.LocalPlayer then
-            return true
-        end
-    end
-    return false
-end
-
-local function updateAltDropState()
-    if not isAltUser() then return end -- เฉพาะ alt เท่านั้น
-    local hasPlayers = hasRealPlayers()
-    if hasPlayers ~= lastDropState then
-        if hasPlayers then
-            print("[ALT AUTO] พบ Players จริง -> Dropping")
-            if MainEvent then
-                MainEvent:FireServer("Dropping")
-            end
-            -- Sync DropBtn to ON
-            if DropBtn then
-                DropBtn.Text = "On"
-                DropBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-            end
-        else
-            print("[ALT AUTO] ไม่มี Players จริง -> Stopped Dropping")
-            if MainEvent then
-                MainEvent:FireServer("Stopped Dropping")
-            end
-            -- Sync DropBtn to OFF
-            if DropBtn then
-                DropBtn.Text = "Off"
-                DropBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            end
-        end
-        lastDropState = hasPlayers
-    end
-end
-
-game.Players.PlayerAdded:Connect(function(player)
-    updateAltDropState()
-end)
-game.Players.PlayerRemoving:Connect(function(player)
-    updateAltDropState()
-end)
-updateAltDropState()
-
--- =========================
 -- GLOBAL: ระบบ /drop /stop อัตโนมัติ (ควรอยู่ global scope ก่อน logic อื่นหลัง pollLatestGoal)
 -- =========================
 local lastDropState = nil -- true = dropped, false = stopped
@@ -4284,23 +4168,11 @@ local function updateDropState()
     end
     if hasPlayers ~= lastDropState then
         if hasPlayers then
-            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> DropMoney (ครั้งเดียว)")
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-            if MainEvent then
-                MainEvent:FireServer("DropMoney", 15000)
-            else
-                warn("MainEvent not found! ไม่สามารถ drop ได้")
-            end
+            print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
+            game.Players:Chat("/drop")
         else
-            print("[DROPLOG] ไม่มี Players จริงเหลือ -> StopDrop (ครั้งเดียว)")
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local MainEvent = ReplicatedStorage:FindFirstChild("MainEvent")
-            if MainEvent then
-                MainEvent:FireServer("StopDrop")
-            else
-                warn("MainEvent not found! ไม่สามารถ stop ได้")
-            end
+            print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
+            game.Players:Chat("/stop")
         end
         lastDropState = hasPlayers
     end
