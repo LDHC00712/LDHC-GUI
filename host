@@ -1998,63 +1998,40 @@ if isAlt(PLAYER.UserId) == true then
 
   
 
-    local function setupChatListener(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
+    -- Chat listener for commands (from Untitled-1.lua)
+    local TextChatService = game:GetService("TextChatService")
+    TextChatService.OnIncomingMessage = function(message)
+        if message.TextSource then
+            local userId = message.TextSource.UserId
+            local text = message.Text or ""
 
-                
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
+            print("New Chat from", userId, ":", text)
 
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
+            if userId == getgenv().mainId then
+                local splitString = string.split(text, " ")
+
+                if #splitString > 0 then
+                    local firstWord = splitString[1]
+                    local cmdName = ""
+
+                    if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
+                        cmdName = string.lower(firstWord:sub(2))
                     end
-            
-                    altCommands[cmdName](player, args)
+
+                    print("firstWord:", firstWord)
+                    print("cmdName:", cmdName)
+
+                    if altCommands[cmdName] then
+                        local args = {}
+                        for i = 2, #splitString, 1 do
+                            table.insert(args, splitString[i])
+                        end
+                        altCommands[cmdName](game.Players:GetPlayerByUserId(userId), args)
+                    end
                 end
-            end)
-             
+            end
         end
     end
-    
-    for _, player in pairs(game.Players:GetPlayers()) do
-        setupChatListener(player)
-    end
-
-
-    game.Players.PlayerAdded:Connect(function(player)
-        if player.UserId == getgenv().mainId then
-            player.Chatted:Connect(function(message)
-
-                local splitString = message:split(" ")
-        
-                local cmdName = ""
-                local firstWord = splitString[1]
-                print(firstWord)
-                if firstWord:sub(1, 1) == "/" or firstWord:sub(1, 1) == "." then
-                    cmdName = string.lower(firstWord:sub(2))
-                end
-
-                if altCommands[cmdName] then
-                    local args = {}
-                    for i = 2, #splitString, 1 do
-                        table.insert(args, splitString[i])
-                    end
-            
-                    altCommands[cmdName](player, args)
-                end
-
-            end)
-        end
-    end)
 
 
     --Anti-afk
@@ -4227,12 +4204,13 @@ local function updateDropState()
         end
     end
     if hasPlayers ~= lastDropState then
+        local TextChatService = game:GetService("TextChatService")
         if hasPlayers then
             print("[DROPLOG] พบ Players จริงเข้าใหม่ -> /drop (ครั้งเดียว)")
-            game.Players:Chat("/drop")
+            TextChatService.TextChannels.RBXGeneral:SendAsync("/drop")
         else
             print("[DROPLOG] ไม่มี Players จริงเหลือ -> /stop (ครั้งเดียว)")
-            game.Players:Chat("/stop")
+            TextChatService.TextChannels.RBXGeneral:SendAsync("/stop")
         end
         lastDropState = hasPlayers
     end
@@ -5161,8 +5139,8 @@ end
                     end
 
                     if GuiSettings["Bring_on_Join"] == true then
-                        task.wait(0.5)
-                        game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
+                            task.wait(0.5)
+                            game:GetService("ReplicatedStorage"):WaitForChild("MainEvent"):FireServer("VIP_CMD", "Summon", player)
                     end
                 end
             end
